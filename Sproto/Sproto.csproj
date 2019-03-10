@@ -53,7 +53,7 @@
 		<PackageLicenseFile>License.txt</PackageLicenseFile>
 		<RepositoryUrl>https://github.com/BobbyCannon/Sproto</RepositoryUrl>
 		<RepositoryType></RepositoryType>
-		<PackageTags>Sproto</PackageTags>
+		<PackageTags>Sproto OSC Serial SerialPort Protocol</PackageTags>
 		<Version>1.0.0.0</Version>
 		<Authors>Bobby Cannon</Authors>
 	</PropertyGroup>

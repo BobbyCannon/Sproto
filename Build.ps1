@@ -58,6 +58,7 @@ try
 	$versionInfo = [System.Diagnostics.FileVersionInfo]::GetVersionInfo("$destination\bin\$productName.dll")
 	$nugetVersion = $versionInfo.ProductVersionRaw.ToString(3)
 
+	Copy-Item "$productName\bin\$Configuration\$productName.$nugetVersion.nupkg" "$destination\"
 	Copy-Item "$productName\bin\$Configuration\$productName.$nugetVersion.nupkg" "$destination2\"
 	
 	if ($versionInfo.FileVersion.ToString() -ne $newVersion)
