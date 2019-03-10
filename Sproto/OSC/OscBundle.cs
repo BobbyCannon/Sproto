@@ -1,0 +1,379 @@
+﻿#region References
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using Sproto.Internal;
+
+#endregion
+
+namespace Sproto.OSC
+{
+	public class OscBundle : OscPacket, IEnumerable<OscPacket>
+	{
+		#region Fields
+
+		private readonly byte[] _bundleBytes = { 0x23, 0x62, 0x75, 0x6E, 0x64, 0x6C, 0x65, 0x00 };
+		private readonly byte[] _extendedBundleBytes = { 0x2B, 0x62, 0x75, 0x6E, 0x64, 0x6C, 0x65, 0x00 };
+		private readonly List<OscPacket> _packets;
+
+		#endregion
+
+		#region Constructors
+
+		public OscBundle(params OscPacket[] packets)
+			: this(DateTime.Now, packets)
+		{
+		}
+
+		public OscBundle(ulong time, params OscPacket[] packets)
+			: this(new OscTimeTag(time), packets)
+		{
+		}
+
+		public OscBundle(DateTime dateTime, params OscPacket[] packets)
+			: this(OscTimeTag.FromDateTime(dateTime), packets)
+		{
+		}
+
+		public OscBundle(OscTimeTag timeTag, params OscPacket[] packets)
+		{
+			_packets = new List<OscPacket>();
+
+			Time = timeTag;
+
+			Add(packets);
+		}
+
+		#endregion
+
+		#region Properties
+
+		/// <summary>
+		/// The number of packets in the bundle.
+		/// </summary>
+		public int Count
+		{
+			get
+			{
+				lock (_packets)
+				{
+					return _packets.Count;
+				}
+			}
+		}
+
+		/// <summary>
+		/// If true this is an extended message that contains a CRC.
+		/// </summary>
+		public bool IsExtended { get; set; }
+
+		/// <summary>
+		/// Access bundle messages by index
+		/// </summary>
+		/// <param name="index"> the index of the message </param>
+		/// <returns> message at the supplied index </returns>
+		public OscPacket this[int index]
+		{
+			get
+			{
+				lock (_packets)
+				{
+					return _packets[index];
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets the time of this bundle.
+		/// </summary>
+		public OscTimeTag Time { get; set; }
+
+		#endregion
+
+		#region Methods
+
+		public void Add(params OscPacket[] packets)
+		{
+			lock (_packets)
+			{
+				_packets.AddRange(packets);
+
+				foreach (var p in _packets)
+				{
+					UpdatePacketTime(p);
+				}
+			}
+		}
+
+		public void Clear()
+		{
+			lock (_packets)
+			{
+				_packets.Clear();
+			}
+		}
+
+		public IEnumerator<OscPacket> GetEnumerator()
+		{
+			lock (_packets)
+			{
+				return _packets.GetEnumerator();
+			}
+		}
+
+		/// <summary>
+		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
+		/// </summary>
+		/// <param name="bundle"> </param>
+		/// <param name="length"> </param>
+		/// <returns> Bundle containing elements and a time tag </returns>
+		public static OscPacket Parse(byte[] bundle, int length)
+		{
+			var index = 0;
+			var messages = new List<OscPacket>();
+			var bundleTag = Encoding.ASCII.GetString(bundle.SubArray(0, 8));
+			index += 8;
+
+			var time = GetULong(bundle, index);
+			var timeTag = new OscTimeTag(time);
+			index += 8;
+
+			if (bundleTag != "#bundle\0" && bundleTag != "+bundle\0")
+			{
+				return new OscError(OscError.Message.InvalidBundle);
+			}
+
+			var isExtended = bundleTag == "+bundle\0";
+			if (isExtended)
+			{
+				length -= 4;
+			}
+
+			while (index < length)
+			{
+				var size = GetInt(bundle, index);
+				index += 4;
+
+				var messageBytes = bundle.SubArray(index, size);
+				var packet = OscMessage.Parse(messageBytes, messageBytes.Length);
+				if (packet is OscError error)
+				{
+					return error;
+				}
+
+				if (!(packet is OscMessage message))
+				{
+					// Should never get here but just in case
+					return new OscError(OscError.Message.InvalidParsedMessage);
+				}
+
+				message.TimeTag = timeTag;
+				messages.Add(message);
+				index += size;
+
+				while (index % 4 != 0)
+				{
+					index++;
+				}
+			}
+
+			if (isExtended)
+			{
+				// Seems like we have a CRC
+				var readCrc = BitConverter.ToUInt16(bundle, index);
+				var calculatedCrc = bundle.CalculateCrc16(index);
+
+				if (readCrc != calculatedCrc)
+				{
+					return new OscError(OscError.Message.InvalidBundleCrc);
+				}
+			}
+
+			return new OscBundle(timeTag, messages.ToArray()) { IsExtended = isExtended };
+		}
+
+		/// <summary>
+		/// Parse a bundle from a string using the default provider InvariantCulture.
+		/// </summary>
+		/// <param name="value"> A string containing the OSC bundle data. </param>
+		/// <returns> The parsed OSC bundle. </returns>
+		public new static OscPacket Parse(string value)
+		{
+			return Parse(value, CultureInfo.InvariantCulture);
+		}
+
+		/// <summary>
+		/// Parse a bundle from a string using the supplied provider.
+		/// </summary>
+		/// <param name="value"> A string containing the OSC bundle data. </param>
+		/// <param name="provider"> The format provider to use during parsing. </param>
+		/// <returns> The parsed OSC bundle. </returns>
+		public new static OscPacket Parse(string value, IFormatProvider provider)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				return new OscError(OscError.Message.InvalidParseOscPacketInput);
+			}
+
+			var start = 0;
+			var end = value.IndexOf(',', start);
+
+			if (end <= start)
+			{
+				return new OscError(OscError.Message.InvalidBundleStart);
+			}
+
+			var ident = value.Substring(start, end - start).Trim();
+
+			if (!"#bundle".Equals(ident, StringComparison.InvariantCulture) && !"+bundle".Equals(ident, StringComparison.InvariantCulture))
+			{
+				return new OscError(OscError.Message.InvalidBundleIdent, ident);
+			}
+
+			start = end + 1;
+			end = value.IndexOf(',', start);
+
+			if (end < 0)
+			{
+				end = value.Length;
+			}
+
+			var timeStampValue = value.Substring(start, end - start);
+			var timeStamp = OscTimeTag.Parse(timeStampValue.Trim(), provider);
+
+			start = end + 1;
+
+			if (start >= value.Length)
+			{
+				return new OscBundle(timeStamp);
+			}
+
+			end = value.IndexOf('{', start);
+
+			if (end < 0)
+			{
+				end = value.Length;
+			}
+
+			var gap = value.Substring(start, end - start);
+
+			if (string.IsNullOrWhiteSpace(gap) == false)
+			{
+				return new OscError(OscError.Message.InvalidParsedMessageArray, gap);
+			}
+
+			start = end;
+
+			var messages = new List<OscPacket>();
+
+			while (start > 0 && start < value.Length)
+			{
+				end = Extensions.ScanForwardObject(value, start);
+				messages.Add(OscPacket.Parse(value.Substring(start + 1, end - (start + 1)).Trim(), provider));
+				start = end + 1;
+				end = value.IndexOf('{', start);
+
+				if (end < 0)
+				{
+					end = value.Length;
+				}
+
+				gap = value.Substring(start, end - start).Trim();
+
+				if (gap.Equals(",") == false && string.IsNullOrWhiteSpace(gap) == false)
+				{
+					return new OscError(OscError.Message.InvalidParsedMessageArray, gap);
+				}
+
+				start = end;
+			}
+
+			return new OscBundle(timeStamp, messages.ToArray());
+		}
+
+		public override byte[] ToByteArray()
+		{
+			var outMessages = new List<byte[]>();
+
+			lock (_packets)
+			{
+				foreach (var packets in _packets)
+				{
+					outMessages.Add(packets.ToByteArray());
+				}
+			}
+
+			// 16 (8 header string, 8 time tag)
+			var total = 16 + outMessages.Sum(x => x.Length + 4) + (IsExtended ? 4 : 0);
+			var response = new byte[total];
+			var responseIndex = 0;
+
+			// Add header string
+			if (IsExtended)
+			{
+				_extendedBundleBytes.CopyTo(response, responseIndex);
+				responseIndex += _extendedBundleBytes.Length;
+			}
+			else
+			{
+				_bundleBytes.CopyTo(response, responseIndex);
+				responseIndex += _bundleBytes.Length;
+			}
+
+			// Add the time tag
+			var time = SetULong(Time.Value);
+			time.CopyTo(response, responseIndex);
+			responseIndex += time.Length;
+
+			foreach (var msg in outMessages)
+			{
+				var size = SetInt(msg.Length);
+				size.CopyTo(response, responseIndex);
+				responseIndex += size.Length;
+
+				// msg size is always a multiple of 4
+				msg.CopyTo(response, responseIndex);
+				responseIndex += msg.Length;
+			}
+
+			if (IsExtended)
+			{
+				var crc = response.CalculateCrc16(total - 4);
+				var data = BitConverter.GetBytes(crc);
+				data.CopyTo(response, responseIndex);
+			}
+
+			return response;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		private void UpdatePacketTime(OscPacket packet)
+		{
+			switch (packet)
+			{
+				case OscMessage message:
+					message.TimeTag = Time;
+					break;
+
+				case OscBundle bundle:
+				{
+					foreach (var bunglePacket in bundle)
+					{
+						UpdatePacketTime(bunglePacket);
+					}
+					break;
+				}
+			}
+		}
+
+		#endregion
+	}
+}
