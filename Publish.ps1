@@ -5,7 +5,7 @@ param
 )
 
 $serverPath = ".\Binaries"
-$files = Get-ChildItem $serverPath -Filter "OSC.*.nupkg" -File
+$files = Get-ChildItem $serverPath -Filter "sproto.*.nupkg" -File
 
 foreach ($file in $files)
 {

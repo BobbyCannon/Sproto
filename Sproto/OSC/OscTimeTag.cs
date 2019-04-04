@@ -141,6 +141,11 @@ namespace Sproto.OSC
 			return a.Equals(b);
 		}
 
+		public static OscTimeTag Parse(string value)
+		{
+			return Parse(value, CultureInfo.InvariantCulture);
+		}
+
 		public static OscTimeTag Parse(string value, IFormatProvider provider)
 		{
 			var style = DateTimeStyles.AdjustToUniversal;
@@ -152,16 +157,37 @@ namespace Sproto.OSC
 				value = value.Trim().TrimEnd('Z');
 			}
 
+			// https://en.wikipedia.org/wiki/ISO_8601
+			// yyyy = four-digit year
+			// MM   = two-digit month (01=January, etc.)
+			// dd   = two-digit day of month (01 through 31)
+			// HH   = two digits of hour (00 through 23) (am/pm NOT allowed)
+			// mm   = two digits of minute (00 through 59)
+			// ss   = two digits of second (00 through 59)
+			// f    = one or more digits representing a decimal fraction of a second
+			// TZD  = time zone designator (Z or +hh:mm or -hh:mm)
+
+			// Examples
+			// Year: YYYY (eg 1997)
+			// Year and month: YYYY-MM (eg 1997-07)
+			// Complete date: YYYY-MM-DD (eg 1997-07-16)
+			// Complete date plus hours and minutes:
+			//		YYYY-MM-DDThh:mmTZD (eg 1997-07-16T19:20+01:00)
+			// Complete date plus hours, minutes and seconds:
+			//		YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
+			// Complete date plus hours, minutes, seconds and a decimal fraction of a second
+			//		YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
 			string[] formats =
 			{
-				"dd-MM-yy",
-				"dd-MM-yyyy",
+				"yyyy",
+				"yyyy-MM",
+				"yyyy-MM-dd",
 				"HH:mm",
 				"HH:mm:ss",
 				"HH:mm:ss.ffff",
-				"dd-MM-yyyy HH:mm:ss",
-				"dd-MM-yyyy HH:mm",
-				"dd-MM-yyyy HH:mm:ss.ffff"
+				"yyyy-MM-ddTHH:mm:ss",
+				"yyyy-MM-ddTHH:mm",
+				"yyyy-MM-ddTHH:mm:ss.ffff"
 			};
 
 			if (DateTime.TryParseExact(value, formats, provider, style, out var datetime))
@@ -184,7 +210,7 @@ namespace Sproto.OSC
 
 		public override string ToString()
 		{
-			return ToString("dd-MM-yyyy HH:mm:ss.ffffZ");
+			return ToString("yyyy-MM-ddTHH:mm:ss.ffffZ");
 		}
 
 		public string ToString(string format)
