@@ -1,6 +1,8 @@
 ﻿#region References
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sproto.OSC;
 
@@ -90,6 +92,45 @@ namespace OSC.Tests.OSC
 			var time = new OscTimeTag(5304284610u);
 			time.Value.Dump();
 			Assert.AreEqual(1235, time.ToMilliseconds());
+		}
+
+		[TestMethod]
+		public void ParseTime()
+		{
+			var values = new Dictionary<string, ulong>
+			{
+				{ "2019-04-05T00:00:59.1234Z", 16163728279333186305 },
+				{ "2019-04-05T00:00:59Z", 16163728278803185664 },
+				{ "2019-04-05", 16163728025400115200 },
+				{ "2019-05-23T12:37:23.7150Z", 16181735293039820143 }
+			};
+
+			foreach (var e in values)
+			{
+				var actual = OscTimeTag.Parse(e.Key);
+				actual.Value.Dump();
+				Assert.AreEqual(e.Value, actual.Value);
+			}
+		}
+
+		[TestMethod]
+		public void ToFromUtcNowUsingParse()
+		{
+			var time = OscTimeTag.UtcNow;
+			var text = time.ToString();
+			var time2 = OscTimeTag.Parse(text);
+			
+			time.Dump();
+			time2.Dump();
+			Assert.AreEqual(time.ToString(), time2.ToString());
+			
+			time = OscTimeTag.Now;
+			text = time.ToString();
+			time2 = OscTimeTag.Parse(text);
+			
+			time.Dump();
+			time2.Dump();
+			Assert.AreEqual(time.ToString(), time2.ToString());
 		}
 
 		#endregion

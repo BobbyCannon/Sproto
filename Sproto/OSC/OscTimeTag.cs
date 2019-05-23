@@ -148,12 +148,11 @@ namespace Sproto.OSC
 
 		public static OscTimeTag Parse(string value, IFormatProvider provider)
 		{
-			var style = DateTimeStyles.AdjustToUniversal;
+			var style = DateTimeStyles.AssumeLocal;
 
 			if (value.Trim().EndsWith("Z"))
 			{
-				style = DateTimeStyles.AssumeUniversal;
-
+				style = DateTimeStyles.AdjustToUniversal;
 				value = value.Trim().TrimEnd('Z');
 			}
 
