@@ -1,5 +1,6 @@
 ﻿#region References
 
+using System.Collections.Generic;
 using System.IO;
 
 #endregion
@@ -67,6 +68,23 @@ namespace Sproto.OSC
 				stream.WriteByte((byte) OscSlipBytes.End);
 
 				return stream.ToArray();
+			}
+		}
+
+		public IEnumerable<OscPacket> ProcessStream(Stream stream)
+		{
+			if (stream.CanSeek)
+			{
+				stream.Position = 0;
+			}
+
+			while (stream.Position < stream.Length)
+			{
+				var packet = ProcessByte((byte) stream.ReadByte());
+				if (packet != null)
+				{
+					yield return packet;
+				}
 			}
 		}
 
