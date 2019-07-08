@@ -25,7 +25,7 @@ namespace Sproto.OSC
 		#region Constructors
 
 		public OscBundle(params OscPacket[] packets)
-			: this(DateTime.Now, packets)
+			: this(OscTimeTag.UtcNow, packets)
 		{
 		}
 
@@ -87,11 +87,6 @@ namespace Sproto.OSC
 			}
 		}
 
-		/// <summary>
-		/// Gets the time of this bundle.
-		/// </summary>
-		public OscTimeTag Time { get; set; }
-
 		#endregion
 
 		#region Methods
@@ -102,9 +97,9 @@ namespace Sproto.OSC
 			{
 				_packets.AddRange(packets);
 
-				foreach (var p in _packets)
+				foreach (var packet in _packets)
 				{
-					UpdatePacketTime(p);
+					SetPacketTime(packet);
 				}
 			}
 		}
@@ -144,7 +139,7 @@ namespace Sproto.OSC
 
 			if (bundleTag != "#bundle\0" && bundleTag != "+bundle\0")
 			{
-				return new OscError(OscError.Message.InvalidBundle);
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidBundle);
 			}
 
 			var isExtended = bundleTag == "+bundle\0";
@@ -159,7 +154,7 @@ namespace Sproto.OSC
 				index += 4;
 
 				var messageBytes = bundle.SubArray(index, size);
-				var packet = OscMessage.Parse(messageBytes, messageBytes.Length);
+				var packet = OscMessage.Parse(timeTag, messageBytes, messageBytes.Length);
 				if (packet is OscError error)
 				{
 					return error;
@@ -168,10 +163,10 @@ namespace Sproto.OSC
 				if (!(packet is OscMessage message))
 				{
 					// Should never get here but just in case
-					return new OscError(OscError.Message.InvalidParsedMessage);
+					return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidParsedMessage);
 				}
 
-				message.TimeTag = timeTag;
+				message.Time = timeTag;
 				messages.Add(message);
 				index += size;
 
@@ -189,7 +184,7 @@ namespace Sproto.OSC
 
 				if (readCrc != calculatedCrc)
 				{
-					return new OscError(OscError.Message.InvalidBundleCrc);
+					return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidBundleCrc);
 				}
 			}
 
@@ -216,7 +211,7 @@ namespace Sproto.OSC
 		{
 			if (string.IsNullOrWhiteSpace(value))
 			{
-				return new OscError(OscError.Message.InvalidParseOscPacketInput);
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidParseOscPacketInput);
 			}
 
 			var start = 0;
@@ -224,14 +219,14 @@ namespace Sproto.OSC
 
 			if (end <= start)
 			{
-				return new OscError(OscError.Message.InvalidBundleStart);
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidBundleStart);
 			}
 
 			var ident = value.Substring(start, end - start).Trim();
 
 			if (!"#bundle".Equals(ident, StringComparison.InvariantCulture) && !"+bundle".Equals(ident, StringComparison.InvariantCulture))
 			{
-				return new OscError(OscError.Message.InvalidBundleIdent, ident);
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidBundleIdent, ident);
 			}
 
 			start = end + 1;
@@ -263,7 +258,7 @@ namespace Sproto.OSC
 
 			if (string.IsNullOrWhiteSpace(gap) == false)
 			{
-				return new OscError(OscError.Message.InvalidParsedMessageArray, gap);
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidParsedMessageArray, gap);
 			}
 
 			start = end;
@@ -286,7 +281,7 @@ namespace Sproto.OSC
 
 				if (gap.Equals(",") == false && string.IsNullOrWhiteSpace(gap) == false)
 				{
-					return new OscError(OscError.Message.InvalidParsedMessageArray, gap);
+					return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidParsedMessageArray, gap);
 				}
 
 				start = end;
@@ -355,19 +350,19 @@ namespace Sproto.OSC
 			return GetEnumerator();
 		}
 
-		private void UpdatePacketTime(OscPacket packet)
+		private void SetPacketTime(OscPacket packet)
 		{
 			switch (packet)
 			{
 				case OscMessage message:
-					message.TimeTag = Time;
+					message.Time = Time;
 					break;
 
 				case OscBundle bundle:
 				{
 					foreach (var bunglePacket in bundle)
 					{
-						UpdatePacketTime(bunglePacket);
+						SetPacketTime(bunglePacket);
 					}
 					break;
 				}

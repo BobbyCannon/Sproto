@@ -11,9 +11,23 @@ namespace Sproto.OSC
 {
 	public abstract class OscPacket
 	{
+		#region Properties
+		
+		/// <summary>
+		/// Gets the time of this bundle.
+		/// </summary>
+		public OscTimeTag Time { get; set; }
+
+		#endregion
+
 		#region Methods
 
 		public static OscPacket GetPacket(byte[] buffer, int length)
+		{
+			return GetPacket(OscTimeTag.UtcNow, buffer, length);
+		}
+
+		public static OscPacket GetPacket(OscTimeTag time, byte[] buffer, int length)
 		{
 			try
 			{
@@ -22,11 +36,11 @@ namespace Sproto.OSC
 					return OscBundle.Parse(buffer, length);
 				}
 
-				return OscMessage.Parse(buffer, length);
+				return OscMessage.Parse(time, buffer, length);
 			}
 			catch (Exception)
 			{
-				return new OscError(OscError.Message.InvalidParsedMessage);
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidParsedMessage);
 			}
 		}
 
@@ -48,12 +62,23 @@ namespace Sproto.OSC
 		/// <returns> The parsed OSC packet. </returns>
 		public static OscPacket Parse(string value, IFormatProvider provider)
 		{
+			return Parse(OscTimeTag.UtcNow, value, provider);
+		}
+		
+		/// <summary>
+		/// Parse a packet from a string using the supplied provider.
+		/// </summary>
+		/// <param name="value"> A string containing the OSC packet data. </param>
+		/// <param name="provider"> The format provider to use during parsing. </param>
+		/// <returns> The parsed OSC packet. </returns>
+		public static OscPacket Parse(OscTimeTag time, string value, IFormatProvider provider)
+		{
 			if (value.StartsWith("#") || value.StartsWith("+"))
 			{
 				return OscBundle.Parse(value, provider);
 			}
 
-			return OscMessage.Parse(value, provider);
+			return OscMessage.Parse(time, value, provider);
 		}
 
 		public abstract byte[] ToByteArray();

@@ -45,7 +45,7 @@ namespace OSC.Benchmark
 
 			foreach (var item in MessageValues)
 			{
-				packets.Add(new OscMessage(item.Key, item.Value));
+				packets.Add(new OscMessage(OscTimeTag.UtcNow, item.Key, item.Value));
 			}
 
 			Packets = packets.ToArray();
@@ -123,7 +123,7 @@ namespace OSC.Benchmark
 			for (var i = 0; i < count; i++)
 			{
 				var key = keys[keyOffset];
-				var message = new OscMessage(key, MessageValues[key]);
+				var message = new OscMessage(OscTimeTag.UtcNow, key, MessageValues[key]);
 				keyOffset = (keyOffset + 1) % keys.Count;
 			}
 		}

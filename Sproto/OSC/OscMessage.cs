@@ -27,10 +27,27 @@ namespace Sproto.OSC
 		/// single entry array.
 		/// </remarks>
 		public OscMessage(string address, params object[] args)
+			: this(OscTimeTag.UtcNow, address, args)
+		{
+		}
+		
+		/// <summary>
+		/// Instantiates an instance of an OSC message for the provided address and arguments. 
+		/// </summary>
+		/// <param name="time"> The time. </param>
+		/// <param name="address"> The address. </param>
+		/// <param name="args"> The arguments. </param>
+		/// <remarks>
+		/// Do NOT call this constructor with an object[] unless you want a message with a single
+		/// object of type object[]. Because an object[] is an object the parameter is seen as a
+		/// single entry array.
+		/// </remarks>
+		public OscMessage(OscTimeTag time, string address, params object[] args)
 		{
 			Address = address;
 			Arguments = new List<object>();
 			Arguments.AddRange(args);
+			Time = time;
 		}
 
 		#endregion
@@ -64,11 +81,6 @@ namespace Sproto.OSC
 		/// <returns> argument at the supplied index </returns>
 		public object this[int index] => Arguments[index];
 
-		/// <summary>
-		/// Optional time tag, will be non-null if this message was extracted from a bundle
-		/// </summary>
-		public OscTimeTag? TimeTag { get; set; }
-
 		#endregion
 
 		#region Methods
@@ -82,7 +94,20 @@ namespace Sproto.OSC
 		/// <returns> The message for the address and arguments. </returns>
 		public static OscMessage FromObjectArray(string address, IEnumerable<object> args)
 		{
-			var response = new OscMessage(address);
+			return FromObjectArray(OscTimeTag.UtcNow, address, args);
+		}
+
+		/// <summary>
+		/// They'll be times when you want to instantiate an message with an actually object array. Used this factory method. If you pass
+		/// an object[] to the constructor it will actually be an object[] with one entry of that object[].
+		/// </summary>
+		/// <param name="time"> The time. </param>
+		/// <param name="address"> The address. </param>
+		/// <param name="args"> The arguments. </param>
+		/// <returns> The message for the address and arguments. </returns>
+		public static OscMessage FromObjectArray(OscTimeTag time, string address, IEnumerable<object> args)
+		{
+			var response = new OscMessage(time, address);
 			response.Arguments.AddRange(args);
 			return response;
 		}
@@ -96,10 +121,11 @@ namespace Sproto.OSC
 		/// <summary>
 		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
 		/// </summary>
+		/// <param name="time"> </param>
 		/// <param name="data"> </param>
 		/// <param name="length"> </param>
 		/// <returns> Message containing various arguments and an address </returns>
-		public static OscPacket Parse(byte[] data, int length)
+		public static OscPacket Parse(OscTimeTag time, byte[] data, int length)
 		{
 			var index = 0;
 			var arguments = new List<object>();
@@ -111,7 +137,7 @@ namespace Sproto.OSC
 
 			if (index % 4 != 0)
 			{
-				return new OscError(OscError.Message.InvalidMessageAddressMisAligned);
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidMessageAddressMisAligned);
 			}
 
 			// Get type tags
@@ -228,7 +254,7 @@ namespace Sproto.OSC
 					case '[':
 						if (arguments != mainArray)
 						{
-							return new OscError(OscError.Message.UnsupportedNestedArrays);
+							return new OscError(OscTimeTag.UtcNow, OscError.Message.UnsupportedNestedArrays);
 						}
 						arguments = new List<object>(); // make arguments point to a new object array
 						break;
@@ -239,7 +265,7 @@ namespace Sproto.OSC
 						break;
 
 					default:
-						return new OscError(OscError.Message.UnknownTagType, type);
+						return new OscError(OscTimeTag.UtcNow, OscError.Message.UnknownTagType, type);
 				}
 
 				while (index % 4 != 0)
@@ -248,7 +274,7 @@ namespace Sproto.OSC
 				}
 			}
 
-			return new OscMessage(address, arguments.ToArray());
+			return new OscMessage(time, address, arguments.ToArray());
 		}
 
 		/// <summary>
@@ -264,14 +290,27 @@ namespace Sproto.OSC
 		/// <summary>
 		/// Parse a message from a string using the supplied provider.
 		/// </summary>
+		/// <param name="time"> The time to represent the message. </param>
 		/// <param name="value"> A string containing the OSC message data. </param>
 		/// <param name="provider"> The format provider to use during parsing. </param>
 		/// <returns> The parsed OSC message. </returns>
 		public new static OscPacket Parse(string value, IFormatProvider provider)
 		{
+			return Parse(OscTimeTag.UtcNow, value, provider);
+		}
+		
+		/// <summary>
+		/// Parse a message from a string using the supplied provider.
+		/// </summary>
+		/// <param name="time"> The time to represent the message. </param>
+		/// <param name="value"> A string containing the OSC message data. </param>
+		/// <param name="provider"> The format provider to use during parsing. </param>
+		/// <returns> The parsed OSC message. </returns>
+		public new static OscPacket Parse(OscTimeTag time, string value, IFormatProvider provider)
+		{
 			if (string.IsNullOrWhiteSpace(value))
 			{
-				return new OscError(OscError.Message.InvalidParseOscPacketInput);
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidParseOscPacketInput);
 			}
 
 			var index = value.IndexOf(',');
@@ -286,12 +325,12 @@ namespace Sproto.OSC
 
 			if (string.IsNullOrWhiteSpace(address))
 			{
-				return new OscError(OscError.Message.InvalidMessageAddressWasEmpty);
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidMessageAddressWasEmpty);
 			}
 
 			if (OscAddress.IsValidAddress(address) == false)
 			{
-				return new OscError(OscError.Message.InvalidMessageAddress);
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidMessageAddress);
 			}
 
 			var arguments = new List<object>();
@@ -302,10 +341,10 @@ namespace Sproto.OSC
 			}
 			catch (Exception ex)
 			{
-				return new OscError(OscError.Message.FailedParsingArguments, ex.Message);
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.FailedParsingArguments, ex.Message);
 			}
 
-			return new OscMessage(address, arguments.ToArray());
+			return new OscMessage(time, address, arguments.ToArray());
 		}
 
 		public override byte[] ToByteArray()

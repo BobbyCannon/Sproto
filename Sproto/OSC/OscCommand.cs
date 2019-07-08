@@ -37,11 +37,6 @@ namespace Sproto.OSC
 		public bool HasBeenUpdated { get; set; }
 
 		/// <summary>
-		/// Gets the timestamp of the parsed message.
-		/// </summary>
-		public OscTimeTag Timestamp { get; set; }
-
-		/// <summary>
 		/// The message that represents this command.
 		/// </summary>
 		protected OscMessage OscMessage { get; set; }
@@ -115,15 +110,14 @@ namespace Sproto.OSC
 
 		public virtual OscBundle ToBundle(OscTimeTag? time = null)
 		{
-			var date = time ?? Timestamp;
-			return new OscBundle(date.Value, ToMessage());
+			return new OscBundle(time ?? OscTimeTag.UtcNow, ToMessage());
 		}
 
 		public OscMessage ToMessage(bool includeData = true)
 		{
 			if (!includeData)
 			{
-				return new OscMessage(Address);
+				return new OscMessage(OscTimeTag.UtcNow, Address);
 			}
 
 			UpdateMessage();

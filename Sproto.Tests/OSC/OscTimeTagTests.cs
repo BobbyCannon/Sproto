@@ -16,6 +16,17 @@ namespace OSC.Tests.OSC
 		#region Methods
 
 		[TestMethod]
+		public void AddTimeSpan()
+		{
+			var span = TimeSpan.FromMilliseconds(123);
+			var datetime = new DateTime(2019, 1, 20, 08, 50, 12, DateTimeKind.Utc);
+			var expected = new OscTimeTag(datetime.Add(span));
+			var timetag = new OscTimeTag(datetime);
+
+			Assert.AreEqual(expected, timetag.Add(span));
+		}
+
+		[TestMethod]
 		public void Compare()
 		{
 			var expected = new DateTime(2019, 1, 20, 08, 50, 12, DateTimeKind.Utc);
@@ -23,6 +34,21 @@ namespace OSC.Tests.OSC
 			var time2 = new OscTimeTag(16136033268821655552);
 			Assert.IsTrue(time1 == time2);
 			Assert.AreEqual(time1, time2);
+
+			time1 = OscTimeTag.MinValue;
+			time2 = OscTimeTag.MaxValue;
+			Assert.IsTrue(time1 < time2);
+			Assert.IsFalse(time1 > time2);
+			
+			time1 = OscTimeTag.MinValue;
+			time2 = OscTimeTag.MinValue;
+			Assert.IsTrue(time1 == time2);
+			Assert.IsFalse(time1 != time2);
+			
+			time1 = OscTimeTag.MinValue;
+			time2 = OscTimeTag.MinValue;
+			Assert.IsTrue(time1 >= time2);
+			Assert.IsTrue(time1 <= time2);
 		}
 
 		[TestMethod]
@@ -49,7 +75,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void FromMinimalDate()
 		{
-			var time = OscTimeTag.FromDateTime(OscTimeTag.BaseDate);
+			var time = OscTimeTag.FromDateTime(OscTimeTag.MinDateTime);
 			var actual = time.Value;
 			Assert.AreEqual(0u, actual);
 		}
@@ -57,7 +83,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void FromSmallTime()
 		{
-			var time = OscTimeTag.FromDateTime(OscTimeTag.BaseDate.AddMilliseconds(1234.56));
+			var time = OscTimeTag.FromDateTime(OscTimeTag.MinDateTime.AddMilliseconds(1234.56));
 			var actual = time.Value;
 			Assert.AreEqual(5304284610u, actual);
 		}
@@ -81,9 +107,8 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void ToMinimalDate()
 		{
-			var time = new OscTimeTag(0);
-			var actual = time.ToDateTime();
-			Assert.AreEqual(OscTimeTag.BaseDate, actual);
+			var actual = new OscTimeTag(0);
+			Assert.AreEqual(OscTimeTag.MinValue, actual);
 		}
 
 		[TestMethod]
@@ -92,6 +117,20 @@ namespace OSC.Tests.OSC
 			var time = new OscTimeTag(5304284610u);
 			time.Value.Dump();
 			Assert.AreEqual(1235, time.ToMilliseconds());
+		}
+
+		[TestMethod]
+		public void MaxValue()
+		{
+			var expected = new OscTimeTag(0xffffffffffffffff);
+			Assert.AreEqual(expected, OscTimeTag.MaxValue);
+		}
+
+		[TestMethod]
+		public void MinValue()
+		{
+			var expected = new OscTimeTag(0);
+			Assert.AreEqual(expected, OscTimeTag.MinValue);
 		}
 
 		[TestMethod]
@@ -111,6 +150,18 @@ namespace OSC.Tests.OSC
 				actual.Value.Dump();
 				Assert.AreEqual(e.Value, actual.Value);
 			}
+		}
+
+		[TestMethod]
+		public void Subtract()
+		{
+			var expected = new DateTime(2019, 1, 20, 08, 50, 12, DateTimeKind.Utc);
+			var span = TimeSpan.FromMilliseconds(123);
+			var t1 = new OscTimeTag(expected);
+			var t2 = new OscTimeTag(expected.Add(span));
+			var actual = t2 - t1;
+			Assert.AreEqual(123, actual.TotalMilliseconds);
+			Assert.AreEqual(t1, t2 - span);
 		}
 
 		[TestMethod]

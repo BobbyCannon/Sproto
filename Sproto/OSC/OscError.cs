@@ -10,11 +10,12 @@ namespace Sproto.OSC
 	public class OscError : OscPacket
 	{
 		#region Constructors
-
-		public OscError(Message message, params object[] arguments)
+		
+		public OscError(OscTimeTag time, Message message, params object[] arguments)
 		{
 			Code = message;
 			Description = message.GetDescription(arguments);
+			Time = time;
 		}
 
 		#endregion

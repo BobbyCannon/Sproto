@@ -42,7 +42,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void DecodeOscMessageWithAllTypes()
 		{
-			var message = new OscMessage("/Address");
+			var message = new OscMessage(OscTimeTag.UtcNow, "/Address");
 			message.Arguments.Add(123);
 			message.Arguments.Add(123.45f);
 			message.Arguments.Add("Boom");
@@ -248,7 +248,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void EncodePacket()
 		{
-			var message = new OscMessage("/test");
+			var message = new OscMessage(OscTimeTag.UtcNow, "/test");
 			message.Arguments.Add(123);
 
 			var actual = OscSlip.EncodePacket(message);
@@ -263,7 +263,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void EncodeThenDecodeOscMessageWithRgbaArgument()
 		{
-			var message = new OscMessage("/test");
+			var message = new OscMessage(OscTimeTag.UtcNow, "/test");
 			message.Arguments.Add(new OscRgba(1, 2, 3, 4));
 
 			var data = OscSlip.EncodePacket(message);
@@ -298,7 +298,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void EncodeThenDecodeOscMessageWithStringArgument()
 		{
-			var message = new OscMessage("/test");
+			var message = new OscMessage(OscTimeTag.UtcNow, "/test");
 			message.Arguments.Add("Test");
 
 			var data = OscSlip.EncodePacket(message);
@@ -333,7 +333,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void EncodeThenDecodeOscMessageWithSymbolArgument()
 		{
-			var message = new OscMessage("/test");
+			var message = new OscMessage(OscTimeTag.UtcNow, "/test");
 			message.Arguments.Add(new OscSymbol("Test"));
 
 			// The OscSymbol of test should force another 4 bytes for null terminator

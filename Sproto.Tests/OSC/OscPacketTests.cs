@@ -50,7 +50,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void GetBytes()
 		{
-			var message = new OscMessage("/test");
+			var message = new OscMessage(OscTimeTag.UtcNow, "/test");
 			message.Arguments.Add(true);
 			message.Arguments.Add(123);
 
@@ -66,22 +66,22 @@ namespace OSC.Tests.OSC
 		public void GetBytesForAllInfinity()
 		{
 			var expected = new byte[] { 0x2F, 0x74, 0x65, 0x73, 0x74, 0x00, 0x00, 0x00, 0x2C, 0x49, 0x00, 0x00 };
-			var message = new OscMessage("/test");
+			var message = new OscMessage(OscTimeTag.UtcNow, "/test");
 			message.Arguments.Add(float.PositiveInfinity);
 			var actual = message.ToByteArray();
 			Extensions.AreEqual(expected, actual);
 
-			message = new OscMessage("/test");
+			message = new OscMessage(OscTimeTag.UtcNow, "/test");
 			message.Arguments.Add(float.NegativeInfinity);
 			actual = message.ToByteArray();
 			Extensions.AreEqual(expected, actual);
 
-			message = new OscMessage("/test");
+			message = new OscMessage(OscTimeTag.UtcNow, "/test");
 			message.Arguments.Add(double.PositiveInfinity);
 			actual = message.ToByteArray();
 			Extensions.AreEqual(expected, actual);
 
-			message = new OscMessage("/test");
+			message = new OscMessage(OscTimeTag.UtcNow, "/test");
 			message.Arguments.Add(double.NegativeInfinity);
 			actual = message.ToByteArray();
 			Extensions.AreEqual(expected, actual);

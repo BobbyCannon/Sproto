@@ -7,7 +7,7 @@ using System.Globalization;
 
 namespace Sproto.OSC
 {
-	public struct OscTimeTag
+	public struct OscTimeTag : IComparable<OscTimeTag>, IComparable, IEquatable<OscTimeTag>
 	{
 		#region Constructors
 
@@ -28,7 +28,17 @@ namespace Sproto.OSC
 		/// <summary>
 		/// The minimum date for any OscTimeTag.
 		/// </summary>
-		public static readonly DateTime BaseDate = new DateTime(1900, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+		public static readonly DateTime MinDateTime = new DateTime(1900, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+		
+		/// <summary>
+		/// The minimum OSC date time for any OscTimeTag.
+		/// </summary>
+		public static readonly OscTimeTag MinValue = new OscTimeTag(0);
+
+		/// <summary>
+		/// The maximum OSC date time for any OscTimeTag.
+		/// </summary>
+		public static readonly OscTimeTag MaxValue = new OscTimeTag(0xffffffffffffffff);
 
 		/// <summary>
 		/// Gets the number of seconds since midnight on January 1, 1900. This is the first 32 bits of the 64 bit fixed point OscTimeTag value.
@@ -65,6 +75,17 @@ namespace Sproto.OSC
 		#region Methods
 
 		/// <summary>
+		/// Adds a timespan to this time tag.
+		/// </summary>
+		/// <param name="span"> The time span to be added. </param>
+		/// <returns> The adjusted time. </returns>
+		public OscTimeTag Add(TimeSpan span)
+		{
+			var dt = ToDateTime();
+			return new OscTimeTag(dt.Add(span));
+		}
+
+		/// <summary>
 		/// Get the equivalent DateTime value from the OscTimeTag.
 		/// </summary>
 		/// <returns>
@@ -76,7 +97,7 @@ namespace Sproto.OSC
 			var seconds = Seconds;
 			var fraction = SubSeconds;
 			var milliseconds = fraction / (double) uint.MaxValue * 1000;
-			var datetime = BaseDate.AddSeconds(seconds).AddMilliseconds(milliseconds);
+			var datetime = MinDateTime.AddSeconds(seconds).AddMilliseconds(milliseconds);
 			return datetime;
 		}
 
@@ -87,7 +108,7 @@ namespace Sproto.OSC
 		/// <returns> The equivalent value as an osc time tag. </returns>
 		public static OscTimeTag FromDateTime(DateTime datetime)
 		{
-			var span = datetime.Subtract(BaseDate);
+			var span = datetime.Subtract(MinDateTime);
 			return FromTimeSpan(span);
 		}
 
@@ -129,16 +150,6 @@ namespace Sproto.OSC
 		public override int GetHashCode()
 		{
 			return (int) (((uint) (Value >> 32) + (uint) (Value & 0x00000000FFFFFFFF)) / 2);
-		}
-
-		public static bool operator ==(OscTimeTag a, OscTimeTag b)
-		{
-			return a.Equals(b);
-		}
-
-		public static bool operator !=(OscTimeTag a, OscTimeTag b)
-		{
-			return a.Equals(b);
 		}
 
 		public static OscTimeTag Parse(string value)
@@ -207,6 +218,11 @@ namespace Sproto.OSC
 			throw new Exception($"Invalid OscTimeTag string \'{value}\'");
 		}
 
+		public double ToMilliseconds()
+		{
+			return ToDateTime().Subtract(MinDateTime).TotalMilliseconds;
+		}
+
 		public override string ToString()
 		{
 			return ToString("yyyy-MM-ddTHH:mm:ss.ffffZ");
@@ -217,11 +233,76 @@ namespace Sproto.OSC
 			return ToDateTime().ToString(format);
 		}
 
-		#endregion
-
-		public double ToMilliseconds()
+		public int CompareTo(object obj)
 		{
-			return ToDateTime().Subtract(BaseDate).TotalMilliseconds;
+			return CompareTo((OscTimeTag) obj);
 		}
+
+		public int CompareTo(OscTimeTag other)
+		{
+			if (PreciseValue == other.PreciseValue)
+			{
+				return 0;
+			}
+
+			if (PreciseValue < other.PreciseValue)
+			{
+				return -1;
+			}
+
+			return 1;
+		}
+
+		public bool Equals(OscTimeTag other)
+		{
+			return PreciseValue == other.PreciseValue;
+		}
+
+		public static OscTimeTag operator +(OscTimeTag a, TimeSpan b)
+		{
+			return new OscTimeTag(a.ToDateTime().Add(b));
+		}
+		
+		public static OscTimeTag operator -(OscTimeTag a, TimeSpan b)
+		{
+			return new OscTimeTag(a.ToDateTime().Subtract(b));
+		}
+
+		public static TimeSpan operator -(OscTimeTag d1, OscTimeTag d2)
+		{
+			return d1.ToDateTime() - d2.ToDateTime();
+		}
+		
+		public static bool operator ==(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue == b.PreciseValue;
+		}
+		
+		public static bool operator !=(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue != b.PreciseValue;
+		}
+		
+		public static bool operator <(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue < b.PreciseValue;
+		}
+		
+		public static bool operator >(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue > b.PreciseValue;
+		}
+		
+		public static bool operator <=(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue <= b.PreciseValue;
+		}
+		
+		public static bool operator >=(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue >= b.PreciseValue;
+		}
+
+		#endregion
 	}
 }
