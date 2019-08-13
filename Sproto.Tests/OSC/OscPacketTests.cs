@@ -2,7 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Sproto;
 using Sproto.OSC;
 
 #endregion
@@ -88,6 +90,80 @@ namespace OSC.Tests.OSC
 		}
 
 		[TestMethod]
+		public void ParseAllTypes()
+		{
+			var command = "/command,\"value1, value2\",0.1234d";
+			var packet = OscMessage.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
+			var actual = packet as OscMessage;
+
+			Assert.IsNotNull(actual);
+			Assert.AreEqual("/command", actual.Address);
+			Assert.AreEqual(2, actual.Arguments.Count);
+			Assert.AreEqual("value1, value2", actual.Arguments[0]);
+			Assert.AreEqual(0.1234, actual.Arguments[1]);
+		}
+
+		[TestMethod]
+		public void ParseDouble()
+		{
+			var message = new OscMessage("/command", 1234.5678);
+			var actualString = message.ToString();
+			var command = "/command, 1234.5678d";
+
+			Assert.AreEqual(command, actualString);
+
+			var packet = OscMessage.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
+			var actual = packet as OscMessage;
+
+			Assert.IsNotNull(actual);
+			Assert.AreEqual("/command", actual.Address);
+			Assert.AreEqual(1, actual.Arguments.Count);
+			Assert.AreEqual(1234.5678, actual.Arguments[0]);
+		}
+
+		[TestMethod]
+		public void ParseString()
+		{
+			var commands = new[]
+			{
+				"/command,\"value1, value2\",0.1234d",
+				"/command, \"value1, value2\", 0.1234d",
+				"/command,  \"value1, value2\",  0.1234d"
+			};
+			
+			foreach (var command in commands)
+			{
+				var packet = OscMessage.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
+				var actual = packet as OscMessage;
+
+				Assert.IsNotNull(actual);
+				Assert.AreEqual("/command", actual.Address);
+				Assert.AreEqual(2, actual.Arguments.Count);
+				Assert.AreEqual("value1, value2", actual.Arguments[0]);
+				Assert.AreEqual(0.1234, actual.Arguments[1]);
+			}
+
+			commands = new[]
+			{
+				"/command,0.1234d,\"value1, value2\"",
+				"/command, 0.1234d, \"value1, value2\"",
+				"/command,  0.1234d,  \"value1, value2\""
+			};
+
+			foreach (var command in commands)
+			{
+				var packet = OscMessage.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
+				var actual = packet as OscMessage;
+
+				Assert.IsNotNull(actual);
+				Assert.AreEqual("/command", actual.Address);
+				Assert.AreEqual(2, actual.Arguments.Count);
+				Assert.AreEqual(0.1234, actual.Arguments[0]);
+				Assert.AreEqual("value1, value2", actual.Arguments[1]);
+			}
+		}
+
+		[TestMethod]
 		public void ParseTime()
 		{
 			var values = new Dictionary<string, OscTimeTag>
@@ -105,6 +181,30 @@ namespace OSC.Tests.OSC
 				Assert.AreEqual(1, message.Arguments.Count);
 				Assert.AreEqual(e.Value, ((OscTimeTag) message.Arguments[0]).Value);
 			}
+		}
+
+		[TestMethod]
+		public void ValidateToString()
+		{
+			var oscMessage = new OscMessage("/command", 
+				123,
+				1234L,
+				12.34f,
+				123.456d,
+				(byte) 65,
+				true,
+				false,
+				new byte[] { 0, 1, 2 },
+				new object[] { -123, -1234L, -12.34f, -123.456d, (byte) 66, true, false, }
+			);
+
+			var expected = "/command, 123, 1234L, 12.34f, 123.456d, 'A', True, False, { Blob: 0x000102 }, [-123, -1234L, -12.34f, -123.456d, 'B', True, False]";
+			var actualString = oscMessage.ToString();
+
+			Assert.AreEqual(expected, actualString);
+
+			var actualMessage = OscMessage.Parse(expected) as OscMessage;
+			Extensions.AreEqual(oscMessage, actualMessage, false, null, nameof(OscMessage.Time));
 		}
 
 		#endregion

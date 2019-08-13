@@ -466,7 +466,13 @@ namespace Sproto
 			// parse double
 			if (argString.EndsWith("d"))
 			{
-				if (double.TryParse(argString.Substring(0, argString.Length - 1), NumberStyles.Float, provider, out valueDouble))
+				var argument = argString.Substring(0, argString.Length - 1);
+				if (double.TryParse(argument, NumberStyles.Float, provider, out valueDouble))
+				{
+					return valueDouble;
+				}
+				
+				if (double.TryParse(argument, out valueDouble))
 				{
 					return valueDouble;
 				}
@@ -475,7 +481,8 @@ namespace Sproto
 			// parse float
 			if (argString.EndsWith("f"))
 			{
-				if (float.TryParse(argString.Substring(0, argString.Length - 1), NumberStyles.Float, provider, out valueFloat))
+				var argument = argString.Substring(0, argString.Length - 1);
+				if (float.TryParse(argument, NumberStyles.Float, provider, out valueFloat))
 				{
 					return valueFloat;
 				}
@@ -811,93 +818,119 @@ namespace Sproto
 					return;
 				}
 
-				// scan forward for the first control char ',', '[', '{'
-				var controlChar = str.IndexOfAny(new[] { ',', '[', '{' }, index);
+				// scan forward for the first control char ',', '[', '{', '"'
+				var controlChar = str.IndexOfAny(new[] { ',', '[', '{', '"' }, index);
 
 				if (controlChar == -1)
 				{
 					// no control char found 
-					arguments.Add(ParseArgument(str.Substring(index, str.Length - index), provider));
-
+					var argument = str.Substring(index, str.Length - index);
+					arguments.Add(ParseArgument(argument, provider));
 					return;
 				}
+
 				var c = str[controlChar];
 
-				if (c == ',')
+				switch (c)
 				{
-					arguments.Add(ParseArgument(str.Substring(index, controlChar - index), provider));
-
-					index = controlChar + 1;
-				}
-				else if (c == '[')
-				{
-					var end = ScanForwardInArray(str, controlChar);
-					var array = new List<object>();
-
-					ParseArguments(str.Substring(controlChar + 1, end - (controlChar + 1)), array, 0, provider);
-
-					arguments.Add(array.ToArray());
-
-					end++;
-
-					if (end >= str.Length)
+					case ',':
 					{
-						return;
+						if (index == controlChar)
+						{
+							index++;
+							continue;
+						}
+
+						var argument = str.Substring(index, controlChar - index);
+						arguments.Add(ParseArgument(argument, provider));
+						index = controlChar + 1;
+						break;
 					}
 
-					if (str[end] != ',')
+					case '[':
 					{
-						controlChar = str.IndexOfAny(new[] { ',' }, end);
+						var end = ScanForwardInArray(str, controlChar);
+						var array = new List<object>();
 
-						if (controlChar == -1)
+						ParseArguments(str.Substring(controlChar + 1, end - (controlChar + 1)), array, 0, provider);
+
+						arguments.Add(array.ToArray());
+
+						end++;
+
+						if (end >= str.Length)
 						{
 							return;
 						}
 
-						if (string.IsNullOrWhiteSpace(str.Substring(end, controlChar - end)) == false)
+						if (str[end] != ',')
 						{
-							throw new Exception($@"Malformed array '{str.Substring(index, controlChar - end)}'");
+							controlChar = str.IndexOfAny(new[] { ',' }, end);
+
+							if (controlChar == -1)
+							{
+								return;
+							}
+
+							if (string.IsNullOrWhiteSpace(str.Substring(end, controlChar - end)) == false)
+							{
+								throw new Exception($@"Malformed array '{str.Substring(index, controlChar - end)}'");
+							}
+
+							index = controlChar;
+						}
+						else
+						{
+							index = end + 1;
 						}
 
-						index = controlChar;
-					}
-					else
-					{
-						index = end + 1;
-					}
-				}
-				else if (c == '{')
-				{
-					var end = ScanForwardObject(str, controlChar);
-
-					arguments.Add(ParseObject(str.Substring(controlChar + 1, end - (controlChar + 1)), provider));
-
-					end++;
-
-					if (end >= str.Length)
-					{
-						return;
+						break;
 					}
 
-					if (str[end] != ',')
+					case '{':
 					{
-						controlChar = str.IndexOfAny(new[] { ',' }, end);
+						var end = ScanForwardObject(str, controlChar);
 
-						if (controlChar == -1)
+						arguments.Add(ParseObject(str.Substring(controlChar + 1, end - (controlChar + 1)), provider));
+
+						end++;
+
+						if (end >= str.Length)
 						{
 							return;
 						}
 
-						if (string.IsNullOrWhiteSpace(str.Substring(end, controlChar - end)) == false)
+						if (str[end] != ',')
 						{
-							throw new Exception($@"Malformed object '{str.Substring(index, controlChar - end)}'");
+							controlChar = str.IndexOfAny(new[] { ',' }, end);
+
+							if (controlChar == -1)
+							{
+								return;
+							}
+
+							if (string.IsNullOrWhiteSpace(str.Substring(end, controlChar - end)) == false)
+							{
+								throw new Exception($@"Malformed object '{str.Substring(index, controlChar - end)}'");
+							}
+
+							index = controlChar;
+						}
+						else
+						{
+							index = end + 1;
 						}
 
-						index = controlChar;
+						break;
 					}
-					else
+
+					case '"':
 					{
-						index = end + 1;
+						var nextQuote = str.IndexOf('"', controlChar + 1);
+						var argument = str.Substring(controlChar, nextQuote - controlChar + 1);
+						arguments.Add(ParseArgument(argument, provider));
+						index = nextQuote + 1;
+						break;
 					}
 				}
 			}

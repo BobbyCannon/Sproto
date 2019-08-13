@@ -17,7 +17,7 @@ if ($scriptPath.Length -le 0)
 }
 
 $destination = "$scriptPath\Binaries"
-$destination2 = "C:\Workspaces\Nuget\Developer"
+$destination2 = "C:\Workspaces\Nuget\Development"
 
 Push-Location $scriptPath
 
@@ -43,8 +43,8 @@ try
 	
 	& nuget.exe restore "$scriptPath\$productName.sln"
 
-	$msbuild = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\MSBuild.exe"
-	& $msbuild "$scriptPath\$productName.sln" /p:Configuration="$Configuration" /p:Platform="Any CPU" /t:Rebuild /p:VisualStudioVersion=15.0 /v:m /m
+	$msbuild = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\MSBuild.exe"
+	& $msbuild "$scriptPath\$productName.sln" /p:Configuration="$Configuration" /p:Platform="Any CPU" /t:Rebuild /v:m /m
 
 	if ($LASTEXITCODE -ne 0)
 	{
