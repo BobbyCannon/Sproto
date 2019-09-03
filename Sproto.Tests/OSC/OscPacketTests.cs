@@ -191,6 +191,7 @@ namespace OSC.Tests.OSC
 				1234L,
 				12.34f,
 				123.456d,
+				"123456",
 				(byte) 65,
 				true,
 				false,
@@ -198,7 +199,7 @@ namespace OSC.Tests.OSC
 				new object[] { -123, -1234L, -12.34f, -123.456d, (byte) 66, true, false, }
 			);
 
-			var expected = "/command, 123, 1234L, 12.34f, 123.456d, 'A', True, False, { Blob: 0x000102 }, [-123, -1234L, -12.34f, -123.456d, 'B', True, False]";
+			var expected = "/command, 123, 1234L, 12.34f, 123.456d, \"123456\", 'A', True, False, { Blob: 0x000102 }, [-123, -1234L, -12.34f, -123.456d, 'B', True, False]";
 			var actualString = oscMessage.ToString();
 
 			Assert.AreEqual(expected, actualString);

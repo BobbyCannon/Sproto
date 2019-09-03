@@ -26,6 +26,12 @@ namespace OSCNativeTests
 			OscMessageGetArgumentAsBool(&message, &bActual);
 			OscMessageGetArgumentAsInt32(&message, &iActual);
 
+			Assert::AreEqual(size_t(5), message.oscAddressPatternLength);
+			Assert::AreEqual('/', message.oscAddressPattern[0]);
+			Assert::AreEqual('t', message.oscAddressPattern[1]);
+			Assert::AreEqual('e', message.oscAddressPattern[2]);
+			Assert::AreEqual('s', message.oscAddressPattern[3]);
+			Assert::AreEqual('t', message.oscAddressPattern[4]);
 			Assert::AreEqual(true, bActual);
 			Assert::AreEqual(123, iActual);
 		}
