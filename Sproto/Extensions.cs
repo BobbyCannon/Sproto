@@ -86,7 +86,7 @@ namespace Sproto
 
 			var sb = new StringBuilder();
 
-			OscMessage.ArgumentsToString(sb, provider, args);
+			OscMessage.ArgumentsToString(sb, false, provider, args);
 
 			return sb.ToString();
 		}
@@ -424,17 +424,17 @@ namespace Sproto
 			{
 				var hexString = argString.Substring(2);
 
-				// parse a int32
 				if (hexString.Length <= 8)
 				{
+					// parse a int32
 					if (uint.TryParse(hexString, NumberStyles.HexNumber, provider, out var value))
 					{
 						return unchecked((int) value);
 					}
 				}
-				// parse a int64
 				else
 				{
+					// parse a int64
 					if (ulong.TryParse(hexString, NumberStyles.HexNumber, provider, out var value))
 					{
 						return unchecked((long) value);

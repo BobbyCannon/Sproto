@@ -290,7 +290,6 @@ namespace Sproto.OSC
 		/// <summary>
 		/// Parse a message from a string using the supplied provider.
 		/// </summary>
-		/// <param name="time"> The time to represent the message. </param>
 		/// <param name="value"> A string containing the OSC message data. </param>
 		/// <param name="provider"> The format provider to use during parsing. </param>
 		/// <returns> The parsed OSC message. </returns>
@@ -505,10 +504,15 @@ namespace Sproto.OSC
 
 		public override string ToString()
 		{
-			return ToString(CultureInfo.InvariantCulture);
+			return ToString(CultureInfo.InvariantCulture, false);
+		}
+		
+		public string ToHexString()
+		{
+			return ToString(CultureInfo.InvariantCulture, true);
 		}
 
-		public string ToString(IFormatProvider provider)
+		public string ToString(IFormatProvider provider, bool numberAsHex)
 		{
 			var sb = new StringBuilder();
 
@@ -521,12 +525,12 @@ namespace Sproto.OSC
 
 			sb.Append(", ");
 
-			ArgumentsToString(sb, provider, Arguments);
+			ArgumentsToString(sb, numberAsHex, provider, Arguments);
 
 			return sb.ToString();
 		}
 
-		internal static void ArgumentsToString(StringBuilder sb, IFormatProvider provider, IEnumerable<object> args)
+		internal static void ArgumentsToString(StringBuilder sb, bool hex, IFormatProvider provider, IEnumerable<object> args)
 		{
 			var first = true;
 
@@ -545,16 +549,16 @@ namespace Sproto.OSC
 				{
 					case object[] objects:
 						sb.Append('[');
-						ArgumentsToString(sb, provider, objects);
+						ArgumentsToString(sb, hex, provider, objects);
 						sb.Append(']');
 						break;
 
 					case int i:
-						sb.Append(i.ToString(provider));
+						sb.Append(hex ? $"0x{i.ToString("X8", provider)}" : i.ToString(provider));
 						break;
 
 					case long l:
-						sb.Append(l.ToString(provider) + "L");
+						sb.Append(hex ? $"0x{l.ToString("X16", provider)}" : $"{l.ToString(provider)}L");
 						break;
 
 					case float f:

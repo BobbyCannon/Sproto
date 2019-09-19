@@ -122,6 +122,16 @@ namespace OSC.Tests.OSC
 		}
 
 		[TestMethod]
+		public void ParseHexNumbers()
+		{
+			var data = "/command, 0x0000007B, 0x00000000000004D2";
+			var expected = new OscMessage("/command", 123, 1234L);
+			var actual = (OscMessage) OscMessage.Parse(data);
+
+			Extensions.AreEqual(expected, actual, false, null, nameof(OscMessage.Time));
+		}
+
+		[TestMethod]
 		public void ParseString()
 		{
 			var commands = new[]
@@ -130,7 +140,7 @@ namespace OSC.Tests.OSC
 				"/command, \"value1, value2\", 0.1234d",
 				"/command,  \"value1, value2\",  0.1234d"
 			};
-			
+
 			foreach (var command in commands)
 			{
 				var packet = OscMessage.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
@@ -184,9 +194,9 @@ namespace OSC.Tests.OSC
 		}
 
 		[TestMethod]
-		public void ValidateToString()
+		public void ToStringAllTypes()
 		{
-			var oscMessage = new OscMessage("/command", 
+			var oscMessage = new OscMessage("/command",
 				123,
 				1234L,
 				12.34f,
@@ -196,7 +206,7 @@ namespace OSC.Tests.OSC
 				true,
 				false,
 				new byte[] { 0, 1, 2 },
-				new object[] { -123, -1234L, -12.34f, -123.456d, (byte) 66, true, false, }
+				new object[] { -123, -1234L, -12.34f, -123.456d, (byte) 66, true, false }
 			);
 
 			var expected = "/command, 123, 1234L, 12.34f, 123.456d, \"123456\", 'A', True, False, { Blob: 0x000102 }, [-123, -1234L, -12.34f, -123.456d, 'B', True, False]";
@@ -205,6 +215,62 @@ namespace OSC.Tests.OSC
 			Assert.AreEqual(expected, actualString);
 
 			var actualMessage = OscMessage.Parse(expected) as OscMessage;
+			Extensions.AreEqual(oscMessage, actualMessage, false, null, nameof(OscMessage.Time));
+		}
+		
+		[TestMethod]
+		public void ToStringAllTypesAsHex()
+		{
+			var oscMessage = new OscMessage("/command",
+				123,
+				1234L,
+				12.34f,
+				123.456d,
+				"123456",
+				(byte) 65,
+				true,
+				false,
+				new byte[] { 0, 1, 2 },
+				new object[] { -123, -1234L, -12.34f, -123.456d, (byte) 66, true, false }
+			);
+
+			var expected = "/command, 0x0000007B, 0x00000000000004D2, 12.34f, 123.456d, \"123456\", 'A', True, False, { Blob: 0x000102 }, [0xFFFFFF85, 0xFFFFFFFFFFFFFB2E, -12.34f, -123.456d, 'B', True, False]";
+			var actualString = oscMessage.ToHexString();
+
+			Assert.AreEqual(expected, actualString);
+
+			var actualMessage = OscMessage.Parse(expected) as OscMessage;
+			Extensions.AreEqual(oscMessage, actualMessage, false, null, nameof(OscMessage.Time));
+		}
+
+		[TestMethod]
+		public void ToStringAsHexFormat()
+		{
+			var oscMessage = new OscMessage("/command", 123, 1234L);
+			var expected = "/command, 0x0000007B, 0x00000000000004D2";
+			var actualString = oscMessage.ToHexString();
+
+			Assert.AreEqual(expected, actualString);
+
+			var actualMessage = OscMessage.Parse(expected) as OscMessage;
+			Extensions.AreEqual(oscMessage, actualMessage, false, null, nameof(OscMessage.Time));
+			
+			oscMessage = new OscMessage("/command", int.MinValue, long.MinValue);
+			expected = "/command, 0x80000000, 0x8000000000000000";
+			actualString = oscMessage.ToHexString();
+
+			Assert.AreEqual(expected, actualString);
+
+			actualMessage = OscMessage.Parse(expected) as OscMessage;
+			Extensions.AreEqual(oscMessage, actualMessage, false, null, nameof(OscMessage.Time));
+			
+			oscMessage = new OscMessage("/command", int.MaxValue, long.MaxValue);
+			expected = "/command, 0x7FFFFFFF, 0x7FFFFFFFFFFFFFFF";
+			actualString = oscMessage.ToHexString();
+
+			Assert.AreEqual(expected, actualString);
+
+			actualMessage = OscMessage.Parse(expected) as OscMessage;
 			Extensions.AreEqual(oscMessage, actualMessage, false, null, nameof(OscMessage.Time));
 		}
 

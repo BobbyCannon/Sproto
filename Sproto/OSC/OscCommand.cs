@@ -113,9 +113,14 @@ namespace Sproto.OSC
 			return new OscBundle(time ?? OscTimeTag.UtcNow, ToMessage());
 		}
 
-		public OscMessage ToMessage(bool includeData = true)
+		/// <summary>
+		/// Converts this OSC command to an OSC Message.
+		/// </summary>
+		/// <param name="includeArguments"> Option to include arguments in message. Defaults to true. If true then UpdateMessage will be called to populate the message. </param>
+		/// <returns> The OSC message. </returns>
+		public OscMessage ToMessage(bool includeArguments = true)
 		{
-			if (!includeData)
+			if (!includeArguments)
 			{
 				return new OscMessage(OscTimeTag.UtcNow, Address);
 			}
