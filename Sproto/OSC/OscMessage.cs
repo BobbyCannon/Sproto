@@ -17,7 +17,7 @@ namespace Sproto.OSC
 		#region Constructors
 
 		/// <summary>
-		/// Instantiates an instance of an OSC message for the provided address and arguments. 
+		/// Instantiates an instance of an OSC message for the provided address and arguments.
 		/// </summary>
 		/// <param name="address"> The address. </param>
 		/// <param name="args"> The arguments. </param>
@@ -30,9 +30,9 @@ namespace Sproto.OSC
 			: this(OscTimeTag.UtcNow, address, args)
 		{
 		}
-		
+
 		/// <summary>
-		/// Instantiates an instance of an OSC message for the provided address and arguments. 
+		/// Instantiates an instance of an OSC message for the provided address and arguments.
 		/// </summary>
 		/// <param name="time"> The time. </param>
 		/// <param name="address"> The address. </param>
@@ -110,6 +110,23 @@ namespace Sproto.OSC
 			var response = new OscMessage(time, address);
 			response.Arguments.AddRange(args);
 			return response;
+		}
+
+		/// <summary>
+		/// Gets the argument as the specified type. Does a direct cast so if the type is wrong then it will exception.
+		/// </summary>
+		/// <typeparam name="T"> The type the argument is. </typeparam>
+		/// <param name="index"> The index of the argument to cast. </param>
+		/// <param name="defaultValue"> The default value if the argument index does not exists. </param>
+		/// <returns> The typed argument. </returns>
+		public T GetArgument<T>(int index, T defaultValue = default)
+		{
+			if (index >= Arguments.Count)
+			{
+				return defaultValue;
+			}
+
+			return (T) Arguments[index];
 		}
 
 		/// <inheritdoc />
@@ -297,7 +314,7 @@ namespace Sproto.OSC
 		{
 			return Parse(OscTimeTag.UtcNow, value, provider);
 		}
-		
+
 		/// <summary>
 		/// Parse a message from a string using the supplied provider.
 		/// </summary>
@@ -502,14 +519,14 @@ namespace Sproto.OSC
 			return output;
 		}
 
-		public override string ToString()
-		{
-			return ToString(CultureInfo.InvariantCulture, false);
-		}
-		
 		public string ToHexString()
 		{
 			return ToString(CultureInfo.InvariantCulture, true);
+		}
+
+		public override string ToString()
+		{
+			return ToString(CultureInfo.InvariantCulture, false);
 		}
 
 		public string ToString(IFormatProvider provider, bool numberAsHex)
@@ -605,11 +622,11 @@ namespace Sproto.OSC
 						break;
 
 					case string sValue:
-						sb.Append($@"""{sValue.EscapeString()}""");
+						sb.Append($"\"{sValue.ToLiteral()}\"");
 						break;
 
 					case OscSymbol symbol:
-						sb.Append(symbol.Value.EscapeString());
+						sb.Append(symbol.Value.ToLiteral());
 						break;
 
 					case byte[] bytes:

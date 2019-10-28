@@ -19,6 +19,8 @@ namespace Sproto
 	{
 		#region Fields
 
+		private static readonly char[] _charactersToEscape = { '\0', '\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\', '"' };
+
 		private static readonly ushort[] _crcTable =
 		{
 			0x0000, 0x1189, 0x2312, 0x329B, 0x4624, 0x57AD, 0x6536, 0x74BF,
@@ -111,99 +113,85 @@ namespace Sproto
 		}
 
 		/// <summary>
+		/// To literal version of the string.
+		/// </summary>
+		/// <param name="input"> The string input. </param>
+		/// <returns> The literal version of the string. </returns>
+		public static string ToLiteral(this string input)
+		{
+			if (input == null)
+			{
+				return "null";
+			}
+
+			var literal = new StringBuilder(input.Length);
+
+			foreach (var c in input)
+			{
+				switch (c)
+				{
+					case '\'':
+						literal.Append(@"\'");
+						break;
+					case '\"':
+						literal.Append("\\\"");
+						break;
+					case '\\':
+						literal.Append(@"\\");
+						break;
+					case '\0':
+						literal.Append(@"\0");
+						break;
+					case '\a':
+						literal.Append(@"\a");
+						break;
+					case '\b':
+						literal.Append(@"\b");
+						break;
+					case '\f':
+						literal.Append(@"\f");
+						break;
+					case '\n':
+						literal.Append(@"\n");
+						break;
+					case '\r':
+						literal.Append(@"\r");
+						break;
+					case '\t':
+						literal.Append(@"\t");
+						break;
+					case '\v':
+						literal.Append(@"\v");
+						break;
+					default:
+						// ASCII printable character
+						if (c >= 0x20 && c <= 0x7e)
+						{
+							literal.Append(c);
+							// As UTF16 escaped character
+						}
+						else
+						{
+							literal.Append(@"\u");
+							literal.Append(((int) c).ToString("x4"));
+						}
+
+						break;
+				}
+			}
+
+			return literal.ToString();
+		}
+
+		/// <summary>
 		/// Turn a byte array into a readable, escaped string
 		/// </summary>
 		/// <param name="bytes"> bytes </param>
 		/// <returns> a string </returns>
-		public static string Escape(this byte[] bytes)
+		public static string ToLiteral(this byte[] bytes)
 		{
-			// the result is maximum of bytes length * 4
-			var chars = new char[bytes.Length * 4];
-
-			var j = 0;
-
-			for (var i = 0; i < bytes.Length; i++)
-			{
-				var b = bytes[i];
-				var c = (char) b;
-
-				if (c > '~')
-				{
-					//chars[j++] = '�';
-					chars[j++] = '\\';
-					chars[j++] = 'x';
-					chars[j++] = ((b & 240) >> 4).ToString("X")[0];
-					chars[j++] = (b & 15).ToString("X")[0];
-				}
-				else if (c >= ' ')
-				{
-					chars[j++] = c;
-				}
-				else
-				{
-					switch (c)
-					{
-						case '\0':
-							chars[j++] = '\\';
-							chars[j++] = '0';
-							break;
-
-						case '\a':
-							chars[j++] = '\\';
-							chars[j++] = 'a';
-							break;
-
-						case '\b':
-							chars[j++] = '\\';
-							chars[j++] = 'b';
-							break;
-
-						case '\f':
-							chars[j++] = '\\';
-							chars[j++] = 'f';
-							break;
-
-						case '\n':
-							chars[j++] = '\\';
-							chars[j++] = 'n';
-							break;
-
-						case '\r':
-							chars[j++] = '\\';
-							chars[j++] = 'r';
-							break;
-
-						case '\t':
-							chars[j++] = '\\';
-							chars[j++] = 't';
-							break;
-
-						case '\v':
-							chars[j++] = '\\';
-							chars[j++] = 'v';
-							break;
-
-						case '\\':
-							chars[j++] = '\\';
-							chars[j++] = '\\';
-							break;
-
-						default:
-							chars[j++] = '\\';
-							chars[j++] = 'x';
-							chars[j++] = ((b & 240) >> 4).ToString("X")[0];
-							chars[j++] = (b & 15).ToString("X")[0];
-							break;
-					}
-				}
-			}
-
-			return new string(chars, 0, j);
-		}
-
-		public static string EscapeString(this string str)
-		{
-			return Escape(GetBytes(str));
+			var data = Encoding.UTF8.GetString(bytes);
+			return ToLiteral(data);
 		}
 
 		public static void FixMaxBaudRateIssue(this SerialPort port)
@@ -341,12 +329,14 @@ namespace Sproto
 						parseHexCount = 0;
 					}
 				}
+
 				// if we are not in  an escape sequence and the char is a escape char
 				else if (isEscaped == false && c == '\\')
 				{
 					// escape
 					isEscaped = true;
 				}
+
 				// else if we are escaped
 				else if (isEscaped)
 				{
@@ -471,7 +461,7 @@ namespace Sproto
 				{
 					return valueDouble;
 				}
-				
+
 				if (double.TryParse(argument, out valueDouble))
 				{
 					return valueDouble;
@@ -537,12 +527,12 @@ namespace Sproto
 			// parse string
 			if (argString[0] == '\"')
 			{
-				var end = argString.IndexOf('"', 1);
+				var end = argString.LastIndexOf('"');
 
 				if (end < argString.Length - 1)
 				{
 					// some kind of other value tacked on the end of a string! 
-					throw new Exception($@"Malformed string argument '{argString}'");
+					throw new Exception($"Malformed string argument '{argString}'");
 				}
 
 				return UnescapeString(argString.Substring(1, argString.Length - 2));
@@ -656,6 +646,7 @@ namespace Sproto
 						parseHexCount = 0;
 					}
 				}
+
 				// if we are not in  an escape sequence and the char is a escape char
 				else if (isEscaped == false && c == '\\')
 				{
@@ -665,6 +656,7 @@ namespace Sproto
 					// increment count
 					count++;
 				}
+
 				// else if we are escaped
 				else if (isEscaped)
 				{
@@ -683,6 +675,7 @@ namespace Sproto
 						case 't':
 						case 'v':
 						case '\\':
+						case '"':
 							// do not increment count
 							break;
 
@@ -735,6 +728,7 @@ namespace Sproto
 					// escape
 					isEscaped = true;
 				}
+
 				// else if we are escaped
 				else if (isEscaped)
 				{
@@ -778,6 +772,10 @@ namespace Sproto
 
 						case '\\':
 							chars[j++] = (byte) '\\';
+							break;
+
+						case '"':
+							chars[j++] = (byte) '"';
 							break;
 
 						case 'x':
@@ -874,7 +872,7 @@ namespace Sproto
 
 							if (string.IsNullOrWhiteSpace(str.Substring(end, controlChar - end)) == false)
 							{
-								throw new Exception($@"Malformed array '{str.Substring(index, controlChar - end)}'");
+								throw new Exception($"Malformed array '{str.Substring(index, controlChar - end)}'");
 							}
 
 							index = controlChar;
@@ -911,7 +909,7 @@ namespace Sproto
 
 							if (string.IsNullOrWhiteSpace(str.Substring(end, controlChar - end)) == false)
 							{
-								throw new Exception($@"Malformed object '{str.Substring(index, controlChar - end)}'");
+								throw new Exception($"Malformed object '{str.Substring(index, controlChar - end)}'");
 							}
 
 							index = controlChar;
@@ -926,9 +924,10 @@ namespace Sproto
 
 					case '"':
 					{
-						var nextQuote = str.IndexOf('"', controlChar + 1);
-						var argument = str.Substring(controlChar, nextQuote - controlChar + 1);
-						arguments.Add(ParseArgument(argument, provider));
+						var start = controlChar + 1;
+						var nextQuote = ScanForwardUntil(str, start, '"', '\\', "Malformed string");
+						var argument = str.Substring(start, nextQuote - start);
+						arguments.Add(UnescapeString(argument));
 						index = nextQuote + 1;
 						break;
 					}
@@ -944,7 +943,7 @@ namespace Sproto
 		/// <returns> the index of the end char </returns>
 		internal static int ScanForwardObject(string str, int controlChar)
 		{
-			return ScanForward(str, controlChar, '{', '}', @"Expected '}'");
+			return ScanForward(str, controlChar, '{', '}', "Expected '}'");
 		}
 
 		private static byte[] GetBytes(this string str)
@@ -971,7 +970,7 @@ namespace Sproto
 
 			if (colon <= 0)
 			{
-				throw new Exception($@"Malformed object '{strTrimmed}', missing type name");
+				throw new Exception($"Malformed object '{strTrimmed}', missing type name");
 			}
 
 			var name = strTrimmed.Substring(0, colon).Trim();
@@ -979,12 +978,12 @@ namespace Sproto
 
 			if (name.Length == 0)
 			{
-				throw new Exception($@"Malformed object '{strTrimmed}', missing type name");
+				throw new Exception($"Malformed object '{strTrimmed}', missing type name");
 			}
 
 			if (colon + 1 >= strTrimmed.Length)
 			{
-				throw new Exception($@"Malformed object '{strTrimmed}'");
+				throw new Exception($"Malformed object '{strTrimmed}'");
 			}
 
 			switch (nameLower)
@@ -1008,7 +1007,7 @@ namespace Sproto
 					return ParseBlob(strTrimmed.Substring(colon + 1).Trim(), provider);
 
 				default:
-					throw new Exception($@"Unknown object type '{name}'");
+					throw new Exception($"Unknown object type '{name}'");
 			}
 		}
 
@@ -1085,7 +1084,33 @@ namespace Sproto
 		/// <returns> the index of the end char </returns>
 		private static int ScanForwardInArray(string str, int controlChar)
 		{
-			return ScanForward(str, controlChar, '[', ']', @"Expected ']'");
+			return ScanForward(str, controlChar, '[', ']', "Expected ']'");
+		}
+
+		/// <summary>
+		/// Scan for start and end control chars
+		/// </summary>
+		/// <param name="str"> the string to scan </param>
+		/// <param name="index"> the index to start from </param>
+		/// <param name="endChar"> end control char </param>
+		/// <param name="errorString"> string to use in the case of an error </param>
+		/// <returns> the index of the end char </returns>
+		private static int ScanForwardUntil(string str, int index, char endChar, char escapeCharacter, string errorString)
+		{
+			var hasEscape = false;
+
+			while (index < str.Length)
+			{
+				if (str[index] == endChar && !hasEscape)
+				{
+					return index;
+				}
+
+				hasEscape = !hasEscape && str[index] == escapeCharacter;
+				index++;
+			}
+
+			return -1;
 		}
 
 		#endregion

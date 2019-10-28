@@ -31,6 +31,14 @@ namespace OSC.Tests
 			}
 		}
 
+		[TestMethod]
+		public void EscapeString()
+		{
+			Assert.AreEqual("Hello \\\"aoeu\\\" foo.", "Hello \"aoeu\" foo.".ToLiteral());
+			Assert.AreEqual("\\0", "\0".ToLiteral());
+			Assert.AreEqual("\\0", "\0".ToLiteral());
+		}
+
 		#endregion
 	}
 }
