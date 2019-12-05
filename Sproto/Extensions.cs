@@ -117,7 +117,7 @@ namespace Sproto
 		/// </summary>
 		/// <param name="input"> The string input. </param>
 		/// <returns> The literal version of the string. </returns>
-		public static string ToLiteral(this string input)
+		public static string Escape(this string input)
 		{
 			if (input == null)
 			{
@@ -188,10 +188,10 @@ namespace Sproto
 		/// </summary>
 		/// <param name="bytes"> bytes </param>
 		/// <returns> a string </returns>
-		public static string ToLiteral(this byte[] bytes)
+		public static string Escape(this byte[] bytes)
 		{
 			var data = Encoding.UTF8.GetString(bytes);
-			return ToLiteral(data);
+			return Escape(data);
 		}
 
 		public static void FixMaxBaudRateIssue(this SerialPort port)
@@ -535,11 +535,11 @@ namespace Sproto
 					throw new Exception($"Malformed string argument '{argString}'");
 				}
 
-				return UnescapeString(argString.Substring(1, argString.Length - 2));
+				return Unescape(argString.Substring(1, argString.Length - 2));
 			}
 
 			// if all else fails then its a symbol i guess (?!?) 
-			return new OscSymbol(UnescapeString(argString));
+			return new OscSymbol(Unescape(argString));
 		}
 
 		public static byte[] ParseBlob(string str, IFormatProvider provider)
@@ -616,20 +616,19 @@ namespace Sproto
 		/// <summary>
 		/// Turn a readable string into a byte array
 		/// </summary>
-		/// <param name="str"> a string, optionally with escape sequences in it </param>
-		/// <returns> a byte array </returns>
-		public static byte[] Unescape(this string str)
+		/// <param name="value"> a string, optionally with escape sequences in it </param>
+		/// <returns> The unescape version of the provided value. </returns>
+		public static string Unescape(this string value)
 		{
 			var count = 0;
 			var isEscaped = false;
 			var parseHexNext = false;
 			var parseHexCount = 0;
 
-			// Uri.HexEscape(
 			// first we count the number of chars we will be returning
-			for (var i = 0; i < str.Length; i++)
+			for (var i = 0; i < value.Length; i++)
 			{
-				var c = str[i];
+				var c = value[i];
 
 				if (parseHexNext)
 				{
@@ -699,12 +698,12 @@ namespace Sproto
 
 			if (parseHexNext)
 			{
-				throw new Exception($"Invalid escape sequence at char '{str.Length - 1}' missing hex value.");
+				throw new Exception($"Invalid escape sequence at char '{value.Length - 1}' missing hex value.");
 			}
 
 			if (isEscaped)
 			{
-				throw new Exception($"Invalid escape sequence at char '{str.Length - 1}'.");
+				throw new Exception($"Invalid escape sequence at char '{value.Length - 1}'.");
 			}
 
 			// reset the escape state
@@ -718,9 +717,9 @@ namespace Sproto
 			var j = 0;
 
 			// actually populate the array
-			for (var i = 0; i < str.Length; i++)
+			for (var i = 0; i < value.Length; i++)
 			{
-				var c = str[i];
+				var c = value[i];
 
 				// if we are not in  an escape sequence and the char is a escape char
 				if (isEscaped == false && c == '\\')
@@ -736,7 +735,7 @@ namespace Sproto
 					isEscaped = false;
 
 					// check the char against the set of known escape chars
-					switch (char.ToLower(str[i]))
+					switch (char.ToLower(value[i]))
 					{
 						case '0':
 							chars[j++] = (byte) '\0';
@@ -781,7 +780,7 @@ namespace Sproto
 						case 'x':
 							//string temp = "" + str[++i] + str[++i];
 							//chars[j++] = byte.Parse(temp, NumberStyles.HexNumber); //;
-							chars[j++] = (byte) ((Uri.FromHex(str[++i]) << 4) | Uri.FromHex(str[++i]));
+							chars[j++] = (byte) ((Uri.FromHex(value[++i]) << 4) | Uri.FromHex(value[++i]));
 							break;
 					}
 				}
@@ -792,12 +791,7 @@ namespace Sproto
 				}
 			}
 
-			return chars;
-		}
-
-		public static string UnescapeString(this string str)
-		{
-			return GetString(Unescape(str));
+			return GetString(chars);
 		}
 
 		/// <summary>
@@ -927,7 +921,7 @@ namespace Sproto
 						var start = controlChar + 1;
 						var nextQuote = ScanForwardUntil(str, start, '"', '\\', "Malformed string");
 						var argument = str.Substring(start, nextQuote - start);
-						arguments.Add(UnescapeString(argument));
+						arguments.Add(Unescape(argument));
 						index = nextQuote + 1;
 						break;
 					}

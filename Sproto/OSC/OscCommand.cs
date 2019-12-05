@@ -15,6 +15,7 @@ namespace Sproto.OSC
 		protected OscCommand(string address)
 		{
 			Address = address;
+			OscMessage = new OscMessage(Address);
 		}
 
 		#endregion
@@ -127,6 +128,15 @@ namespace Sproto.OSC
 
 			UpdateMessage();
 			return OscMessage;
+		}
+
+		/// <summary>
+		/// Returns the OscMessage string value.
+		/// </summary>
+		/// <returns> The string value in OscMessage format. </returns>
+		public override string ToString()
+		{
+			return OscMessage.ToString();
 		}
 
 		/// <summary>

@@ -1,5 +1,6 @@
 ﻿#region References
 
+using System.Collections.Generic;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sproto;
@@ -22,6 +23,21 @@ namespace OSC.Tests
 			Assert.AreEqual(0x2189, actual);
 		}
 
+		[TestMethod]
+		public void EscapeString()
+		{
+			var items = new Dictionary<string, string>
+			{
+				{ "Hello \\\"aoeu\\\" foo.", "Hello \"aoeu\" foo." },
+				{ "\\0", "\0" }
+			};
+
+			foreach (var item in items)
+			{
+				Assert.AreEqual(item.Key, item.Value.Escape());
+			}
+		}
+
 		//[TestMethod]
 		public void OpenPortAtHighDataRate()
 		{
@@ -32,11 +48,18 @@ namespace OSC.Tests
 		}
 
 		[TestMethod]
-		public void EscapeString()
+		public void UnescapeString()
 		{
-			Assert.AreEqual("Hello \\\"aoeu\\\" foo.", "Hello \"aoeu\" foo.".ToLiteral());
-			Assert.AreEqual("\\0", "\0".ToLiteral());
-			Assert.AreEqual("\\0", "\0".ToLiteral());
+			var items = new Dictionary<string, string>
+			{
+				{ "Hello \\\"aoeu\\\" foo.", "Hello \"aoeu\" foo." },
+				{ "\\0", "\0" }
+			};
+
+			foreach (var item in items)
+			{
+				Assert.AreEqual(item.Value, item.Key.Unescape());
+			}
 		}
 
 		#endregion

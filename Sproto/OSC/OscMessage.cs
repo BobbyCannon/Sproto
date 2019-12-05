@@ -622,11 +622,11 @@ namespace Sproto.OSC
 						break;
 
 					case string sValue:
-						sb.Append($"\"{sValue.ToLiteral()}\"");
+						sb.Append($"\"{sValue.Escape()}\"");
 						break;
 
 					case OscSymbol symbol:
-						sb.Append(symbol.Value.ToLiteral());
+						sb.Append(symbol.Value.Escape());
 						break;
 
 					case byte[] bytes:

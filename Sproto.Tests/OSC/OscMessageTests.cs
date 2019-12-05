@@ -133,7 +133,7 @@ namespace OSC.Tests.OSC
 			var json = JsonConvert.SerializeObject(time);
 			var message = new OscMessage("/object", json);
 			var actual = message.ToString();
-			actual.ToLiteral().Dump();
+			actual.Escape().Dump();
 
 			var actualMessage = OscPacket.Parse(actual) as OscMessage;
 			Assert.IsNotNull(actualMessage);
