@@ -136,6 +136,7 @@ namespace Sproto.OSC
 		/// <returns> The string value in OscMessage format. </returns>
 		public override string ToString()
 		{
+			UpdateMessage();
 			return OscMessage.ToString();
 		}
 
@@ -146,6 +147,78 @@ namespace Sproto.OSC
 		{
 			// Reload the original message, resetting the state.
 			Load(OscMessage);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <typeparam name="T"> The type of the argument expected. </typeparam>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		protected T GetArgument<T>(int index, T defaultValue)
+		{
+			return OscMessage.Arguments.Count <= index ? defaultValue : (T) OscMessage.Arguments[index];
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		protected double GetArgument(int index, double defaultValue)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			if (value is OscSymbol symbol)
+			{
+				switch (symbol.Value)
+				{
+					case "Infinityd":
+						return double.PositiveInfinity;
+
+					case "-Infinityd":
+						return double.NegativeInfinity;
+				}
+			}
+
+			return (double) value;
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		protected float GetArgument(int index, float defaultValue)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			if (value is OscSymbol symbol)
+			{
+				switch (symbol.Value)
+				{
+					case "Infinityd":
+						return float.PositiveInfinity;
+
+					case "-Infinityd":
+						return float.NegativeInfinity;
+				}
+			}
+
+			return (float) value;
 		}
 
 		protected abstract void LoadMessage();

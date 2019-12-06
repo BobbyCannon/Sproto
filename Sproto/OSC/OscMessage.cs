@@ -540,7 +540,7 @@ namespace Sproto.OSC
 				return sb.ToString();
 			}
 
-			sb.Append(", ");
+			sb.Append(",");
 
 			ArgumentsToString(sb, numberAsHex, provider, Arguments);
 
@@ -555,7 +555,7 @@ namespace Sproto.OSC
 			{
 				if (first == false)
 				{
-					sb.Append(", ");
+					sb.Append(",");
 				}
 				else
 				{
