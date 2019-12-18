@@ -154,7 +154,7 @@ namespace Sproto.OSC
 				index += 4;
 
 				var messageBytes = bundle.SubArray(index, size);
-				var packet = OscMessage.Parse(timeTag, messageBytes, messageBytes.Length);
+				var packet = OscMessage.Parse(timeTag, messageBytes);
 				if (packet is OscError error)
 				{
 					return error;

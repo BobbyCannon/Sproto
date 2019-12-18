@@ -73,7 +73,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void ParseWithStringInnerQuotes()
 		{
-			var data = "/update, \"This is \\\"a quote\\\". -John\"";
+			var data = "/update,\"This is \\\"a quote\\\". -John\"";
 			var expected = new OscMessage("/update", "This is \"a quote\". -John");
 			var actual = (OscMessage) OscPacket.Parse(data);
 
@@ -85,7 +85,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void ToBytes()
 		{
-			var message = OscMessage.Parse("/ahoy, \"Flare Lite\"");
+			var message = OscMessage.Parse("/ahoy,\"Flare Lite\"");
 			var actual = OscSlip.EncodePacket(message);
 			actual.Dump();
 
@@ -101,16 +101,16 @@ namespace OSC.Tests.OSC
 		{
 			var itemsToTest = new Dictionary<string, string>
 			{
-				{ "This is \"a quote\". -John", "/update, \"This is \\\"a quote\\\". -John\"" },
-				{ "\0", "/update, \"\\0\"" },
-				{ "\a", "/update, \"\\a\"" },
-				{ "\b", "/update, \"\\b\"" },
-				{ "\f", "/update, \"\\f\"" },
-				{ "\n", "/update, \"\\n\"" },
-				{ "\r", "/update, \"\\r\"" },
-				{ "\t", "/update, \"\\t\"" },
-				{ "\v", "/update, \"\\v\"" },
-				{ "\\", "/update, \"\\\\\"" }
+				{ "This is \"a quote\". -John", "/update,\"This is \\\"a quote\\\". -John\"" },
+				{ "\0", "/update,\"\\0\"" },
+				{ "\a", "/update,\"\\a\"" },
+				{ "\b", "/update,\"\\b\"" },
+				{ "\f", "/update,\"\\f\"" },
+				{ "\n", "/update,\"\\n\"" },
+				{ "\r", "/update,\"\\r\"" },
+				{ "\t", "/update,\"\\t\"" },
+				{ "\v", "/update,\"\\v\"" },
+				{ "\\", "/update,\"\\\\\"" }
 			};
 
 			foreach (var item in itemsToTest)

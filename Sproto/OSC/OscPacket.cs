@@ -22,6 +22,11 @@ namespace Sproto.OSC
 
 		#region Methods
 
+		public static OscPacket GetPacket(byte[] buffer)
+		{
+			return GetPacket(buffer, buffer.Length);
+		}
+
 		public static OscPacket GetPacket(byte[] buffer, int length)
 		{
 			return GetPacket(OscTimeTag.UtcNow, buffer, length);

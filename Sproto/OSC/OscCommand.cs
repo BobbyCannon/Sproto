@@ -1,5 +1,6 @@
 ﻿#region References
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -10,12 +11,20 @@ namespace Sproto.OSC
 {
 	public abstract class OscCommand : INotifyPropertyChanged
 	{
+		#region Fields
+
+		private int _argumentIndex;
+
+		#endregion
+
 		#region Constructors
 
 		protected OscCommand(string address)
 		{
 			Address = address;
 			OscMessage = new OscMessage(Address);
+
+			StartArgumentProcessing();
 		}
 
 		#endregion
@@ -53,14 +62,156 @@ namespace Sproto.OSC
 			return t;
 		}
 
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <typeparam name="T"> The type of the argument expected. </typeparam>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public T GetArgument<T>(T defaultValue)
+		{
+			_argumentIndex++;
+			return GetArgument(_argumentIndex, defaultValue);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <typeparam name="T"> The type of the argument expected. </typeparam>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public T GetArgument<T>(int index, T defaultValue)
+		{
+			return OscMessage.Arguments.Count <= index ? defaultValue : (T) OscMessage.Arguments[index];
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public double GetArgument(double defaultValue)
+		{
+			_argumentIndex++;
+			return GetArgument(_argumentIndex, defaultValue);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public double GetArgument(int index, double defaultValue)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			if (value is OscSymbol symbol)
+			{
+				switch (symbol.Value)
+				{
+					case "Infinityd":
+						return double.PositiveInfinity;
+
+					case "-Infinityd":
+						return double.NegativeInfinity;
+				}
+			}
+
+			return (double) value;
+		}
+
+		public bool GetArgumentAsBoolean()
+		{
+			_argumentIndex++;
+			return GetArgumentAsBoolean(_argumentIndex);
+		}
+
+		public bool GetArgumentAsBoolean(int index)
+		{
+			return OscMessage.Arguments[index] is bool ? (bool) OscMessage.Arguments[index] : bool.Parse(OscMessage.Arguments[index].ToString());
+		}
+
+		public DateTime GetArgumentAsDateTime()
+		{
+			_argumentIndex++;
+			return GetArgumentAsDateTime(_argumentIndex);
+		}
+
+		public DateTime GetArgumentAsDateTime(int index)
+		{
+			return OscMessage.Arguments[index] is OscTimeTag ? ((OscTimeTag) OscMessage.Arguments[index]).ToDateTime() : DateTime.Parse(OscMessage.Arguments[index].ToString());
+		}
+
+		public double GetArgumentAsDouble()
+		{
+			_argumentIndex++;
+			return GetArgumentAsDouble(_argumentIndex);
+		}
+
+		public double GetArgumentAsDouble(int index)
+		{
+			return OscMessage.Arguments[index] is double ? (double) OscMessage.Arguments[index] : double.Parse(OscMessage.Arguments[index].ToString());
+		}
+
+		public float GetArgumentAsFloat()
+		{
+			_argumentIndex++;
+			return GetArgumentAsFloat(_argumentIndex);
+		}
+
+		public float GetArgumentAsFloat(int index)
+		{
+			return OscMessage.Arguments[index] is float ? (float) OscMessage.Arguments[index] : float.Parse(OscMessage.Arguments[index].ToString());
+		}
+
+		public int GetArgumentAsInteger()
+		{
+			_argumentIndex++;
+			return GetArgumentAsInteger(_argumentIndex);
+		}
+
+		public int GetArgumentAsInteger(int index)
+		{
+			return OscMessage.Arguments[index] is int ? (int) OscMessage.Arguments[index] : int.Parse(OscMessage.Arguments[index].ToString());
+		}
+
+		public long GetArgumentAsLong()
+		{
+			_argumentIndex++;
+			return GetArgumentAsLong(_argumentIndex);
+		}
+
+		public long GetArgumentAsLong(int index)
+		{
+			return OscMessage.Arguments[index] is long ? (long) OscMessage.Arguments[index] : long.Parse(OscMessage.Arguments[index].ToString());
+		}
+
+		public string GetArgumentAsString()
+		{
+			_argumentIndex++;
+			return GetArgumentAsString(_argumentIndex);
+		}
+
+		public string GetArgumentAsString(int index)
+		{
+			return OscMessage.Arguments[index] is string ? (string) OscMessage.Arguments[index] : OscMessage.Arguments[index].ToString();
+		}
+
 		public IEnumerable<object> GetArguments(params object[] collection)
 		{
 			var response = new List<object>();
 			foreach (var item in collection)
 			{
-				if (item is IOscArrayableValue arrayable)
+				if (item is IOscArrayableValue arrayValue)
 				{
-					response.AddRange(arrayable.ToArray());
+					response.AddRange(arrayValue.ToArray());
 				}
 				else
 				{
@@ -89,26 +240,19 @@ namespace Sproto.OSC
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 
-		public bool ReadBoolean(ref int index)
+		/// <summary>
+		/// Resets the index for sequential argument processing. Call this before calling "GetArgument" methods that do *not* provide an index.
+		/// </summary>
+		public void StartArgumentProcessing()
 		{
-			return OscMessage.Arguments[index] is bool ? (bool) OscMessage.Arguments[index++] : bool.Parse(OscMessage.Arguments[index++].ToString());
+			_argumentIndex = -1;
 		}
 
-		public double ReadDouble(ref int index)
-		{
-			return OscMessage.Arguments[index] is double ? (double) OscMessage.Arguments[index++] : double.Parse(OscMessage.Arguments[index++].ToString());
-		}
-
-		public float ReadFloat(ref int index)
-		{
-			return OscMessage.Arguments[index] is float ? (float) OscMessage.Arguments[index++] : float.Parse(OscMessage.Arguments[index++].ToString());
-		}
-
-		public int ReadInteger(ref int index)
-		{
-			return OscMessage.Arguments[index] is int ? (int) OscMessage.Arguments[index++] : int.Parse(OscMessage.Arguments[index++].ToString());
-		}
-
+		/// <summary>
+		/// Converts the OscCommand into an OscBundle.
+		/// </summary>
+		/// <param name="time"> On optional time for the bundle. Defaults to OscTimeTag.UtcNow. </param>
+		/// <returns> The OscBundle containing this OscCommand as an OscMessage. </returns>
 		public virtual OscBundle ToBundle(OscTimeTag? time = null)
 		{
 			return new OscBundle(time ?? OscTimeTag.UtcNow, ToMessage());
@@ -147,48 +291,6 @@ namespace Sproto.OSC
 		{
 			// Reload the original message, resetting the state.
 			Load(OscMessage);
-		}
-
-		/// <summary>
-		/// Gets the argument or returns the default value if the index is not found.
-		/// </summary>
-		/// <typeparam name="T"> The type of the argument expected. </typeparam>
-		/// <param name="index"> The index of the argument. </param>
-		/// <param name="defaultValue"> The default value to return if not found. </param>
-		/// <returns> The argument if found or default value if not. </returns>
-		protected T GetArgument<T>(int index, T defaultValue)
-		{
-			return OscMessage.Arguments.Count <= index ? defaultValue : (T) OscMessage.Arguments[index];
-		}
-
-		/// <summary>
-		/// Gets the argument or returns the default value if the index is not found.
-		/// </summary>
-		/// <param name="index"> The index of the argument. </param>
-		/// <param name="defaultValue"> The default value to return if not found. </param>
-		/// <returns> The argument if found or default value if not. </returns>
-		protected double GetArgument(int index, double defaultValue)
-		{
-			if (OscMessage.Arguments.Count <= index)
-			{
-				return defaultValue;
-			}
-
-			var value = OscMessage.Arguments[index];
-
-			if (value is OscSymbol symbol)
-			{
-				switch (symbol.Value)
-				{
-					case "Infinityd":
-						return double.PositiveInfinity;
-
-					case "-Infinityd":
-						return double.NegativeInfinity;
-				}
-			}
-
-			return (double) value;
 		}
 
 		/// <summary>

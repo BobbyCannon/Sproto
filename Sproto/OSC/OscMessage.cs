@@ -138,9 +138,30 @@ namespace Sproto.OSC
 		/// <summary>
 		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
 		/// </summary>
-		/// <param name="time"> </param>
-		/// <param name="data"> </param>
-		/// <param name="length"> </param>
+		/// <param name="data"> The data for the message. </param>
+		/// <returns> Message containing various arguments and an address </returns>
+		public static OscPacket Parse(byte[] data)
+		{
+			return Parse(OscTimeTag.UtcNow, data, data.Length);
+		}
+
+		/// <summary>
+		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
+		/// </summary>
+		/// <param name="time"> The created time of the message. </param>
+		/// <param name="data"> The data for the message. </param>
+		/// <returns> Message containing various arguments and an address </returns>
+		public static OscPacket Parse(OscTimeTag time, byte[] data)
+		{
+			return Parse(time, data, data.Length);
+		}
+
+		/// <summary>
+		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
+		/// </summary>
+		/// <param name="time"> The created time of the message. </param>
+		/// <param name="data"> The data for the message. </param>
+		/// <param name="length"> The length for the message. </param>
 		/// <returns> Message containing various arguments and an address </returns>
 		public static OscPacket Parse(OscTimeTag time, byte[] data, int length)
 		{
@@ -289,6 +310,11 @@ namespace Sproto.OSC
 				{
 					index++;
 				}
+
+				if (index > length)
+				{
+					break;
+				}
 			}
 
 			return new OscMessage(time, address, arguments.ToArray());
@@ -411,6 +437,12 @@ namespace Sproto.OSC
 					case ulong ui64:
 						typeString += "t";
 						parts.Add(SetULong(ui64));
+						break;
+
+					case DateTime time:
+						typeString += "t";
+						var oscTime = new OscTimeTag(time);
+						parts.Add(SetULong(oscTime.Value));
 						break;
 
 					case OscTimeTag timeTag:
@@ -603,6 +635,11 @@ namespace Sproto.OSC
 
 					case OscRgba rgba:
 						sb.Append($"{{ Color: {rgba} }}");
+						break;
+
+					case DateTime dateTime:
+						var oscTime = dateTime.ToOscTimeTag();
+						sb.Append($"{{ Time: {oscTime} }}");
 						break;
 
 					case OscTimeTag tag:
