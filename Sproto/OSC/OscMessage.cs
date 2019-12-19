@@ -208,6 +208,12 @@ namespace Sproto.OSC
 						arguments.Add(iValue);
 						index += 4;
 						break;
+					
+					case 'u':
+						var uValue = GetUInt(data, index);
+						arguments.Add(uValue);
+						index += 4;
+						break;
 
 					case 'f':
 						var fValue = GetFloat(data, index);
@@ -229,6 +235,12 @@ namespace Sproto.OSC
 					case 'h':
 						var hValue = GetLong(data, index);
 						arguments.Add(hValue);
+						index += 8;
+						break;
+					
+					case 'H':
+						var ulValue = GetULong(data, index);
+						arguments.Add(ulValue);
 						index += 8;
 						break;
 
@@ -406,6 +418,11 @@ namespace Sproto.OSC
 						typeString += "i";
 						parts.Add(SetInt(iArg));
 						break;
+					
+					case uint uiArg:
+						typeString += "u";
+						parts.Add(SetUInt(uiArg));
+						break;
 
 					case float sArg:
 						if (float.IsPositiveInfinity(sArg) || float.IsNegativeInfinity(sArg))
@@ -435,7 +452,7 @@ namespace Sproto.OSC
 						break;
 
 					case ulong ui64:
-						typeString += "t";
+						typeString += "H";
 						parts.Add(SetULong(ui64));
 						break;
 
@@ -467,6 +484,11 @@ namespace Sproto.OSC
 						parts.Add(SetString(s2Value.Value));
 						break;
 
+					case byte bValue:
+						typeString += "c";
+						parts.Add(SetChar((char) bValue));
+						break;
+						
 					case char character:
 						typeString += "c";
 						parts.Add(SetChar(character));
@@ -605,9 +627,17 @@ namespace Sproto.OSC
 					case int i:
 						sb.Append(hex ? $"0x{i.ToString("X8", provider)}" : i.ToString(provider));
 						break;
-
+					
+					case uint u:
+						sb.Append(hex ? $"0x{u.ToString("X8", provider)}u" : $"{u.ToString(provider)}u");
+						break;
+					
 					case long l:
-						sb.Append(hex ? $"0x{l.ToString("X16", provider)}" : $"{l.ToString(provider)}L");
+						sb.Append(hex ? $"0x{l.ToString("X16", provider)}L" : $"{l.ToString(provider)}L");
+						break;
+
+					case ulong ul:
+						sb.Append(hex ? $"0x{ul.ToString("X16", provider)}U" : $"{ul.ToString(provider)}U");
 						break;
 
 					case float f:
@@ -631,6 +661,10 @@ namespace Sproto.OSC
 
 					case byte b:
 						sb.Append($"'{(char) b}'");
+						break;
+					
+					case char c:
+						sb.Append($"'{c}'");
 						break;
 
 					case OscRgba rgba:

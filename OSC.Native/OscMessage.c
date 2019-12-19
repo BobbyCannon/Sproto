@@ -141,6 +141,41 @@ OscError OscMessageAddInt32(OscMessage* const oscMessage, const int32_t int32)
 }
 
 /*
+ * @brief Adds a 32-bit unsigned integer argument to an OSC message.
+ *
+ * Example use:
+ * @code
+ * OscMessageAddUInt32(&oscMessage, 123);
+ * @endcode
+ *
+ * @param oscMessage OSC message.
+ * @param uint32 32-bit unsigned integer to be added as argument to the OSC message.
+ * @return Error code (0 if successful).
+ */
+OscError OscMessageAddUInt32(OscMessage* const oscMessage, const uint32_t uint32)
+{
+	if (oscMessage->oscTypeTagStringLength > MAX_NUMBER_OF_ARGUMENTS)
+	{
+		return OscErrorTooManyArguments; // error: too many arguments
+	}
+
+	if ((oscMessage->argumentsSize + sizeof(OscArgument32)) > MAX_ARGUMENTS_SIZE)
+	{
+		return OscErrorArgumentsSizeTooLarge; // error: message full
+	}
+
+	oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringLength++] = OscTypeTagUInt32;
+	oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringLength] = '\0'; // null terminate string
+	OscArgument32 oscArgument32;
+	oscArgument32.int32 = uint32;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument32.byteStruct.byte3;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument32.byteStruct.byte2;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument32.byteStruct.byte1;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument32.byteStruct.byte0;
+	return OscErrorNone;
+}
+
+/*
  * @brief Adds a 32-bit float argument to an OSC message.
  *
  * Example use:
@@ -284,7 +319,44 @@ OscError OscMessageAddInt64(OscMessage* const oscMessage, const uint64_t int64)
 	oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringLength++] = OscTypeTagInt64;
 	oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringLength] = '\0'; // null terminate string
 	OscArgument64 oscArgument64;
-	oscArgument64.int64 = int64;
+	oscArgument64.uint64 = int64;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument64.byteStruct.byte7;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument64.byteStruct.byte6;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument64.byteStruct.byte5;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument64.byteStruct.byte4;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument64.byteStruct.byte3;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument64.byteStruct.byte2;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument64.byteStruct.byte1;
+	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument64.byteStruct.byte0;
+	return OscErrorNone;
+}
+
+/*
+ * @brief Adds a unsigned 64-bit integer argument to an OSC message.
+ *
+ * Example use:
+ * @code
+ * OscMessageAddUInt64(&oscMessage, 123);
+ * @endcode
+ *
+ * @param oscMessage OSC message.
+ * @param uint64 64-bit integer to be added as argument to the OSC message.
+ * @return Error code (0 if successful).
+ */
+OscError OscMessageAddUInt64(OscMessage* const oscMessage, const uint64_t uint64)
+{
+	if (oscMessage->oscTypeTagStringLength > MAX_NUMBER_OF_ARGUMENTS)
+	{
+		return OscErrorTooManyArguments; // error: too many arguments
+	}
+	if ((oscMessage->argumentsSize + sizeof(OscArgument64)) > MAX_ARGUMENTS_SIZE)
+	{
+		return OscErrorArgumentsSizeTooLarge; // error: message full
+	}
+	oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringLength++] = OscTypeTagUInt64;
+	oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringLength] = '\0'; // null terminate string
+	OscArgument64 oscArgument64;
+	oscArgument64.uint64 = uint64;
 	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument64.byteStruct.byte7;
 	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument64.byteStruct.byte6;
 	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument64.byteStruct.byte5;
@@ -424,20 +496,20 @@ OscError OscMessageAddCharacter(OscMessage* const oscMessage, const char asciiCh
 }
 
 /*
- * @brief Adds a 32-bit RGBA colour argument to an OSC message.
+ * @brief Adds a 32-bit RGBA color argument to an OSC message.
  *
  * Example use:
  * @code
- * const RgbaColour rgbaColour = { 0x00, 0x00, 0x00, 0x00 };
- * OscMessageAddRgbaColour(&oscMessage, rgbaColour);
+ * const RgbaColor rgbaColor = { 0x00, 0x00, 0x00, 0x00 };
+ * OscMessageAddRgbaColor(&oscMessage, rgbaColor);
  * @endcode
  *
  * @param oscMessage OSC message.
- * @param rgbaColour 32-bit RGBA colour to be added as argument to the OSC
+ * @param rgbaColor 32-bit RGBA color to be added as argument to the OSC
  * message.
  * @return Error code (0 if successful).
  */
-OscError OscMessageAddRgbaColour(OscMessage* const oscMessage, const RgbaColour rgbaColour)
+OscError OscMessageAddRgbaColor(OscMessage* const oscMessage, const RgbaColor rgbaColor)
 {
 	if (oscMessage->oscTypeTagStringLength > MAX_NUMBER_OF_ARGUMENTS)
 	{
@@ -447,10 +519,10 @@ OscError OscMessageAddRgbaColour(OscMessage* const oscMessage, const RgbaColour 
 	{
 		return OscErrorArgumentsSizeTooLarge; // error: message full
 	}
-	oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringLength++] = OscTypeTagRgbaColour;
+	oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringLength++] = OscTypeTagRgbaColor;
 	oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringLength] = '\0'; // null terminate string
 	OscArgument32 oscArgument32;
-	oscArgument32.rgbaColour = rgbaColour;
+	oscArgument32.rgbaColor = rgbaColor;
 	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument32.byteStruct.byte3;
 	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument32.byteStruct.byte2;
 	oscMessage->arguments[oscMessage->argumentsSize++] = oscArgument32.byteStruct.byte1;
@@ -958,6 +1030,60 @@ OscError OscMessageGetInt32(OscMessage* const oscMessage, int32_t* const int32)
 }
 
 /*
+ * @brief Gets a 32-bit unsigned integer argument from an OSC message.
+ *
+ * The next argument available within the OSC message (indicated by the internal
+ * index oscTypeTagStringIndex) must be a 32-bit unsigned integer else this function
+ * will return an error.  The internal index oscTypeTagStringIndex, will only
+ * be incremented to the next argument if this function is successful.  The user
+ * application may determine the next argument type by first calling
+ * OscMessageGetArgumentType.
+ *
+ * Example use:
+ * @code
+ * switch (OscMessageGetArgumentType(&oscMessage)) {
+ *     case OscTypeTagUInt32:
+ *     {
+ *         uint32_t uint32;
+ *         OscMessageGetUInt32(&oscMessage, &uint32);
+ *         printf("Value = %d", uint32);
+ *         break;
+ *     }
+ *     default:
+ *         printf("Expected argument not available");
+ *         break;
+ * }
+ * @endcode
+ *
+ * @param oscMessage OSC message.
+ * @param uint32 32-bit unsigned integer argument.
+ * @return Error code (0 if successful).
+ */
+OscError OscMessageGetUInt32(OscMessage* const oscMessage, uint32_t* const uint32)
+{
+	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] == '\0')
+	{
+		return OscErrorNoArgumentsAvailable; // error: end of type tag string
+	}
+	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] != OscTypeTagInt32)
+	{
+		return OscErrorUnexpectedArgumentType; // error: unexpected argument type
+	}
+	if ((oscMessage->argumentsIndex + sizeof(OscArgument32)) > oscMessage->argumentsSize)
+	{
+		return OscErrorMessageTooShortForArgumentType; // error: message too short to contain argument
+	}
+	OscArgument32 oscArgument32;
+	oscArgument32.byteStruct.byte3 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	oscArgument32.byteStruct.byte2 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	oscArgument32.byteStruct.byte1 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	oscArgument32.byteStruct.byte0 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	*uint32 = oscArgument32.int32;
+	oscMessage->oscTypeTagStringIndex++;
+	return OscErrorNone;
+}
+
+/*
  * @brief Gets a 32-bit float argument from an OSC message.
  *
  * The next argument available within the OSC message (indicated by the internal
@@ -1144,11 +1270,11 @@ OscError OscMessageGetBlob(OscMessage* const oscMessage, size_t* const blobSize,
 	{
 		return OscErrorMessageTooShortForArgumentType; // error: message too short to contain argument
 	}
-	if (blobSizeArgument.int32 > (int) destinationSize)
+	if (blobSizeArgument.int32 > (uint32_t) destinationSize)
 	{
 		return OscErrorDestinationTooSmall; // error: destination too small
 	}
-	for (int destinationIndex = 0; destinationIndex < blobSizeArgument.int32; destinationIndex++)
+	for (uint32_t destinationIndex = 0; destinationIndex < blobSizeArgument.int32; destinationIndex++)
 	{
 		destination[destinationIndex] = oscMessage->arguments[argumentsIndex++];
 	}
@@ -1218,7 +1344,65 @@ OscError OscMessageGetInt64(OscMessage* const oscMessage, int64_t* const int64)
 	oscArgument64.byteStruct.byte2 = oscMessage->arguments[oscMessage->argumentsIndex++];
 	oscArgument64.byteStruct.byte1 = oscMessage->arguments[oscMessage->argumentsIndex++];
 	oscArgument64.byteStruct.byte0 = oscMessage->arguments[oscMessage->argumentsIndex++];
-	*int64 = oscArgument64.int64;
+	*int64 = oscArgument64.uint64;
+	oscMessage->oscTypeTagStringIndex++;
+	return OscErrorNone;
+}
+
+/*
+ * @brief Gets a 64-bit unsigned integer argument from an OSC message.
+ *
+ * The next argument available within the OSC message (indicated by the internal
+ * index oscTypeTagStringIndex) must be a 64-bit integer else this function
+ * will return an error.  The internal index oscTypeTagStringIndex, will only
+ * be incremented to the next argument if this function is successful.  The user
+ * application may determine the next argument type by first calling
+ * OscMessageGetArgumentType.
+ *
+ * Example use:
+ * @code
+ * switch (OscMessageGetArgumentType(&oscMessage)) {
+ *     case OscTypeTagUInt64:
+ *     {
+ *         uint64_t uint64;
+ *         OscMessageGetUInt64(&oscMessage, &uint64);
+ *         printf("Value = %d", int64);
+ *         break;
+ *     }
+ *     default:
+ *         printf("Expected argument not available");
+ *         break;
+ * }
+ * @endcode
+ *
+ * @param oscMessage OSC message.
+ * @param uint64 64-bit unsigned integer argument.
+ * @return Error code (0 if successful).
+ */
+OscError OscMessageGetUInt64(OscMessage* const oscMessage, uint64_t* const uint64)
+{
+	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] == '\0')
+	{
+		return OscErrorNoArgumentsAvailable; // error: end of type tag string
+	}
+	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] != OscTypeTagInt64)
+	{
+		return OscErrorUnexpectedArgumentType; // error: unexpected argument type
+	}
+	if ((oscMessage->argumentsIndex + sizeof(OscArgument64)) > oscMessage->argumentsSize)
+	{
+		return OscErrorMessageTooShortForArgumentType; // error: message too short to contain argument
+	}
+	OscArgument64 oscArgument64;
+	oscArgument64.byteStruct.byte7 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	oscArgument64.byteStruct.byte6 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	oscArgument64.byteStruct.byte5 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	oscArgument64.byteStruct.byte4 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	oscArgument64.byteStruct.byte3 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	oscArgument64.byteStruct.byte2 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	oscArgument64.byteStruct.byte1 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	oscArgument64.byteStruct.byte0 = oscMessage->arguments[oscMessage->argumentsIndex++];
+	*uint64 = oscArgument64.uint64;
 	oscMessage->oscTypeTagStringIndex++;
 	return OscErrorNone;
 }
@@ -1388,10 +1572,10 @@ OscError OscMessageGetCharacter(OscMessage* const oscMessage, char* const charac
 }
 
 /*
- * @brief Gets a 32-bit RGBA colour argument from an OSC message.
+ * @brief Gets a 32-bit RGBA color argument from an OSC message.
  *
  * The next argument available within the OSC message (indicated by the internal
- * index oscTypeTagStringIndex) must be a 32-bit RGBA colour else this function
+ * index oscTypeTagStringIndex) must be a 32-bit RGBA color else this function
  * will return an error.  The internal index oscTypeTagStringIndex, will only
  * be incremented to the next argument if this function is successful.  The user
  * application may determine the next argument type by first calling
@@ -1400,11 +1584,11 @@ OscError OscMessageGetCharacter(OscMessage* const oscMessage, char* const charac
  * Example use:
  * @code
  * switch (OscMessageGetArgumentType(&oscMessage)) {
- *     case OscTypeTagRgbaColour:
+ *     case OscTypeTagRgbaColor:
  *     {
- *         RgbaColour rgbaColour;
- *         OscMessageGetRgbaColour(&oscMessage, &rgbaColour);
- *         printf("Value = %u,%u,%u,%u", rgbaColour.red, rgbaColour.green, rgbaColour.blue, rgbaColour.alpha);
+ *         RgbaColor rgbaColor;
+ *         OscMessageGetRgbaColor(&oscMessage, &rgbaColor);
+ *         printf("Value = %u,%u,%u,%u", rgbaColor.red, rgbaColor.green, rgbaColor.blue, rgbaColor.alpha);
  *         break;
  *     }
  *     default:
@@ -1414,16 +1598,16 @@ OscError OscMessageGetCharacter(OscMessage* const oscMessage, char* const charac
  * @endcode
  *
  * @param oscMessage OSC message.
- * @param rgbaColour 32-bit RGBA colour argument.
+ * @param rgbaColor 32-bit RGBA color argument.
  * @return Error code (0 if successful).
  */
-OscError OscMessageGetRgbaColour(OscMessage* const oscMessage, RgbaColour* const rgbaColour)
+OscError OscMessageGetRgbaColor(OscMessage* const oscMessage, RgbaColor* const rgbaColor)
 {
 	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] == '\0')
 	{
 		return OscErrorNoArgumentsAvailable; // error: end of type tag string
 	}
-	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] != OscTypeTagRgbaColour)
+	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] != OscTypeTagRgbaColor)
 	{
 		return OscErrorUnexpectedArgumentType; // error: unexpected argument type
 	}
@@ -1436,7 +1620,7 @@ OscError OscMessageGetRgbaColour(OscMessage* const oscMessage, RgbaColour* const
 	oscArgument32.byteStruct.byte2 = oscMessage->arguments[oscMessage->argumentsIndex++];
 	oscArgument32.byteStruct.byte1 = oscMessage->arguments[oscMessage->argumentsIndex++];
 	oscArgument32.byteStruct.byte0 = oscMessage->arguments[oscMessage->argumentsIndex++];
-	*rgbaColour = oscArgument32.rgbaColour;
+	*rgbaColor = oscArgument32.rgbaColor;
 	oscMessage->oscTypeTagStringIndex++;
 	return OscErrorNone;
 }
@@ -1499,7 +1683,7 @@ OscError OscMessageGetMidiMessage(OscMessage* const oscMessage, MidiMessage* con
  * @brief Interprets the next argument in the OSC message as an int32 even if
  * the argument is of another type.
  *
- * The argument provided must be of a numerical type: int32, float32, int64,
+ * The argument provided must be of a numerical type: int32, uint32 float32, int64, uint64,
  * OSC time tag, 64-bit double, character, boolean, nil, or infinitum.  The
  * internal index oscTypeTagStringIndex will only be incremented to the next
  * argument if this function is successful.
@@ -1526,6 +1710,13 @@ OscError OscMessageGetArgumentAsInt32(OscMessage* const oscMessage, int32_t* con
 		case OscTypeTagInt32:
 		{
 			return OscMessageGetInt32(oscMessage, int32);
+		}
+		case OscTypeTagUInt32:
+		{
+			uint32_t uint32;
+			const OscError oscError = OscMessageGetUInt32(oscMessage, &uint32);
+			*int32 = (uint32_t) uint32;
+			return oscError;
 		}
 		case OscTypeTagFloat32:
 		{
@@ -1584,6 +1775,117 @@ OscError OscMessageGetArgumentAsInt32(OscMessage* const oscMessage, int32_t* con
 		{
 			oscMessage->oscTypeTagStringIndex++;
 			*int32 = UINT32_MAX;
+			return OscErrorNone;
+		}
+		default:
+			return OscErrorUnexpectedArgumentType; // error: unexpected argument type
+	}
+	return OscErrorNone;
+}
+
+/*
+ * @brief Interprets the next argument in the OSC message as an int32 even if
+ * the argument is of another type.
+ *
+ * The argument provided must be of a numerical type: int32, uint32, float32, int64, uint64
+ * OSC time tag, 64-bit double, character, boolean, nil, or infinitum.  The
+ * internal index oscTypeTagStringIndex will only be incremented to the next
+ * argument if this function is successful.
+ *
+ * Example use:
+ * @code
+ * uint32_t uint32;
+ * OscMessageGetArgumentAsUInt32(&oscMessage, &uint32);
+ * printf("Value = %d", uint32);
+ * @endcode
+ *
+ * @param oscMessage OSC message.
+ * @param uint32 32-bit unsigned integer argument.
+ * @return Error code (0 if successful).
+ */
+OscError OscMessageGetArgumentAsUInt32(OscMessage* const oscMessage, uint32_t* const uint32)
+{
+	if (OscMessageIsArgumentAvailable(oscMessage) == false)
+	{
+		return OscErrorNoArgumentsAvailable;
+	}
+	switch (OscMessageGetArgumentType(oscMessage))
+	{
+		case OscTypeTagUInt32:
+		{
+			return OscMessageGetUInt32(oscMessage, uint32);
+		}
+		case OscTypeTagInt32:
+		{
+			int32_t int32;
+			const OscError oscError = OscMessageGetInt32(oscMessage, &int32);
+			*uint32 = (uint32_t) int32;
+			return oscError;
+		}
+		case OscTypeTagFloat32:
+		{
+			float float32;
+			const OscError oscError = OscMessageGetFloat32(oscMessage, &float32);
+			*uint32 = (uint32_t) float32;
+			return oscError;
+		}
+		case OscTypeTagInt64:
+		{
+			int64_t int64;
+			const OscError oscError = OscMessageGetInt64(oscMessage, &int64);
+			*uint32 = (int32_t) int64;
+			return oscError;
+		}
+		case OscTypeTagUInt64:
+		{
+			uint64_t uint64;
+			const OscError oscError = OscMessageGetUInt64(oscMessage, &uint64);
+			*uint32 = (int32_t) uint64;
+			return oscError;
+		}
+		case OscTypeTagTimeTag:
+		{
+			OscTimeTag oscTimeTag;
+			const OscError oscError = OscMessageGetTimeTag(oscMessage, &oscTimeTag);
+			*uint32 = (int32_t) oscTimeTag.value;
+			return oscError;
+		}
+		case OscTypeTagDouble:
+		{
+			Double64 double64;
+			const OscError oscError = OscMessageGetDouble(oscMessage, &double64);
+			*uint32 = (int32_t) double64;
+			return oscError;
+		}
+		case OscTypeTagCharacter:
+		{
+			char character;
+			const OscError oscError = OscMessageGetCharacter(oscMessage, &character);
+			*uint32 = (int32_t) character;
+			return oscError;
+		}
+		case OscTypeTagTrue:
+		{
+			oscMessage->oscTypeTagStringIndex++;
+			*uint32 = (int32_t) true;
+			return OscErrorNone;
+		}
+		case OscTypeTagFalse:
+		{
+			oscMessage->oscTypeTagStringIndex++;
+			*uint32 = (int32_t) false;
+			return OscErrorNone;
+		}
+		case OscTypeTagNil:
+		{
+			oscMessage->oscTypeTagStringIndex++;
+			*uint32 = 0;
+			return OscErrorNone;
+		}
+		case OscTypeTagInfinitum:
+		{
+			oscMessage->oscTypeTagStringIndex++;
+			*uint32 = UINT32_MAX;
 			return OscErrorNone;
 		}
 		default:
@@ -1873,6 +2175,13 @@ OscError OscMessageGetArgumentAsInt64(OscMessage* const oscMessage, int64_t* con
 			*int64 = (int64_t) int32;
 			return oscError;
 		}
+		case OscTypeTagUInt32:
+		{
+			uint32_t uint32;
+			const OscError oscError = OscMessageGetUInt32(oscMessage, &uint32);
+			*int64 = (int64_t) uint32;
+			return oscError;
+		}
 		case OscTypeTagFloat32:
 		{
 			float float32;
@@ -1883,6 +2192,13 @@ OscError OscMessageGetArgumentAsInt64(OscMessage* const oscMessage, int64_t* con
 		case OscTypeTagInt64:
 		{
 			return OscMessageGetInt64(oscMessage, int64);
+		}
+		case OscTypeTagUInt64:
+		{
+			uint64_t uint64;
+			const OscError oscError = OscMessageGetUInt64(oscMessage, &uint64);
+			*int64 = (int64_t) uint64;
+			return oscError;
 		}
 		case OscTypeTagTimeTag:
 		{
@@ -1927,6 +2243,117 @@ OscError OscMessageGetArgumentAsInt64(OscMessage* const oscMessage, int64_t* con
 		{
 			oscMessage->oscTypeTagStringIndex++;
 			*int64 = INT64_MAX;
+			return OscErrorNone;
+		}
+		default:
+			return OscErrorUnexpectedArgumentType; // error: unexpected argument type
+	}
+	return OscErrorNone;
+}
+
+/*
+ * @brief Interprets the next argument in the OSC message as an int64 even if
+ * the argument is of another type.
+ *
+ * The argument provided must be of a numerical type: int32, uint32, float32, int64, uint64,
+ * OSC time tag, 64-bit double, character, boolean, nil, or infinitum.  The
+ * internal index oscTypeTagStringIndex will only be incremented to the next
+ * argument if this function is successful.
+ *
+ * Example use:
+ * @code
+ * int64_t int64;
+ * OscMessageGetArgumentAsUInt64(&oscMessage, &uint64);
+ * printf("Value = %d", uint64);
+ * @endcode
+ *
+ * @param oscMessage OSC message.
+ * @param uint64 64-bit unsigned integer argument.
+ * @return Error code (0 if successful).
+ */
+OscError OscMessageGetArgumentAsUInt64(OscMessage* const oscMessage, uint64_t* const uint64)
+{
+	if (OscMessageIsArgumentAvailable(oscMessage) == false)
+	{
+		return OscErrorNoArgumentsAvailable;
+	}
+	switch (OscMessageGetArgumentType(oscMessage))
+	{
+		case OscTypeTagInt32:
+		{
+			int32_t int32;
+			const OscError oscError = OscMessageGetInt32(oscMessage, &int32);
+			*uint64 = (uint64_t) int32;
+			return oscError;
+		}
+		case OscTypeTagUInt32:
+		{
+			uint32_t uint32;
+			const OscError oscError = OscMessageGetUInt32(oscMessage, &uint32);
+			*uint64 = (uint64_t) uint32;
+			return oscError;
+		}
+		case OscTypeTagFloat32:
+		{
+			float float32;
+			const OscError oscError = OscMessageGetFloat32(oscMessage, &float32);
+			*uint64 = (uint64_t) float32;
+			return oscError;
+		}
+		case OscTypeTagInt64:
+		{
+			int64_t int64;
+			const OscError oscError = OscMessageGetInt64(oscMessage, &int64);
+			*uint64 = (uint64_t) int64;
+			return oscError;
+		}
+		case OscTypeTagUInt64:
+		{
+			return OscMessageGetUInt64(oscMessage, uint64);
+		}
+		case OscTypeTagTimeTag:
+		{
+			OscTimeTag oscTimeTag;
+			const OscError oscError = OscMessageGetTimeTag(oscMessage, &oscTimeTag);
+			*uint64 = (uint64_t) oscTimeTag.value;
+			return oscError;
+		}
+		case OscTypeTagDouble:
+		{
+			Double64 double64;
+			const OscError oscError = OscMessageGetDouble(oscMessage, &double64);
+			*uint64 = (uint64_t) double64;
+			return oscError;
+		}
+		case OscTypeTagCharacter:
+		{
+			char character;
+			const OscError oscError = OscMessageGetCharacter(oscMessage, &character);
+			*uint64 = (uint64_t) character;
+			return oscError;
+		}
+		case OscTypeTagTrue:
+		{
+			oscMessage->oscTypeTagStringIndex++;
+			*uint64 = (uint64_t) true;
+			return OscErrorNone;
+		}
+		case OscTypeTagFalse:
+		{
+			oscMessage->oscTypeTagStringIndex++;
+			*uint64 = (uint64_t) false;
+			return OscErrorNone;
+		}
+		case OscTypeTagNil:
+		{
+			oscMessage->oscTypeTagStringIndex++;
+			*uint64 = (uint64_t) 0;
+			return OscErrorNone;
+		}
+		case OscTypeTagInfinitum:
+		{
+			oscMessage->oscTypeTagStringIndex++;
+			*uint64 = UINT64_MAX;
 			return OscErrorNone;
 		}
 		default:
@@ -2228,24 +2655,24 @@ OscError OscMessageGetArgumentAsCharacter(OscMessage* const oscMessage, char* co
 
 /*
  * @brief Interprets the next argument in the OSC message as a 32-bit RGBA
- * colour even if the argument is of another type.
+ * color even if the argument is of another type.
  *
- * The argument provided must be either a blob or 32-bit RGBA colour.  The
+ * The argument provided must be either a blob or 32-bit RGBA color.  The
  * internal index oscTypeTagStringIndex will only be incremented to the next
  * argument if this function is successful.
  *
  * Example use:
  * @code
- * RgbaColour rgbaColour;
- * OscMessageGetArgumentAsRgbaColour(&oscMessage, &rgbaColour);
- * printf("Value = %u,%u,%u,%u", rgbaColour.red, rgbaColour.green, rgbaColour.blue, rgbaColour.alpha);
+ * RgbaColor rgbaColor;
+ * OscMessageGetArgumentAsRgbaColor(&oscMessage, &rgbaColor);
+ * printf("Value = %u,%u,%u,%u", rgbaColor.red, rgbaColor.green, rgbaColor.blue, rgbaColor.alpha);
  * @endcode
  *
  * @param oscMessage OSC message.
- * @param rgbaColour 32-bit RGBA colour argument.
+ * @param rgbaColor 32-bit RGBA color argument.
  * @return Error code (0 if successful).
  */
-OscError OscMessageGetArgumentAsRgbaColour(OscMessage* const oscMessage, RgbaColour* const rgbaColour)
+OscError OscMessageGetArgumentAsRgbaColor(OscMessage* const oscMessage, RgbaColor* const rgbaColor)
 {
 	if (OscMessageIsArgumentAvailable(oscMessage) == false)
 	{
@@ -2256,20 +2683,20 @@ OscError OscMessageGetArgumentAsRgbaColour(OscMessage* const oscMessage, RgbaCol
 		case OscTypeTagBlob:
 		{
 			size_t blobSize;
-			const OscError oscError = OscMessageGetBlob(oscMessage, &blobSize, (char *) &rgbaColour, sizeof(RgbaColour));
+			const OscError oscError = OscMessageGetBlob(oscMessage, &blobSize, (char *) &rgbaColor, sizeof(RgbaColor));
 			if (oscError != 0)
 			{
 				return oscError;
 			}
-			if (blobSize != sizeof(RgbaColour))
+			if (blobSize != sizeof(RgbaColor))
 			{
 				return OscErrorUnexpectedEndOfSource; // error: not enough bytes in blob
 			}
 			return OscErrorNone;
 		}
-		case OscTypeTagRgbaColour:
+		case OscTypeTagRgbaColor:
 		{
-			return OscMessageGetRgbaColour(oscMessage, rgbaColour);
+			return OscMessageGetRgbaColor(oscMessage, rgbaColor);
 		}
 		default:
 			return OscErrorUnexpectedArgumentType; // error: unexpected argument type

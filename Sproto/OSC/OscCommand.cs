@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 
 #endregion
@@ -127,6 +128,17 @@ namespace Sproto.OSC
 			return (double) value;
 		}
 
+		public byte[] GetArgumentAsBlob()
+		{
+			_argumentIndex++;
+			return GetArgumentAsBlob(_argumentIndex);
+		}
+
+		public byte[] GetArgumentAsBlob(int index)
+		{
+			return OscMessage.Arguments[index] is byte[] ? (byte[]) OscMessage.Arguments[index] : throw new InvalidDataException("The data type is not of type blob.");
+		}
+
 		public bool GetArgumentAsBoolean()
 		{
 			_argumentIndex++;
@@ -136,6 +148,17 @@ namespace Sproto.OSC
 		public bool GetArgumentAsBoolean(int index)
 		{
 			return OscMessage.Arguments[index] is bool ? (bool) OscMessage.Arguments[index] : bool.Parse(OscMessage.Arguments[index].ToString());
+		}
+
+		public byte GetArgumentAsByte()
+		{
+			_argumentIndex++;
+			return GetArgumentAsByte(_argumentIndex);
+		}
+
+		public byte GetArgumentAsByte(int index)
+		{
+			return OscMessage.Arguments[index] is char ? (byte) (char) OscMessage.Arguments[index] : byte.Parse(OscMessage.Arguments[index].ToString());
 		}
 
 		public DateTime GetArgumentAsDateTime()

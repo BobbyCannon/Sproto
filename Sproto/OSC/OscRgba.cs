@@ -67,7 +67,7 @@ namespace Sproto.OSC
 
 		public override string ToString()
 		{
-			return $"{R}, {G}, {B}, {A}";
+			return $"{R},{G},{B},{A}";
 		}
 
 		public static object Parse(string value, IFormatProvider provider)

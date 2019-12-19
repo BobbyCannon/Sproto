@@ -19,8 +19,6 @@ namespace Sproto
 	{
 		#region Fields
 
-		private static readonly char[] _charactersToEscape = { '\0', '\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\', '"' };
-
 		private static readonly ushort[] _crcTable =
 		{
 			0x0000, 0x1189, 0x2312, 0x329B, 0x4624, 0x57AD, 0x6536, 0x74BF,
@@ -432,12 +430,30 @@ namespace Sproto
 				}
 			}
 
+			// parse uint64
+			if (argString.EndsWith("U"))
+			{
+				if (ulong.TryParse(argString.Substring(0, argString.Length - 1), NumberStyles.Integer, provider, out var u64))
+				{
+					return u64;
+				}
+			}
+
 			// parse int64
 			if (argString.EndsWith("L"))
 			{
 				if (long.TryParse(argString.Substring(0, argString.Length - 1), NumberStyles.Integer, provider, out value64))
 				{
 					return value64;
+				}
+			}
+
+			// parse uint32
+			if (argString.EndsWith("u"))
+			{
+				if (uint.TryParse(argString.Substring(0, argString.Length - 1), NumberStyles.Integer, provider, out var u32))
+				{
+					return u32;
 				}
 			}
 
@@ -515,7 +531,7 @@ namespace Sproto
 			if (argString.Length == 3 && argString[0] == '\'' && argString[2] == '\'')
 			{
 				var c = str.Trim()[1];
-				return (byte) c;
+				return c;
 			}
 
 			// parse null
@@ -706,14 +722,8 @@ namespace Sproto
 				throw new Exception($"Invalid escape sequence at char '{value.Length - 1}'.");
 			}
 
-			// reset the escape state
-			isEscaped = false;
-			parseHexNext = false;
-			parseHexCount = 0;
-
 			// create a byte array for the result
 			var chars = new byte[count];
-
 			var j = 0;
 
 			// actually populate the array
@@ -919,7 +929,7 @@ namespace Sproto
 					case '"':
 					{
 						var start = controlChar + 1;
-						var nextQuote = ScanForwardUntil(str, start, '"', '\\', "Malformed string");
+						var nextQuote = ScanForwardUntil(str, start, '"', '\\');
 						var argument = str.Substring(start, nextQuote - start);
 						arguments.Add(Unescape(argument));
 						index = nextQuote + 1;
@@ -938,11 +948,6 @@ namespace Sproto
 		internal static int ScanForwardObject(string str, int controlChar)
 		{
 			return ScanForward(str, controlChar, '{', '}', "Expected '}'");
-		}
-
-		private static byte[] GetBytes(this string str)
-		{
-			return Encoding.UTF8.GetBytes(str);
 		}
 
 		private static string GetString(this byte[] bytes)
@@ -1087,9 +1092,9 @@ namespace Sproto
 		/// <param name="str"> the string to scan </param>
 		/// <param name="index"> the index to start from </param>
 		/// <param name="endChar"> end control char </param>
-		/// <param name="errorString"> string to use in the case of an error </param>
+		/// <param name="escapeCharacter"> the escape character </param>
 		/// <returns> the index of the end char </returns>
-		private static int ScanForwardUntil(string str, int index, char endChar, char escapeCharacter, string errorString)
+		private static int ScanForwardUntil(string str, int index, char endChar, char escapeCharacter)
 		{
 			var hasEscape = false;
 

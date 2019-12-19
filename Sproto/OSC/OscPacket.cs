@@ -12,7 +12,7 @@ namespace Sproto.OSC
 	public abstract class OscPacket
 	{
 		#region Properties
-		
+
 		/// <summary>
 		/// Gets the time of this bundle.
 		/// </summary>
@@ -69,10 +69,11 @@ namespace Sproto.OSC
 		{
 			return Parse(OscTimeTag.UtcNow, value, provider);
 		}
-		
+
 		/// <summary>
 		/// Parse a packet from a string using the supplied provider.
 		/// </summary>
+		/// <param name="time"> The time for the OscPacket. </param>
 		/// <param name="value"> A string containing the OSC packet data. </param>
 		/// <param name="provider"> The format provider to use during parsing. </param>
 		/// <returns> The parsed OSC packet. </returns>
@@ -159,7 +160,10 @@ namespace Sproto.OSC
 
 		protected static int GetInt(byte[] msg, int index)
 		{
-			return (msg[index] << 24) + (msg[index + 1] << 16) + (msg[index + 2] << 8) + (msg[index + 3] << 0);
+			return (msg[index] << 24)
+				+ (msg[index + 1] << 16)
+				+ (msg[index + 2] << 8)
+				+ msg[index + 3];
 		}
 
 		protected static long GetLong(byte[] msg, int index)
@@ -229,6 +233,14 @@ namespace Sproto.OSC
 			}
 
 			return types;
+		}
+
+		protected static uint GetUInt(byte[] msg, int index)
+		{
+			return ((uint) msg[index] << 24)
+				+ ((uint) msg[index + 1] << 16)
+				+ ((uint) msg[index + 2] << 8)
+				+ msg[index + 3];
 		}
 
 		protected static ulong GetULong(byte[] msg, int index)
@@ -351,6 +363,17 @@ namespace Sproto.OSC
 
 			bytes.CopyTo(msg, 0);
 
+			return msg;
+		}
+
+		protected static byte[] SetUInt(uint value)
+		{
+			var msg = new byte[4];
+			var bytes = BitConverter.GetBytes(value);
+			msg[0] = bytes[3];
+			msg[1] = bytes[2];
+			msg[2] = bytes[1];
+			msg[3] = bytes[0];
 			return msg;
 		}
 

@@ -99,40 +99,16 @@ namespace Sproto.OSC
 			}
 
 			var index = 0;
-			var port = byte.Parse(parts[index++].Trim(), provider);
-
-			if (byte.TryParse(parts[index].Trim(), NumberStyles.Integer, provider, out var status) == false)
-			{
-				if (byte.TryParse(parts[index].Trim(), out var messageType))
-				{
-					index++;
-					var channel = byte.Parse(parts[index++].Trim(), NumberStyles.Integer, provider);
-
-					if (channel > 15)
-					{
-						throw new ArgumentOutOfRangeException(nameof(channel));
-					}
-
-					status = (byte) (messageType | channel);
-
-					if (parts.Length < 5)
-					{
-						throw new Exception($"Not a midi message '{value}'");
-					}
-				}
-				else
-				{
-					throw new Exception($"Not a midi message '{value}'");
-				}
-			}
-
+			var port = byte.Parse(parts[index++].Trim(), NumberStyles.Integer, provider);
+			var status = byte.Parse(parts[index++].Trim(), NumberStyles.Integer, provider);
 			var data1 = byte.Parse(parts[index++].Trim(), NumberStyles.Integer, provider);
+			var data2 = byte.Parse(parts[index++].Trim(), NumberStyles.Integer, provider);
+
 			if (data1 > 0x7F)
 			{
 				throw new ArgumentOutOfRangeException(nameof(data1));
 			}
 
-			var data2 = byte.Parse(parts[index++].Trim(), NumberStyles.Integer, provider);
 			if (data2 > 0x7F)
 			{
 				throw new ArgumentOutOfRangeException(nameof(data2));
@@ -146,6 +122,11 @@ namespace Sproto.OSC
 			return new OscMidi(port, status, data1, data2);
 		}
 
+		public override string ToString()
+		{
+			return $"{Port},{Status},{Data1},{Data2}";
+		}
+		
 		#endregion
 	}
 }

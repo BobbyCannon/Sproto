@@ -32,7 +32,7 @@
 #define OSC_ERROR_MESSAGES_ENABLED
 
 /*
- * @brief 32-bit RGBA colour.
+ * @brief 32-bit RGBA color.
  * See http://en.wikipedia.org/wiki/RGBA_color_space
  */
 typedef struct OSC_PACKED {
@@ -47,7 +47,7 @@ typedef struct OSC_PACKED {
     char blue;
     char alpha; // LSB
 	#endif
-} RgbaColour;
+} RgbaColor;
 
 /*
  * @brief 4 byte MIDI message as described in OSC 1.0 specification.
@@ -72,9 +72,9 @@ typedef struct OSC_PACKED {
  */
 typedef union
 {
-	int32_t int32;
+	uint32_t int32;
 	float float32;
-	RgbaColour rgbaColour;
+	RgbaColor rgbaColor;
 	MidiMessage midiMessage;
 
 	struct OSC_PACKED {
@@ -146,7 +146,7 @@ typedef long double Double64; // use long double if double is not 64-bit
  */
 typedef union
 {
-	uint64_t int64;
+	uint64_t uint64;
 	OscTimeTag oscTimeTag;
 	Double64 double64;
 

@@ -105,7 +105,7 @@ namespace OSC.Tests.OSC
 			Extensions.AreEqual(new OscRgba(1, 2, 3, 4), actual.Arguments[index++]);
 			Extensions.AreEqual(new OscMidi(), actual.Arguments[index++]);
 		}
-
+		
 		[TestMethod]
 		public void DecodeOscMessageWithDoubleArgument()
 		{

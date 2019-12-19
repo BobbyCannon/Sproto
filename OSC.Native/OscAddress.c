@@ -181,8 +181,8 @@ static bool MatchExpression(const char* * const oscAddressPattern, const char* *
  * The OSC address pattern must start with a ' *' character.  A ' *' character
  * will be matched to any sequence of zero or more characters in the OSC address
  * up to the next '/' character or to the end of the OSC address.  For example,
- * the OSC address pattern "/colour/b *" would match the OSC addresses
- * "/colour/blue", "/colour/black" and "/colour/brown".
+ * the OSC address pattern "/color/b *" would match the OSC addresses
+ * "/color/blue", "/color/black" and "/color/brown".
  *
  * The oscAddressPattern and oscAddress pointers are advanced to the character
  * proceeding the matched sequence. This function calls MatchCharacter and so

@@ -71,15 +71,17 @@ typedef struct
 typedef enum
 {
 	OscTypeTagInt32 = 'i',
+	OscTypeTagUInt32 = 'u',
 	OscTypeTagFloat32 = 'f',
 	OscTypeTagString = 's',
 	OscTypeTagBlob = 'b',
 	OscTypeTagInt64 = 'h',
+	OscTypeTagUInt64 = 'H',
 	OscTypeTagTimeTag = 't',
 	OscTypeTagDouble = 'd',
 	OscTypeTagAlternateString = 'S',
 	OscTypeTagCharacter = 'c',
-	OscTypeTagRgbaColour = 'r',
+	OscTypeTagRgbaColor = 'r',
 	OscTypeTagMidiMessage = 'm',
 	OscTypeTagTrue = 'T',
 	OscTypeTagFalse = 'F',
@@ -93,15 +95,17 @@ OscError OscMessageInitialize(OscMessage* const oscMessage, const char* oscAddre
 OscError OscMessageSetAddressPattern(OscMessage* const oscMessage, const char* oscAddressPattern);
 OscError OscMessageAppendAddressPattern(OscMessage* const oscMessage, const char* appendedParts);
 OscError OscMessageAddInt32(OscMessage* const oscMessage, const int32_t int32);
+OscError OscMessageAddUInt32(OscMessage* const oscMessage, const uint32_t uint32);
 OscError OscMessageAddFloat32(OscMessage* const oscMessage, const float float32);
 OscError OscMessageAddString(OscMessage* const oscMessage, const char* string);
 OscError OscMessageAddBlob(OscMessage* const oscMessage, const char* const source, const size_t numberOfBytes);
 OscError OscMessageAddInt64(OscMessage* const oscMessage, const uint64_t int64);
+OscError OscMessageAddUInt64(OscMessage* const oscMessage, const uint64_t uint64);
 OscError OscMessageAddTimeTag(OscMessage* const oscMessage, const OscTimeTag oscTimeTag);
 OscError OscMessageAddDouble(OscMessage* const oscMessage, const Double64 double64);
 OscError OscMessageAddAlternateString(OscMessage* const oscMessage, const char* string);
 OscError OscMessageAddCharacter(OscMessage* const oscMessage, const char asciiChar);
-OscError OscMessageAddRgbaColour(OscMessage* const oscMessage, const RgbaColour rgbaColour);
+OscError OscMessageAddRgbaColor(OscMessage* const oscMessage, const RgbaColor rgbaColor);
 OscError OscMessageAddMidiMessage(OscMessage* const oscMessage, const MidiMessage midiMessage);
 OscError OscMessageAddBool(OscMessage* const oscMessage, const bool boolean);
 OscError OscMessageAddNil(OscMessage* const oscMessage);
@@ -116,24 +120,28 @@ bool OscMessageIsArgumentAvailable(OscMessage* const oscMessage);
 OscTypeTag OscMessageGetArgumentType(OscMessage* const oscMessage);
 OscError OscMessageSkipArgument(OscMessage* const oscMessage);
 OscError OscMessageGetInt32(OscMessage* const oscMessage, int32_t* const int32);
+OscError OscMessageGetUInt32(OscMessage* const oscMessage, uint32_t* const uint32);
 OscError OscMessageGetFloat32(OscMessage* const oscMessage, float* const float32);
 OscError OscMessageGetString(OscMessage* const oscMessage, char* const destination, const size_t destinationSize);
 OscError OscMessageGetBlob(OscMessage* const oscMessage, size_t* const blobSize, char* const destination, const size_t destinationSize);
 OscError OscMessageGetInt64(OscMessage* const oscMessage, int64_t* const int64);
+OscError OscMessageGetUInt64(OscMessage* const oscMessage, uint64_t* const uint64);
 OscError OscMessageGetTimeTag(OscMessage* const oscMessage, OscTimeTag* const oscTimeTag);
 OscError OscMessageGetDouble(OscMessage* const oscMessage, Double64* const double64);
 OscError OscMessageGetCharacter(OscMessage* const oscMessage, char* const character);
-OscError OscMessageGetRgbaColour(OscMessage* const oscMessage, RgbaColour* const rgbaColour);
+OscError OscMessageGetRgbaColor(OscMessage* const oscMessage, RgbaColor* const rgbaColor);
 OscError OscMessageGetMidiMessage(OscMessage* const oscMessage, MidiMessage* const midiMessage);
 OscError OscMessageGetArgumentAsInt32(OscMessage* const oscMessage, int32_t* const int32);
+OscError OscMessageGetArgumentAsUInt32(OscMessage* const oscMessage, uint32_t* const uint32);
 OscError OscMessageGetArgumentAsFloat32(OscMessage* const oscMessage, float* const float32);
 OscError OscMessageGetArgumentAsString(OscMessage* const oscMessage, char* const destination, const size_t destinationSize);
 OscError OscMessageGetArgumentAsBlob(OscMessage* const oscMessage, size_t* const blobSize, char* const destination, const size_t destinationSize);
 OscError OscMessageGetArgumentAsInt64(OscMessage* const oscMessage, int64_t* const int64);
+OscError OscMessageGetArgumentAsUInt64(OscMessage* const oscMessage, uint64_t* const uint64);
 OscError OscMessageGetArgumentAsTimeTag(OscMessage* const oscMessage, OscTimeTag* const oscTimeTag);
 OscError OscMessageGetArgumentAsDouble(OscMessage* const oscMessage, Double64* const double64);
 OscError OscMessageGetArgumentAsCharacter(OscMessage* const oscMessage, char* const character);
-OscError OscMessageGetArgumentAsRgbaColour(OscMessage* const oscMessage, RgbaColour* const rgbaColour);
+OscError OscMessageGetArgumentAsRgbaColor(OscMessage* const oscMessage, RgbaColor* const rgbaColor);
 OscError OscMessageGetArgumentAsMidiMessage(OscMessage* const oscMessage, MidiMessage* const midiMessage);
 OscError OscMessageGetArgumentAsBool(OscMessage* const oscMessage, bool* const boolean);
 

@@ -1,5 +1,6 @@
 ﻿#region References
 
+using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -83,6 +84,23 @@ namespace OSC.Tests.OSC
 		}
 
 		[TestMethod]
+		public void TestWithJsonSerializedObject()
+		{
+			var time = OscTimeTag.Now;
+			var json = JsonConvert.SerializeObject(time);
+			var message = new OscMessage("/object", json);
+			var actual = message.ToString();
+			actual.Escape().Dump();
+
+			var actualMessage = OscPacket.Parse(actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			actualMessage.Arguments[0].Dump();
+
+			var actualTime = JsonConvert.DeserializeObject<OscTimeTag>(actualMessage.GetArgument<string>(0));
+			Assert.AreEqual(time, actualTime);
+		}
+
+		[TestMethod]
 		public void ToBytes()
 		{
 			var message = OscMessage.Parse("/ahoy,\"Flare Lite\"");
@@ -94,6 +112,31 @@ namespace OSC.Tests.OSC
 			var actualMessage = (OscMessage) slip.ProcessBytes(actual, ref start, actual.Length);
 			actualMessage.Address.Dump();
 			actualMessage.Arguments[0].Dump();
+		}
+
+		[TestMethod]
+		public void ToFromByteArrayOscMessageWithAllTypes()
+		{
+			var message = GetOscMessage();
+			var expected = new byte[] { 0x2F, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x00, 0x00, 0x00, 0x00, 0x2C, 0x69, 0x75, 0x73, 0x62, 0x68, 0x48, 0x48, 0x74, 0x5B, 0x54, 0x69, 0x73, 0x4E, 0x5D, 0x63, 0x54, 0x46, 0x66, 0x49, 0x49, 0x4E, 0x64, 0x49, 0x49, 0x53, 0x72, 0x6D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7B, 0x00, 0x00, 0x01, 0xC8, 0x42, 0x6F, 0x6F, 0x6D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x8E, 0xDF, 0xEE, 0xA7, 0x94, 0x00, 0x00, 0x00, 0x00, 0xDF, 0xEE, 0xB4, 0xC4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7B, 0x66, 0x6F, 0x78, 0x00, 0x00, 0x00, 0x00, 0x41, 0x42, 0xF6, 0xE6, 0x66, 0x40, 0x4B, 0x29, 0x16, 0x87, 0x2B, 0x02, 0x0C, 0x54, 0x65, 0x73, 0x74, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x50, 0x4C, 0x2A, 0x18 };
+			var actual = message.ToByteArray();
+			actual.Dump();
+
+			Extensions.AreEqual(expected, actual);
+
+			ValidateOscMessage(OscMessage.Parse(actual) as OscMessage, true);
+		}
+
+		[TestMethod]
+		public void ToFromStringOscMessageWithAllTypes()
+		{
+			var message = GetOscMessage();
+			var expected = "/Address,123,456u,\"Boom\",{ Blob: 0x010203 },321L,654U,16136018769012064256U,{ Time: 2019-01-20T08:50:12.0000Z },[True,123,\"fox\",null],'A',True,False,123.45f,Infinity,-Infinity,null,54.321d,Infinityd,-Infinityd,Test,{ Color: 1,2,3,4 },{ Midi: 80,76,42,24 }";
+			var actual = message.ToString();
+
+			Assert.AreEqual(expected, actual);
+
+			ValidateOscMessage(OscMessage.Parse(actual) as OscMessage, false);
 		}
 
 		[TestMethod]
@@ -115,7 +158,7 @@ namespace OSC.Tests.OSC
 
 			foreach (var item in itemsToTest)
 			{
-				var message = new OscMessage("/update", item.Key); 
+				var message = new OscMessage("/update", item.Key);
 				var actual = message.ToString();
 				Assert.AreEqual(item.Value, actual);
 
@@ -126,21 +169,72 @@ namespace OSC.Tests.OSC
 			}
 		}
 
-		[TestMethod]
-		public void TestWithJsonSerializedObject()
+		private OscMessage GetOscMessage()
 		{
-			var time = OscTimeTag.Now;
-			var json = JsonConvert.SerializeObject(time);
-			var message = new OscMessage("/object", json);
-			var actual = message.ToString();
-			actual.Escape().Dump();
+			var message = new OscMessage(OscTimeTag.UtcNow, "/Address");
+			message.Arguments.Add(123);
+			message.Arguments.Add((uint) 456);
+			message.Arguments.Add("Boom");
+			message.Arguments.Add(new byte[] { 1, 2, 3 });
+			message.Arguments.Add((long) 321);
+			message.Arguments.Add((ulong) 654);
+			message.Arguments.Add(new OscTimeTag(new DateTime(2019, 1, 20, 07, 53, 56, DateTimeKind.Local)).Value);
+			message.Arguments.Add(new OscTimeTag(new DateTime(2019, 1, 20, 08, 50, 12, DateTimeKind.Local)));
+			message.Arguments.Add(new object[] { true, 123, "fox", null });
+			message.Arguments.Add('A');
+			message.Arguments.Add(true);
+			message.Arguments.Add(false);
+			message.Arguments.Add(123.45f);
+			message.Arguments.Add(float.PositiveInfinity);
+			message.Arguments.Add(float.NegativeInfinity);
+			message.Arguments.Add(null);
+			message.Arguments.Add(54.321d);
+			message.Arguments.Add(double.PositiveInfinity);
+			message.Arguments.Add(double.NegativeInfinity);
+			message.Arguments.Add(new OscSymbol("Test"));
+			message.Arguments.Add(new OscRgba(1, 2, 3, 4));
+			message.Arguments.Add(new OscMidi(80, 76, 42, 24));
+			return message;
+		}
 
-			var actualMessage = OscPacket.Parse(actual) as OscMessage;
-			Assert.IsNotNull(actualMessage);
-			actualMessage.Arguments[0].Dump();
+		private void ValidateOscMessage(OscMessage actual, bool allInfinityTheSame)
+		{
+			var index = 0;
+			Assert.IsNotNull(actual);
+			Assert.AreEqual("/Address", actual.Address);
+			Assert.AreEqual(22, actual.Arguments.Count);
+			Assert.AreEqual(123, actual.Arguments[index++]);
+			Assert.AreEqual((uint) 456, actual.Arguments[index++]);
+			Assert.AreEqual("Boom", actual.Arguments[index++]);
+			Extensions.AreEqual(new byte[] { 1, 2, 3 }, actual.Arguments[index++]);
+			Assert.AreEqual((long) 321, actual.Arguments[index++]);
+			Assert.AreEqual((ulong) 654, actual.Arguments[index++]);
+			Assert.AreEqual(new OscTimeTag(new DateTime(2019, 1, 20, 07, 53, 56, DateTimeKind.Local)).Value, actual.Arguments[index++]);
+			Assert.AreEqual(new OscTimeTag(new DateTime(2019, 1, 20, 08, 50, 12, DateTimeKind.Local)), actual.Arguments[index++]);
+			Extensions.AreEqual(new object[] { true, 123, "fox", null }, actual.Arguments[index++]);
+			Assert.AreEqual('A', actual.Arguments[index++]);
+			Assert.AreEqual(true, actual.Arguments[index++]);
+			Assert.AreEqual(false, actual.Arguments[index++]);
+			Assert.AreEqual(123.45f, actual.Arguments[index++]);
 
-			var actualTime = JsonConvert.DeserializeObject<OscTimeTag>(actualMessage.GetArgument<string>(0));
-			Assert.AreEqual(time, actualTime);
+			if (allInfinityTheSame)
+			{
+				Assert.AreEqual(double.PositiveInfinity, actual.Arguments[index++]);
+				Assert.AreEqual(double.PositiveInfinity, actual.Arguments[index++]);
+			}
+			else
+			{
+				Assert.AreEqual(float.PositiveInfinity, actual.Arguments[index++]);
+				Assert.AreEqual(float.NegativeInfinity, actual.Arguments[index++]);
+			}
+
+			Assert.AreEqual(null, actual.Arguments[index++]);
+			Assert.AreEqual(54.321d, actual.Arguments[index++]);
+			Assert.AreEqual(double.PositiveInfinity, actual.Arguments[index++]);
+			Assert.AreEqual(allInfinityTheSame ? double.PositiveInfinity : double.NegativeInfinity, actual.Arguments[index++]);
+			Extensions.AreEqual(new OscSymbol("Test"), actual.Arguments[index++]);
+			Extensions.AreEqual(new OscRgba(1, 2, 3, 4), actual.Arguments[index++]);
+			Extensions.AreEqual(new OscMidi(80, 76, 42, 24), actual.Arguments[index++]);
 		}
 
 		#endregion
