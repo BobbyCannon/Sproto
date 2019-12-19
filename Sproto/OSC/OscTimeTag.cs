@@ -29,7 +29,7 @@ namespace Sproto.OSC
 		/// The minimum date for any OscTimeTag.
 		/// </summary>
 		public static readonly DateTime MinDateTime = new DateTime(1900, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-		
+
 		/// <summary>
 		/// The minimum OSC date time for any OscTimeTag.
 		/// </summary>
@@ -83,6 +83,26 @@ namespace Sproto.OSC
 		{
 			var dt = ToDateTime();
 			return new OscTimeTag(dt.Add(span));
+		}
+
+		/// <summary>
+		/// Adds seconds to this time tag.
+		/// </summary>
+		/// <param name="value"> The seconds to be added. </param>
+		/// <returns> The adjusted time. </returns>
+		public OscTimeTag AddSeconds(double value)
+		{
+			return Add(TimeSpan.FromSeconds(value));
+		}
+
+		/// <summary>
+		/// Adds milliseconds to this time tag.
+		/// </summary>
+		/// <param name="value"> The milliseconds to be added. </param>
+		/// <returns> The adjusted time. </returns>
+		public OscTimeTag AddMilliseconds(double value)
+		{
+			return Add(TimeSpan.FromMilliseconds(value));
 		}
 
 		/// <summary>
@@ -159,6 +179,21 @@ namespace Sproto.OSC
 
 		public static OscTimeTag Parse(string value, IFormatProvider provider)
 		{
+			if (TryParse(value, provider, out var result))
+			{
+				return result;
+			}
+
+			throw new Exception($"Invalid OscTimeTag string \'{value}\'");
+		}
+
+		public static bool TryParse(string value, out OscTimeTag result)
+		{
+			return TryParse(value, CultureInfo.InvariantCulture, out result);
+		}
+
+		public static bool TryParse(string value, IFormatProvider provider, out OscTimeTag result)
+		{
 			var style = DateTimeStyles.AssumeLocal;
 
 			if (value.Trim().EndsWith("Z"))
@@ -202,20 +237,24 @@ namespace Sproto.OSC
 
 			if (DateTime.TryParseExact(value, formats, provider, style, out var datetime))
 			{
-				return FromDateTime(datetime);
+				result = FromDateTime(datetime);
+				return true;
 			}
 
 			if (value.StartsWith("0x") && ulong.TryParse(value.Substring(2), NumberStyles.HexNumber, provider, out var value64))
 			{
-				return new OscTimeTag(value64);
+				result = new OscTimeTag(value64);
+				return true;
 			}
 
 			if (ulong.TryParse(value, NumberStyles.Integer, provider, out value64))
 			{
-				return new OscTimeTag(value64);
+				result = new OscTimeTag(value64);
+				return true;
 			}
 
-			throw new Exception($"Invalid OscTimeTag string \'{value}\'");
+			result = default;
+			return false;
 		}
 
 		public double ToMilliseconds()
@@ -262,7 +301,7 @@ namespace Sproto.OSC
 		{
 			return new OscTimeTag(a.ToDateTime().Add(b));
 		}
-		
+
 		public static OscTimeTag operator -(OscTimeTag a, TimeSpan b)
 		{
 			return new OscTimeTag(a.ToDateTime().Subtract(b));
@@ -272,32 +311,32 @@ namespace Sproto.OSC
 		{
 			return d1.ToDateTime() - d2.ToDateTime();
 		}
-		
+
 		public static bool operator ==(OscTimeTag a, OscTimeTag b)
 		{
 			return a.PreciseValue == b.PreciseValue;
 		}
-		
+
 		public static bool operator !=(OscTimeTag a, OscTimeTag b)
 		{
 			return a.PreciseValue != b.PreciseValue;
 		}
-		
+
 		public static bool operator <(OscTimeTag a, OscTimeTag b)
 		{
 			return a.PreciseValue < b.PreciseValue;
 		}
-		
+
 		public static bool operator >(OscTimeTag a, OscTimeTag b)
 		{
 			return a.PreciseValue > b.PreciseValue;
 		}
-		
+
 		public static bool operator <=(OscTimeTag a, OscTimeTag b)
 		{
 			return a.PreciseValue <= b.PreciseValue;
 		}
-		
+
 		public static bool operator >=(OscTimeTag a, OscTimeTag b)
 		{
 			return a.PreciseValue >= b.PreciseValue;

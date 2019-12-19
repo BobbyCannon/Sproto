@@ -16,7 +16,12 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void SequentialProcessingOfArguments()
 		{
-			var message = new OscMessage(TestCommand.Command, "John", 20, new DateTime(2000, 01, 15), 5.11f, 164.32, 4, new byte[] { 0, 1, 1, 2, 3, 5, 8, 13 });
+			var message = new OscMessage(TestCommand.Command, "John", 20, new DateTime(2000, 01, 15),
+				5.11f, 164.32, 4, new byte[] { 0, 1, 1, 2, 3, 5, 8, 13 },
+				float.PositiveInfinity, float.NegativeInfinity,
+				double.PositiveInfinity, double.NegativeInfinity
+			);
+
 			var command = new TestCommand();
 			command.Load(message);
 			command.StartArgumentProcessing();
@@ -27,6 +32,10 @@ namespace OSC.Tests.OSC
 			Assert.AreEqual(164.32, command.GetArgumentAsDouble());
 			Assert.AreEqual((byte) 4, command.GetArgumentAsByte());
 			Extensions.AreEqual(new byte[] { 0, 1, 1, 2, 3, 5, 8, 13 }, command.GetArgumentAsBlob());
+			Assert.AreEqual(float.PositiveInfinity, command.GetArgumentAsFloat());
+			Assert.AreEqual(float.NegativeInfinity, command.GetArgumentAsFloat());
+			Assert.AreEqual(double.PositiveInfinity, command.GetArgumentAsDouble());
+			Assert.AreEqual(double.NegativeInfinity, command.GetArgumentAsDouble());
 		}
 
 		[TestMethod]
@@ -65,7 +74,16 @@ namespace OSC.Tests.OSC
 
 		private static TestCommand GetTestCommand()
 		{
-			return new TestCommand { Name = "John", Age = 20, BirthDate = new DateTime(2000, 01, 15), Height = 5.11f, Weight = 164.32, Rating = 4, Values = new byte[] { 0, 1, 1, 3, 5, 8, 13 } };
+			return new TestCommand
+			{
+				Name = "John",
+				Age = 20,
+				BirthDate = new DateTime(2000, 01, 15),
+				Height = 5.11f,
+				Weight = 164.32,
+				Rating = 4,
+				Values = new byte[] { 0, 1, 1, 3, 5, 8, 13 }
+			};
 		}
 
 		#endregion

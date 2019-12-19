@@ -1,9 +1,7 @@
 ﻿#region References
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Runtime.CompilerServices;
 
 #endregion
@@ -56,6 +54,12 @@ namespace Sproto.OSC
 
 		#region Methods
 
+		/// <summary>
+		/// Gets an OscCommand from an OscMessage
+		/// </summary>
+		/// <typeparam name="T"> The type to be returned. </typeparam>
+		/// <param name="message"> The message to be loaded. </param>
+		/// <returns> The OscCommand with the message loaded. </returns>
 		public static T FromMessage<T>(OscMessage message) where T : OscCommand, new()
 		{
 			var t = new T();
@@ -90,12 +94,11 @@ namespace Sproto.OSC
 		/// <summary>
 		/// Gets the argument or returns the default value if the index is not found.
 		/// </summary>
-		/// <param name="defaultValue"> The default value to return if not found. </param>
 		/// <returns> The argument if found or default value if not. </returns>
-		public double GetArgument(double defaultValue)
+		public byte[] GetArgumentAsBlob()
 		{
 			_argumentIndex++;
-			return GetArgument(_argumentIndex, defaultValue);
+			return GetArgumentAsBlob(_argumentIndex);
 		}
 
 		/// <summary>
@@ -104,7 +107,148 @@ namespace Sproto.OSC
 		/// <param name="index"> The index of the argument. </param>
 		/// <param name="defaultValue"> The default value to return if not found. </param>
 		/// <returns> The argument if found or default value if not. </returns>
-		public double GetArgument(int index, double defaultValue)
+		public byte[] GetArgumentAsBlob(int index, byte[] defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+			return value is byte[] aValue ? aValue : defaultValue;
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
+		public bool GetArgumentAsBoolean()
+		{
+			_argumentIndex++;
+			return GetArgumentAsBoolean(_argumentIndex);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public bool GetArgumentAsBoolean(int index, bool defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+			if (value is bool bValue)
+			{
+				return bValue;
+			}
+
+			return bool.TryParse(value.ToString(), out var result) ? result : defaultValue;
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
+		public byte GetArgumentAsByte()
+		{
+			_argumentIndex++;
+			return GetArgumentAsByte(_argumentIndex);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public byte GetArgumentAsByte(int index, byte defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			return value switch
+			{
+				byte bValue => bValue,
+				DateTime time => (byte) time.Ticks,
+				OscTimeTag time => (byte) time.Value,
+				char cValue => (byte) cValue,
+				int iValue => (byte) iValue,
+				uint uiValue => (byte) uiValue,
+				long lValue => (byte) lValue,
+				ulong ulValue => (byte) ulValue,
+				float fValue => (byte) fValue,
+				double dValue => (byte) dValue,
+				_ => (byte.TryParse(value.ToString(), out var result) ? result : defaultValue)
+			};
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
+		public DateTime GetArgumentAsDateTime()
+		{
+			_argumentIndex++;
+			return GetArgumentAsDateTime(_argumentIndex);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public DateTime GetArgumentAsDateTime(int index, DateTime defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			return value switch
+			{
+				DateTime time => time,
+				OscTimeTag time => time.ToDateTime(),
+				byte bValue => new DateTime(bValue),
+				char cValue => new DateTime(cValue),
+				int iValue => new DateTime(iValue),
+				uint uiValue => new DateTime(uiValue),
+				long lValue => new DateTime(lValue),
+				ulong ulValue => new DateTime((long) ulValue),
+				float fValue => new DateTime((long) fValue),
+				double dValue => new DateTime((long) dValue),
+				_ => (DateTime.TryParse(value.ToString(), out var result) ? result : defaultValue)
+			};
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
+		public double GetArgumentAsDouble()
+		{
+			_argumentIndex++;
+			return GetArgumentAsDouble(_argumentIndex);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public double GetArgumentAsDouble(int index, double defaultValue = default)
 		{
 			if (OscMessage.Arguments.Count <= index)
 			{
@@ -117,131 +261,317 @@ namespace Sproto.OSC
 			{
 				switch (symbol.Value)
 				{
+					case "Infinity":
 					case "Infinityd":
 						return double.PositiveInfinity;
 
+					case "-Infinity":
 					case "-Infinityd":
 						return double.NegativeInfinity;
 				}
 			}
 
-			return (double) value;
+			return value switch
+			{
+				double dValue => dValue,
+				DateTime time => time.Ticks,
+				OscTimeTag time => time.Value,
+				byte bValue => bValue,
+				char cValue => cValue,
+				int iValue => iValue,
+				uint uiValue => uiValue,
+				long lValue => lValue,
+				ulong ulValue => ulValue,
+				float fValue => fValue,
+				_ => (double.TryParse(value.ToString(), out var result) ? result : defaultValue)
+			};
 		}
 
-		public byte[] GetArgumentAsBlob()
-		{
-			_argumentIndex++;
-			return GetArgumentAsBlob(_argumentIndex);
-		}
-
-		public byte[] GetArgumentAsBlob(int index)
-		{
-			return OscMessage.Arguments[index] is byte[] ? (byte[]) OscMessage.Arguments[index] : throw new InvalidDataException("The data type is not of type blob.");
-		}
-
-		public bool GetArgumentAsBoolean()
-		{
-			_argumentIndex++;
-			return GetArgumentAsBoolean(_argumentIndex);
-		}
-
-		public bool GetArgumentAsBoolean(int index)
-		{
-			return OscMessage.Arguments[index] is bool ? (bool) OscMessage.Arguments[index] : bool.Parse(OscMessage.Arguments[index].ToString());
-		}
-
-		public byte GetArgumentAsByte()
-		{
-			_argumentIndex++;
-			return GetArgumentAsByte(_argumentIndex);
-		}
-
-		public byte GetArgumentAsByte(int index)
-		{
-			return OscMessage.Arguments[index] is char ? (byte) (char) OscMessage.Arguments[index] : byte.Parse(OscMessage.Arguments[index].ToString());
-		}
-
-		public DateTime GetArgumentAsDateTime()
-		{
-			_argumentIndex++;
-			return GetArgumentAsDateTime(_argumentIndex);
-		}
-
-		public DateTime GetArgumentAsDateTime(int index)
-		{
-			return OscMessage.Arguments[index] is OscTimeTag ? ((OscTimeTag) OscMessage.Arguments[index]).ToDateTime() : DateTime.Parse(OscMessage.Arguments[index].ToString());
-		}
-
-		public double GetArgumentAsDouble()
-		{
-			_argumentIndex++;
-			return GetArgumentAsDouble(_argumentIndex);
-		}
-
-		public double GetArgumentAsDouble(int index)
-		{
-			return OscMessage.Arguments[index] is double ? (double) OscMessage.Arguments[index] : double.Parse(OscMessage.Arguments[index].ToString());
-		}
-
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
 		public float GetArgumentAsFloat()
 		{
 			_argumentIndex++;
 			return GetArgumentAsFloat(_argumentIndex);
 		}
 
-		public float GetArgumentAsFloat(int index)
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public float GetArgumentAsFloat(int index, float defaultValue = default)
 		{
-			return OscMessage.Arguments[index] is float ? (float) OscMessage.Arguments[index] : float.Parse(OscMessage.Arguments[index].ToString());
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			if (value is OscSymbol symbol)
+			{
+				switch (symbol.Value)
+				{
+					case "Infinity":
+					case "Infinityd":
+						return float.PositiveInfinity;
+
+					case "-Infinity":
+					case "-Infinityd":
+						return float.NegativeInfinity;
+				}
+			}
+
+			return value switch
+			{
+				float fValue => fValue,
+				DateTime time => time.Ticks,
+				OscTimeTag time => time.Value,
+				byte bValue => bValue,
+				char cValue => cValue,
+				int iValue => iValue,
+				uint uiValue => uiValue,
+				long lValue => lValue,
+				ulong ulValue => ulValue,
+				double dValue => (float) dValue,
+				_ => (float.TryParse(value.ToString(), out var result) ? result : defaultValue)
+			};
 		}
 
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
 		public int GetArgumentAsInteger()
 		{
 			_argumentIndex++;
 			return GetArgumentAsInteger(_argumentIndex);
 		}
 
-		public int GetArgumentAsInteger(int index)
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public int GetArgumentAsInteger(int index, int defaultValue = default)
 		{
-			return OscMessage.Arguments[index] is int ? (int) OscMessage.Arguments[index] : int.Parse(OscMessage.Arguments[index].ToString());
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			return value switch
+			{
+				int iValue => iValue,
+				DateTime time => (int) time.Ticks,
+				OscTimeTag time => (int) time.Value,
+				byte bValue => bValue,
+				char cValue => cValue,
+				uint uiValue => (int) uiValue,
+				long lValue => (int) lValue,
+				ulong ulValue => (int) ulValue,
+				float fValue => (int) fValue,
+				double dValue => (int) dValue,
+				_ => (int.TryParse(value.ToString(), out var result) ? result : defaultValue)
+			};
 		}
 
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
 		public long GetArgumentAsLong()
 		{
 			_argumentIndex++;
 			return GetArgumentAsLong(_argumentIndex);
 		}
 
-		public long GetArgumentAsLong(int index)
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public long GetArgumentAsLong(int index, long defaultValue = default)
 		{
-			return OscMessage.Arguments[index] is long ? (long) OscMessage.Arguments[index] : long.Parse(OscMessage.Arguments[index].ToString());
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			return value switch
+			{
+				long lValue => lValue,
+				DateTime time => time.Ticks,
+				OscTimeTag time => (long) time.Value,
+				byte bValue => bValue,
+				char cValue => cValue,
+				int iValue => iValue,
+				uint uiValue => uiValue,
+				ulong ulValue => (long) ulValue,
+				float fValue => (long) fValue,
+				double dValue => (long) dValue,
+				_ => (long.TryParse(value.ToString(), out var result) ? result : defaultValue)
+			};
 		}
 
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
+		public OscTimeTag GetArgumentAsOscTimeTag()
+		{
+			_argumentIndex++;
+			return GetArgumentAsOscTimeTag(_argumentIndex);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public OscTimeTag GetArgumentAsOscTimeTag(int index, OscTimeTag defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			return value switch
+			{
+				OscTimeTag time => time,
+				DateTime time => time.ToOscTimeTag(),
+				byte bValue => new OscTimeTag(bValue),
+				char cValue => new OscTimeTag(cValue),
+				int iValue => new OscTimeTag((ulong) iValue),
+				uint uiValue => new OscTimeTag(uiValue),
+				long lValue => new OscTimeTag((ulong) lValue),
+				ulong ulValue => new OscTimeTag(ulValue),
+				float fValue => new OscTimeTag((ulong) fValue),
+				double dValue => new OscTimeTag((ulong) dValue),
+				_ => (OscTimeTag.TryParse(value.ToString(), out var result) ? result : defaultValue)
+			};
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
 		public string GetArgumentAsString()
 		{
 			_argumentIndex++;
 			return GetArgumentAsString(_argumentIndex);
 		}
 
-		public string GetArgumentAsString(int index)
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public string GetArgumentAsString(int index, string defaultValue = default)
 		{
-			return OscMessage.Arguments[index] is string ? (string) OscMessage.Arguments[index] : OscMessage.Arguments[index].ToString();
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+			return value is string sValue ? sValue : value.ToString();
 		}
 
-		public IEnumerable<object> GetArguments(params object[] collection)
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
+		public uint GetArgumentAsUnsignedInteger()
 		{
-			var response = new List<object>();
-			foreach (var item in collection)
+			_argumentIndex++;
+			return GetArgumentAsUnsignedInteger(_argumentIndex);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public uint GetArgumentAsUnsignedInteger(int index, uint defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
 			{
-				if (item is IOscArrayableValue arrayValue)
-				{
-					response.AddRange(arrayValue.ToArray());
-				}
-				else
-				{
-					response.Add(item);
-				}
+				return defaultValue;
 			}
-			return response;
+
+			var value = OscMessage.Arguments[index];
+
+			return value switch
+			{
+				uint uiValue => uiValue,
+				DateTime time => (uint) time.Ticks,
+				OscTimeTag time => (uint) time.Value,
+				byte bValue => bValue,
+				char cValue => cValue,
+				int iValue => (uint) iValue,
+				long lValue => (uint) lValue,
+				ulong ulValue => (uint) ulValue,
+				float fValue => (uint) fValue,
+				double dValue => (uint) dValue,
+				_ => (uint.TryParse(value.ToString(), out var result) ? result : defaultValue)
+			};
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
+		public ulong GetArgumentAsUnsignedLong()
+		{
+			_argumentIndex++;
+			return GetArgumentAsUnsignedLong(_argumentIndex);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public ulong GetArgumentAsUnsignedLong(int index, ulong defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			return value switch
+			{
+				ulong ulValue => ulValue,
+				DateTime time => (ulong) time.Ticks,
+				OscTimeTag time => time.Value,
+				byte bValue => bValue,
+				char cValue => cValue,
+				int iValue => (ulong) iValue,
+				uint uiValue => uiValue,
+				long lValue => (ulong) lValue,
+				float fValue => (ulong) fValue,
+				double dValue => (ulong) dValue,
+				_ => (ulong.TryParse(value.ToString(), out var result) ? result : defaultValue)
+			};
 		}
 
 		public bool Load(OscMessage message)
@@ -314,36 +644,6 @@ namespace Sproto.OSC
 		{
 			// Reload the original message, resetting the state.
 			Load(OscMessage);
-		}
-
-		/// <summary>
-		/// Gets the argument or returns the default value if the index is not found.
-		/// </summary>
-		/// <param name="index"> The index of the argument. </param>
-		/// <param name="defaultValue"> The default value to return if not found. </param>
-		/// <returns> The argument if found or default value if not. </returns>
-		protected float GetArgument(int index, float defaultValue)
-		{
-			if (OscMessage.Arguments.Count <= index)
-			{
-				return defaultValue;
-			}
-
-			var value = OscMessage.Arguments[index];
-
-			if (value is OscSymbol symbol)
-			{
-				switch (symbol.Value)
-				{
-					case "Infinityd":
-						return float.PositiveInfinity;
-
-					case "-Infinityd":
-						return float.NegativeInfinity;
-				}
-			}
-
-			return (float) value;
 		}
 
 		protected abstract void LoadMessage();
