@@ -25,6 +25,23 @@ namespace OSC.Tests.OSC
 		}
 
 		[TestMethod]
+		public void EscapeQuoteInString()
+		{
+			var data = "/account/update,\"8d337ca7-8f05-45c8-83f5-dcd5b7bc5725\",\"Dawson\\'s Body Shop\"";
+			var packet = OscPacket.Parse(data);
+
+			if (packet is OscError error)
+			{
+				Assert.Fail($"{error.Code}: {error.Description}");
+			}
+
+			var message = packet as OscMessage;
+			Assert.IsNotNull(message);
+			Assert.AreEqual("8d337ca7-8f05-45c8-83f5-dcd5b7bc5725", message.Arguments[0]);
+			Assert.AreEqual("Dawson\'s Body Shop", message.Arguments[1]);
+		}
+
+		[TestMethod]
 		public void FromBytes()
 		{
 			var actual = new byte[] { 0x62, 0x75, 0x6E, 0x64, 0x00, 0x79, 0x00, 0x61, 0x00, 0x6C, 0x69, 0x00, 0x00, 0xBB, 0xC0 };
@@ -145,6 +162,7 @@ namespace OSC.Tests.OSC
 			var itemsToTest = new Dictionary<string, string>
 			{
 				{ "This is \"a quote\". -John", "/update,\"This is \\\"a quote\\\". -John\"" },
+				{ "John's House Of Cards", "/update,\"John\\'s House Of Cards\"" },
 				{ "\0", "/update,\"\\0\"" },
 				{ "\a", "/update,\"\\a\"" },
 				{ "\b", "/update,\"\\b\"" },
@@ -153,6 +171,7 @@ namespace OSC.Tests.OSC
 				{ "\r", "/update,\"\\r\"" },
 				{ "\t", "/update,\"\\t\"" },
 				{ "\v", "/update,\"\\v\"" },
+				{ "\'", "/update,\"\\\'\"" },
 				{ "\\", "/update,\"\\\\\"" }
 			};
 

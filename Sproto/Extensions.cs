@@ -130,37 +130,37 @@ namespace Sproto
 				{
 					case '\'':
 						literal.Append(@"\'");
-						break;
+						continue;
 					case '\"':
 						literal.Append("\\\"");
-						break;
+						continue;
 					case '\\':
 						literal.Append(@"\\");
-						break;
+						continue;
 					case '\0':
 						literal.Append(@"\0");
-						break;
+						continue;
 					case '\a':
 						literal.Append(@"\a");
-						break;
+						continue;
 					case '\b':
 						literal.Append(@"\b");
-						break;
+						continue;
 					case '\f':
 						literal.Append(@"\f");
-						break;
+						continue;
 					case '\n':
 						literal.Append(@"\n");
-						break;
+						continue;
 					case '\r':
 						literal.Append(@"\r");
-						break;
+						continue;
 					case '\t':
 						literal.Append(@"\t");
-						break;
+						continue;
 					case '\v':
 						literal.Append(@"\v");
-						break;
+						continue;
 					default:
 						// ASCII printable character
 						if (c >= 0x20 && c <= 0x7e)
@@ -173,8 +173,7 @@ namespace Sproto
 							literal.Append(@"\u");
 							literal.Append(((int) c).ToString("x4"));
 						}
-
-						break;
+						continue;
 				}
 			}
 
@@ -299,83 +298,6 @@ namespace Sproto
 			});
 
 			return arguments.Any() ? string.Format(value, arguments) : value;
-		}
-
-		public static bool IsValidEscape(this string str)
-		{
-			var isEscaped = false;
-			var parseHexNext = false;
-			var parseHexCount = 0;
-
-			// first we count the number of chars we will be returning
-			for (var i = 0; i < str.Length; i++)
-			{
-				var c = str[i];
-
-				if (parseHexNext)
-				{
-					parseHexCount++;
-
-					if (Uri.IsHexDigit(c) == false)
-					{
-						return false;
-					}
-
-					if (parseHexCount == 2)
-					{
-						parseHexNext = false;
-						parseHexCount = 0;
-					}
-				}
-
-				// if we are not in  an escape sequence and the char is a escape char
-				else if (isEscaped == false && c == '\\')
-				{
-					// escape
-					isEscaped = true;
-				}
-
-				// else if we are escaped
-				else if (isEscaped)
-				{
-					// reset escape state
-					isEscaped = false;
-
-					// check the char against the set of known escape chars
-					switch (char.ToLower(c))
-					{
-						case '0':
-						case 'a':
-						case 'b':
-						case 'f':
-						case 'n':
-						case 'r':
-						case 't':
-						case 'v':
-						case '\\':
-							// do not increment count
-							break;
-
-						case 'x':
-							// do not increment count
-							parseHexNext = true;
-							parseHexCount = 0;
-							break;
-
-						default:
-							// this is not a valid escape sequence
-							// return false
-							return false;
-					}
-				}
-			}
-
-			if (parseHexNext)
-			{
-				return false;
-			}
-
-			return isEscaped == false;
 		}
 
 		/// <summary>
@@ -640,6 +562,7 @@ namespace Sproto
 			var isEscaped = false;
 			var parseHexNext = false;
 			var parseHexCount = 0;
+			var parseHexCounts = new List<int>();
 
 			// first we count the number of chars we will be returning
 			for (var i = 0; i < value.Length; i++)
@@ -648,15 +571,14 @@ namespace Sproto
 
 				if (parseHexNext)
 				{
-					parseHexCount++;
-
-					if (Uri.IsHexDigit(c) == false)
+					if (Uri.IsHexDigit(c))
 					{
-						throw new Exception($@"Invalid escape sequence at char '{i}' ""{c}"" is not a valid hex digit.");
+						parseHexCount++;
 					}
-
-					if (parseHexCount == 2)
+					else
 					{
+						parseHexCounts.Add(parseHexCount);
+						count += parseHexCount;
 						parseHexNext = false;
 						parseHexCount = 0;
 					}
@@ -689,9 +611,15 @@ namespace Sproto
 						case 'r':
 						case 't':
 						case 'v':
+						case '\'':
 						case '\\':
 						case '"':
 							// do not increment count
+							break;
+
+						case 'u':
+							// Skip the 4 value because they are unicode values
+							i += 4;
 							break;
 
 						case 'x':
@@ -702,7 +630,7 @@ namespace Sproto
 
 						default:
 							// this is not a valid escape sequence
-							throw new Exception($"Invalid escape sequence at char '{i - 1}'.");
+							throw new Exception($"Invalid escape sequence at char of [{c}] at offset {i - 1}.");
 					}
 				}
 				else
@@ -722,10 +650,11 @@ namespace Sproto
 				throw new Exception($"Invalid escape sequence at char '{value.Length - 1}'.");
 			}
 
-			// create a byte array for the result
-			var chars = new byte[count];
+			// create a character array for the result
+			var chars = new char[count];
+			var hexCountIndex = 0;
 			var j = 0;
-
+			
 			// actually populate the array
 			for (var i = 0; i < value.Length; i++)
 			{
@@ -748,60 +677,72 @@ namespace Sproto
 					switch (char.ToLower(value[i]))
 					{
 						case '0':
-							chars[j++] = (byte) '\0';
+							chars[j++] = '\0';
 							break;
 
 						case 'a':
-							chars[j++] = (byte) '\a';
+							chars[j++] = '\a';
 							break;
 
 						case 'b':
-							chars[j++] = (byte) '\b';
+							chars[j++] = '\b';
 							break;
 
 						case 'f':
-							chars[j++] = (byte) '\f';
+							chars[j++] = '\f';
 							break;
 
 						case 'n':
-							chars[j++] = (byte) '\n';
+							chars[j++] = '\n';
 							break;
 
 						case 'r':
-							chars[j++] = (byte) '\r';
+							chars[j++] = '\r';
 							break;
-
+						
 						case 't':
-							chars[j++] = (byte) '\t';
+							chars[j++] = '\t';
 							break;
 
 						case 'v':
-							chars[j++] = (byte) '\v';
+							chars[j++] = '\v';
 							break;
 
 						case '\\':
-							chars[j++] = (byte) '\\';
+							chars[j++] = '\\';
 							break;
 
+						case '\'':
+							chars[j++] = '\'';
+							break;
+						
 						case '"':
-							chars[j++] = (byte) '"';
+							chars[j++] = '"';
 							break;
 
 						case 'x':
-							//string temp = "" + str[++i] + str[++i];
-							//chars[j++] = byte.Parse(temp, NumberStyles.HexNumber); //;
-							chars[j++] = (byte) ((Uri.FromHex(value[++i]) << 4) | Uri.FromHex(value[++i]));
+							chars[j++] = '\\';
+							chars[j++] = c;
+							var hexCount = parseHexCounts[hexCountIndex++];
+							for (var h = 0; h < hexCount; h++)
+							{
+								chars[j++] = value[++i];
+							}
+							break;
+						
+						case 'u':
+							chars[j++] = (char) ((Uri.FromHex(value[++i]) << 12) | (Uri.FromHex(value[++i]) << 8) | (Uri.FromHex(value[++i]) << 4) | Uri.FromHex(value[++i]));
 							break;
 					}
 				}
 				else
 				{
 					// normal char
-					chars[j++] = (byte) c;
+					chars[j++] = c;
 				}
 			}
 
-			return GetString(chars);
+			return new string(chars);
 		}
 
 		/// <summary>
@@ -948,11 +889,6 @@ namespace Sproto
 		internal static int ScanForwardObject(string str, int controlChar)
 		{
 			return ScanForward(str, controlChar, '{', '}', "Expected '}'");
-		}
-
-		private static string GetString(this byte[] bytes)
-		{
-			return Encoding.UTF8.GetString(bytes);
 		}
 
 		/// <summary>
