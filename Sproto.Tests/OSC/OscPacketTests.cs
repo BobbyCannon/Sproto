@@ -20,7 +20,7 @@ namespace OSC.Tests.OSC
 		public void FromBytes()
 		{
 			var data = new byte[] { 0x2F, 0x74, 0x65, 0x73, 0x74, 0x00, 0x00, 0x00, 0x2C, 0x54, 0x00, 0x00 };
-			var actual = (OscMessage) OscPacket.GetPacket(data);
+			var actual = (OscMessage) OscPacket.Parse(data);
 
 			Assert.AreEqual("/test", actual.Address);
 			Assert.AreEqual(1, actual.Arguments.Count);
@@ -31,7 +31,7 @@ namespace OSC.Tests.OSC
 		public void FromBytesOfDoubleNegativeInfinity()
 		{
 			var data = new byte[] { 0x2F, 0x74, 0x65, 0x73, 0x74, 0x00, 0x00, 0x00, 0x2C, 0x49, 0x00, 0x00 };
-			var actual = (OscMessage) OscPacket.GetPacket(data);
+			var actual = (OscMessage) OscPacket.Parse(data);
 
 			Assert.AreEqual("/test", actual.Address);
 			Assert.AreEqual(1, actual.Arguments.Count);
@@ -42,7 +42,7 @@ namespace OSC.Tests.OSC
 		public void FromBytesOfFloatNegativeInfinity()
 		{
 			var data = new byte[] { 0x2F, 0x74, 0x65, 0x73, 0x74, 0x00, 0x00, 0x00, 0x2C, 0x49, 0x00, 0x00 };
-			var actual = (OscMessage) OscPacket.GetPacket(data);
+			var actual = (OscMessage) OscPacket.Parse(data);
 
 			Assert.AreEqual("/test", actual.Address);
 			Assert.AreEqual(1, actual.Arguments.Count);

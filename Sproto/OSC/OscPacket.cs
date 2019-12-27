@@ -22,26 +22,55 @@ namespace Sproto.OSC
 
 		#region Methods
 
-		public static OscPacket GetPacket(byte[] buffer)
+		/// <summary>
+		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
+		/// </summary>
+		/// <param name="data"> The data for the message. </param>
+		/// <returns> Message containing various arguments and an address </returns>
+		public static OscPacket Parse(byte[] data)
 		{
-			return GetPacket(buffer, buffer.Length);
+			return Parse(OscTimeTag.UtcNow, data, data.Length);
 		}
 
-		public static OscPacket GetPacket(byte[] buffer, int length)
+		/// <summary>
+		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
+		/// </summary>
+		/// <param name="time"> The created time of the message. </param>
+		/// <param name="data"> The data for the message. </param>
+		/// <returns> Message containing various arguments and an address </returns>
+		public static OscPacket Parse(OscTimeTag time, byte[] data)
 		{
-			return GetPacket(OscTimeTag.UtcNow, buffer, length);
+			return Parse(time, data, data.Length);
 		}
 
-		public static OscPacket GetPacket(OscTimeTag time, byte[] buffer, int length)
+		/// <summary>
+		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
+		/// </summary>
+		/// <param name="data"> The data for the message. </param>
+		/// <param name="length"> The length for the message. </param>
+		/// <returns> Message containing various arguments and an address </returns>
+		public static OscPacket Parse(byte[] data, int length)
+		{
+			return Parse(OscTimeTag.UtcNow, data, length);
+		}
+
+		/// <summary>
+		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
+		/// </summary>
+		/// <param name="time"> The created time of the message. </param>
+		/// <param name="data"> The data for the message. </param>
+		/// <param name="length"> The length for the message. </param>
+		/// <returns> Message containing various arguments and an address </returns>
+		public static OscPacket Parse(OscTimeTag time, byte[] data, int length)
 		{
 			try
 			{
-				if (buffer[0] == '#' || buffer[0] == '+')
+				if (data[0] == '#' || data[0] == '+')
 				{
-					return OscBundle.Parse(buffer, length);
+					return OscBundle.ParseBundle(data, length);
 				}
 
-				return OscMessage.Parse(time, buffer, length);
+				return OscMessage.ParseMessage(time, data, length);
 			}
 			catch (Exception)
 			{
@@ -75,16 +104,27 @@ namespace Sproto.OSC
 		/// </summary>
 		/// <param name="time"> The time for the OscPacket. </param>
 		/// <param name="value"> A string containing the OSC packet data. </param>
+		/// <returns> The parsed OSC packet. </returns>
+		public static OscPacket Parse(OscTimeTag time, string value)
+		{
+			return Parse(time, value, CultureInfo.InvariantCulture);
+		}
+
+		/// <summary>
+		/// Parse a packet from a string using the supplied provider.
+		/// </summary>
+		/// <param name="time"> The time for the OscPacket. </param>
+		/// <param name="value"> A string containing the OSC packet data. </param>
 		/// <param name="provider"> The format provider to use during parsing. </param>
 		/// <returns> The parsed OSC packet. </returns>
 		public static OscPacket Parse(OscTimeTag time, string value, IFormatProvider provider)
 		{
 			if (value.StartsWith("#") || value.StartsWith("+"))
 			{
-				return OscBundle.Parse(value, provider);
+				return OscBundle.ParseBundle(value, provider);
 			}
 
-			return OscMessage.Parse(time, value, provider);
+			return OscMessage.ParseMessage(time, value, provider);
 		}
 
 		public abstract byte[] ToByteArray();
@@ -252,8 +292,12 @@ namespace Sproto.OSC
 
 		protected static byte[] SetBlob(byte[] value)
 		{
-			var len = value.Length + 4;
-			len = len + (4 - len % 4);
+			// Calculate the correct length (size + bytes)
+			var len = 4 + value.Length;
+			if (len % 4 > 0)
+			{
+				len += 4 - len % 4;
+			}
 
 			var msg = new byte[len];
 			var size = SetInt(value.Length);
@@ -355,7 +399,7 @@ namespace Sproto.OSC
 			var len = value.Length + (4 - value.Length % 4);
 			if (len <= value.Length)
 			{
-				len = len + 4;
+				len += 4;
 			}
 
 			var msg = new byte[len];

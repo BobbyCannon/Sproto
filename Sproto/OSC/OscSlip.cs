@@ -107,7 +107,7 @@ namespace Sproto.OSC
 				var packetLength = DecodePacket();
 				if (packetLength > 0)
 				{
-					return OscPacket.GetPacket(_packetBytes, packetLength);
+					return OscPacket.Parse(_packetBytes, packetLength);
 				}
 			}
 

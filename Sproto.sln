@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.271
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sproto", "Sproto\Sproto.csproj", "{DE1FCAF6-D683-44B7-B8E3-FF6A19569C16}"
 EndProject
@@ -12,6 +12,11 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OSC.Native", "OSC.Native\OSC.Native.vcxproj", "{F48D3FF8-9000-4584-8108-2E854AE0592A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OSC.Native.Tests", "OSC.Native.Tests\OSC.Native.Tests.vcxproj", "{720ADB18-D5DC-4D9B-AF40-9ED68B77CACA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{900EA0E3-6491-4FBC-B297-4CF4F156E9E9}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

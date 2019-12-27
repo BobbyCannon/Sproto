@@ -165,7 +165,7 @@ namespace OSC.Benchmark
 			for (var i = 0; i < count; i++)
 			{
 				var data = MessageData[messageOffset];
-				var message = OscPacket.GetPacket(data);
+				var message = OscPacket.Parse(data);
 				messageOffset = (messageOffset + 1) % MessageData.Count;
 			}
 		}

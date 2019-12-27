@@ -13,6 +13,7 @@ namespace Sproto.OSC
 		#region Fields
 
 		private int _argumentIndex;
+		private bool _loadingMessage;
 
 		#endregion
 
@@ -50,6 +51,15 @@ namespace Sproto.OSC
 		/// </summary>
 		protected OscMessage OscMessage { get; set; }
 
+		/// <summary>
+		/// Gets the time of the
+		/// </summary>
+		public OscTimeTag Time
+		{
+			get => OscMessage.Time;
+			set => OscMessage.Time = value;
+		}
+
 		#endregion
 
 		#region Methods
@@ -73,10 +83,9 @@ namespace Sproto.OSC
 		/// <typeparam name="T"> The type of the argument expected. </typeparam>
 		/// <param name="defaultValue"> The default value to return if not found. </param>
 		/// <returns> The argument if found or default value if not. </returns>
-		public T GetArgument<T>(T defaultValue)
+		public T GetArgument<T>(T defaultValue = default)
 		{
-			_argumentIndex++;
-			return GetArgument(_argumentIndex, defaultValue);
+			return GetArgument(_argumentIndex++, defaultValue);
 		}
 
 		/// <summary>
@@ -88,7 +97,23 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public T GetArgument<T>(int index, T defaultValue)
 		{
-			return OscMessage.Arguments.Count <= index ? defaultValue : (T) OscMessage.Arguments[index];
+			return defaultValue switch
+			{
+				byte[] dValue => (T) (object) GetArgumentAsBlob(index, dValue),
+				bool dValue => (T) (object) GetArgumentAsBoolean(index, dValue),
+				byte dValue => (T) (object) GetArgumentAsByte(index, dValue),
+				DateTime dValue => (T) (object) GetArgumentAsDateTime(index, dValue),
+				double dValue => (T) (object) GetArgumentAsDouble(index, dValue),
+				float dValue => (T) (object) GetArgumentAsFloat(index, dValue),
+				Guid dValue => (T) (object) GetArgumentAsGuid(index, dValue),
+				int dValue => (T) (object) GetArgumentAsInteger(index, dValue),
+				long dValue => (T) (object) GetArgumentAsLong(index, dValue),
+				OscTimeTag dValue => (T) (object) GetArgumentAsOscTimeTag(index, dValue),
+				string dValue => (T) (object) GetArgumentAsString(index, dValue),
+				uint dValue => (T) (object) GetArgumentAsUnsignedInteger(index, dValue),
+				ulong dValue => (T) (object) GetArgumentAsUnsignedLong(index, dValue),
+				_ => (OscMessage.Arguments.Count <= index ? defaultValue : (T) OscMessage.Arguments[index])
+			};
 		}
 
 		/// <summary>
@@ -97,8 +122,7 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public byte[] GetArgumentAsBlob()
 		{
-			_argumentIndex++;
-			return GetArgumentAsBlob(_argumentIndex);
+			return GetArgumentAsBlob(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -124,8 +148,7 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public bool GetArgumentAsBoolean()
 		{
-			_argumentIndex++;
-			return GetArgumentAsBoolean(_argumentIndex);
+			return GetArgumentAsBoolean(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -156,8 +179,7 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public byte GetArgumentAsByte()
 		{
-			_argumentIndex++;
-			return GetArgumentAsByte(_argumentIndex);
+			return GetArgumentAsByte(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -197,8 +219,7 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public DateTime GetArgumentAsDateTime()
 		{
-			_argumentIndex++;
-			return GetArgumentAsDateTime(_argumentIndex);
+			return GetArgumentAsDateTime(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -238,8 +259,7 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public double GetArgumentAsDouble()
 		{
-			_argumentIndex++;
-			return GetArgumentAsDouble(_argumentIndex);
+			return GetArgumentAsDouble(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -293,8 +313,7 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public float GetArgumentAsFloat()
 		{
-			_argumentIndex++;
-			return GetArgumentAsFloat(_argumentIndex);
+			return GetArgumentAsFloat(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -346,10 +365,35 @@ namespace Sproto.OSC
 		/// Gets the argument or returns the default value if the index is not found.
 		/// </summary>
 		/// <returns> The argument if found or default value if not. </returns>
+		public Guid GetArgumentAsGuid()
+		{
+			return GetArgumentAsGuid(_argumentIndex++);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public Guid GetArgumentAsGuid(int index, Guid defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+			return Guid.TryParse(value.ToString(), out var result) ? result : defaultValue;
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
 		public int GetArgumentAsInteger()
 		{
-			_argumentIndex++;
-			return GetArgumentAsInteger(_argumentIndex);
+			return GetArgumentAsInteger(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -389,8 +433,7 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public long GetArgumentAsLong()
 		{
-			_argumentIndex++;
-			return GetArgumentAsLong(_argumentIndex);
+			return GetArgumentAsLong(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -430,8 +473,7 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public OscTimeTag GetArgumentAsOscTimeTag()
 		{
-			_argumentIndex++;
-			return GetArgumentAsOscTimeTag(_argumentIndex);
+			return GetArgumentAsOscTimeTag(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -471,8 +513,7 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public string GetArgumentAsString()
 		{
-			_argumentIndex++;
-			return GetArgumentAsString(_argumentIndex);
+			return GetArgumentAsString(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -498,8 +539,7 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public uint GetArgumentAsUnsignedInteger()
 		{
-			_argumentIndex++;
-			return GetArgumentAsUnsignedInteger(_argumentIndex);
+			return GetArgumentAsUnsignedInteger(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -539,8 +579,7 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public ulong GetArgumentAsUnsignedLong()
 		{
-			_argumentIndex++;
-			return GetArgumentAsUnsignedLong(_argumentIndex);
+			return GetArgumentAsUnsignedLong(_argumentIndex++);
 		}
 
 		/// <summary>
@@ -576,11 +615,20 @@ namespace Sproto.OSC
 
 		public bool Load(OscMessage message)
 		{
-			OscMessage = message;
-			LoadMessage();
-			HasBeenRead = true;
-			HasBeenUpdated = false;
-			return true;
+			_loadingMessage = true;
+
+			try
+			{
+				OscMessage = message;
+				LoadMessage();
+				HasBeenRead = true;
+				HasBeenUpdated = false;
+				return true;
+			}
+			finally
+			{
+				_loadingMessage = false;
+			}
 		}
 
 		public virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -598,7 +646,7 @@ namespace Sproto.OSC
 		/// </summary>
 		public void StartArgumentProcessing()
 		{
-			_argumentIndex = -1;
+			_argumentIndex = 0;
 		}
 
 		/// <summary>
@@ -623,7 +671,11 @@ namespace Sproto.OSC
 				return new OscMessage(OscTimeTag.UtcNow, Address);
 			}
 
-			UpdateMessage();
+			if (!_loadingMessage)
+			{
+				UpdateMessage();
+			}
+
 			return OscMessage;
 		}
 
@@ -633,7 +685,11 @@ namespace Sproto.OSC
 		/// <returns> The string value in OscMessage format. </returns>
 		public override string ToString()
 		{
-			UpdateMessage();
+			if (!_loadingMessage)
+			{
+				UpdateMessage();
+			}
+
 			return OscMessage.ToString();
 		}
 

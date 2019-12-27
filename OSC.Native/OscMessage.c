@@ -1245,8 +1245,7 @@ OscError OscMessageGetString(OscMessage* const oscMessage, char* const destinati
  * @param destinationSize Size of the destination that cannot be exceeded.
  * @return Error code (0 if successful).
  */
-OscError OscMessageGetBlob(OscMessage* const oscMessage, size_t* const blobSize, char* const destination,
-	const size_t destinationSize)
+OscError OscMessageGetBlob(OscMessage* const oscMessage, size_t* const blobSize, char* const destination, const size_t destinationSize)
 {
 	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] == '\0')
 	{
@@ -2094,8 +2093,7 @@ OscError OscMessageGetArgumentAsString(OscMessage* const oscMessage, char* const
  * @param destinationSize Size of the destination that cannot be exceeded.
  * @return Error code (0 if successful).
  */
-OscError OscMessageGetArgumentAsBlob(OscMessage* const oscMessage, size_t* const blobSize, char* const destination,
-	const size_t destinationSize)
+OscError OscMessageGetArgumentAsBlob(OscMessage* const oscMessage, size_t* const blobSize, char* const destination,	const size_t destinationSize)
 {
 	if (OscMessageIsArgumentAvailable(oscMessage) == false)
 	{

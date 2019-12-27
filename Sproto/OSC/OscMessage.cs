@@ -135,26 +135,6 @@ namespace Sproto.OSC
 			return Arguments.GetEnumerator();
 		}
 
-		/// <summary>
-		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
-		/// </summary>
-		/// <param name="data"> The data for the message. </param>
-		/// <returns> Message containing various arguments and an address </returns>
-		public static OscPacket Parse(byte[] data)
-		{
-			return Parse(OscTimeTag.UtcNow, data, data.Length);
-		}
-
-		/// <summary>
-		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
-		/// </summary>
-		/// <param name="time"> The created time of the message. </param>
-		/// <param name="data"> The data for the message. </param>
-		/// <returns> Message containing various arguments and an address </returns>
-		public static OscPacket Parse(OscTimeTag time, byte[] data)
-		{
-			return Parse(time, data, data.Length);
-		}
 
 		/// <summary>
 		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
@@ -163,7 +143,7 @@ namespace Sproto.OSC
 		/// <param name="data"> The data for the message. </param>
 		/// <param name="length"> The length for the message. </param>
 		/// <returns> Message containing various arguments and an address </returns>
-		public static OscPacket Parse(OscTimeTag time, byte[] data, int length)
+		internal static OscPacket ParseMessage(OscTimeTag time, byte[] data, int length)
 		{
 			var index = 0;
 			var arguments = new List<object>();
@@ -333,34 +313,13 @@ namespace Sproto.OSC
 		}
 
 		/// <summary>
-		/// Parse a message from a string using the default provider InvariantCulture.
-		/// </summary>
-		/// <param name="value"> A string containing the OSC message data. </param>
-		/// <returns> The parsed OSC message. </returns>
-		public new static OscPacket Parse(string value)
-		{
-			return Parse(value, CultureInfo.InvariantCulture);
-		}
-
-		/// <summary>
-		/// Parse a message from a string using the supplied provider.
-		/// </summary>
-		/// <param name="value"> A string containing the OSC message data. </param>
-		/// <param name="provider"> The format provider to use during parsing. </param>
-		/// <returns> The parsed OSC message. </returns>
-		public new static OscPacket Parse(string value, IFormatProvider provider)
-		{
-			return Parse(OscTimeTag.UtcNow, value, provider);
-		}
-
-		/// <summary>
 		/// Parse a message from a string using the supplied provider.
 		/// </summary>
 		/// <param name="time"> The time to represent the message. </param>
 		/// <param name="value"> A string containing the OSC message data. </param>
 		/// <param name="provider"> The format provider to use during parsing. </param>
 		/// <returns> The parsed OSC message. </returns>
-		public new static OscPacket Parse(OscTimeTag time, string value, IFormatProvider provider)
+		internal static OscPacket ParseMessage(OscTimeTag time, string value, IFormatProvider provider)
 		{
 			if (string.IsNullOrWhiteSpace(value))
 			{
@@ -515,6 +474,14 @@ namespace Sproto.OSC
 
 					case null:
 						typeString += "N";
+						break;
+
+					//
+					// All types that are just converted to strings and back.
+					//
+					case Guid value:
+						typeString += "s";
+						parts.Add(SetString(value.ToString()));
 						break;
 
 					// This part handles arrays. It points currentList to the array and reSets i
@@ -692,8 +659,8 @@ namespace Sproto.OSC
 						sb.Append("null");
 						break;
 
-					case string sValue:
-						sb.Append($"\"{sValue.Escape()}\"");
+					case string value:
+						sb.Append($"\"{value.Escape()}\"");
 						break;
 
 					case OscSymbol symbol:
@@ -702,6 +669,10 @@ namespace Sproto.OSC
 
 					case byte[] bytes:
 						sb.Append($"{{ Blob: {bytes.ToStringBlob()} }}");
+						break;
+
+					case Guid value:
+						sb.Append($"\"{value.ToString()}\"");
 						break;
 
 					default:

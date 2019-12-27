@@ -120,7 +120,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void ToBytes()
 		{
-			var message = OscMessage.Parse("/ahoy,\"Flare Lite\"");
+			var message = OscPacket.Parse("/ahoy,\"Flare Lite\"");
 			var actual = OscSlip.EncodePacket(message);
 			actual.Dump();
 
@@ -129,6 +129,131 @@ namespace OSC.Tests.OSC
 			var actualMessage = (OscMessage) slip.ProcessBytes(actual, ref start, actual.Length);
 			actualMessage.Address.Dump();
 			actualMessage.Arguments[0].Dump();
+		}
+
+		[TestMethod]
+		public void ToBytesAllTypes()
+		{
+			var message = new OscMessage("/a", true);
+			//                             /     a                 ,     T
+			var expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x54, 0x00, 0x00 };
+			var actual = message.ToByteArray();
+			Extensions.AreEqual(expected, actual);
+			var actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message, actualMessage, membersToIgnore: new[] { nameof(OscTimeTag.Now), nameof(OscTimeTag.UtcNow) });
+			
+			message = new OscMessage("/a", false);
+			//                         /     a                 ,     F
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x46, 0x00, 0x00 };
+			actual = message.ToByteArray();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message, actualMessage, membersToIgnore: new[] { nameof(OscTimeTag.Now), nameof(OscTimeTag.UtcNow) });
+			
+			message = new OscMessage("/a", "");
+			//                         /     a                 ,     s                 
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+			actual = message.ToByteArray();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message, actualMessage, membersToIgnore: new[] { nameof(OscTimeTag.Now), nameof(OscTimeTag.UtcNow) });
+			
+			message = new OscMessage("/a", "1");
+			//                         /     a                 ,     s                 1
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x73, 0x00, 0x00, 0x31, 0x00, 0x00, 0x00 };
+			actual = message.ToByteArray();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message, actualMessage, membersToIgnore: new[] { nameof(OscTimeTag.Now), nameof(OscTimeTag.UtcNow) });
+			
+			message = new OscMessage("/a", "123");
+			//                         /     a                 ,     s                 1     2     3
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x73, 0x00, 0x00, 0x31, 0x32, 0x33, 0x00 };
+			actual = message.ToByteArray();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message, actualMessage, membersToIgnore: new[] { nameof(OscTimeTag.Now), nameof(OscTimeTag.UtcNow) });
+			
+			message = new OscMessage("/a", "1234");
+			//                         /     a                 ,     s                 1     2     3     4
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x73, 0x00, 0x00, 0x31, 0x32, 0x33, 0x34, 0x00, 0x00, 0x00, 0x00, };
+			actual = message.ToByteArray();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message, actualMessage, membersToIgnore: new[] { nameof(OscTimeTag.Now), nameof(OscTimeTag.UtcNow) });
+			
+			message = new OscMessage("/a", "12345");
+			//                         /     a                 ,     s                 1     2     3     4     5
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x73, 0x00, 0x00, 0x31, 0x32, 0x33, 0x34, 0x35, 0x00, 0x00, 0x00, };
+			actual = message.ToByteArray();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message, actualMessage, membersToIgnore: new[] { nameof(OscTimeTag.Now), nameof(OscTimeTag.UtcNow) });
+			
+			message = new OscMessage("/a", true, "12345");
+			//                         /     a                 ,     T     s           1     2     3     4     5
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x54, 0x73, 0x00, 0x31, 0x32, 0x33, 0x34, 0x35, 0x00, 0x00, 0x00 };
+			actual = message.ToByteArray();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message, actualMessage, membersToIgnore: new[] { nameof(OscTimeTag.Now), nameof(OscTimeTag.UtcNow) });
+			
+			message = new OscMessage("/a", 23, "12345");
+			//                         /     a                 ,     i     s                            23     1     2     3     4     5
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x69, 0x73, 0x00, 0x00, 0x00, 0x00, 0x17, 0x31, 0x32, 0x33, 0x34, 0x35, 0x00, 0x00, 0x00 };
+			actual = message.ToByteArray();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message, actualMessage, membersToIgnore: new[] { nameof(OscTimeTag.Now), nameof(OscTimeTag.UtcNow) });
+			
+			message = new OscMessage("/a", 23, Guid.Parse("0354FF2E-508C-4CF6-8BEA-2A2870E78A9B"));
+			//                         /     a                 ,     i     s                            23     0     3     5     4     F     F     2     E     -     5     0     8     C     -     4     C     F     6     -     8     B     E     A     -     2     A     2     8     7     0     E     7     8     A     9     B
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x69, 0x73, 0x00, 0x00, 0x00, 0x00, 0x17, 0x30, 0x33, 0x35, 0x34, 0x66, 0x66, 0x32, 0x65, 0x2D, 0x35, 0x30, 0x38, 0x63, 0x2D, 0x34, 0x63, 0x66, 0x36, 0x2D, 0x38, 0x62, 0x65, 0x61, 0x2D, 0x32, 0x61, 0x32, 0x38, 0x37, 0x30, 0x65, 0x37, 0x38, 0x61, 0x39, 0x62, 0x00, 0x00, 0x00, 0x00 };
+			actual = message.ToByteArray();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Assert.AreEqual(message[0], actualMessage[0]);
+			Assert.AreEqual(message[1].ToString(), actualMessage[1]);
+			
+			message = new OscMessage("/a", new byte[] { 0, 1, 1, 2, 3, 5, 8, 13 });
+			//                         /     a                 ,     i                                   8     0     1     1     2     3     5     8    13
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x62, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x01, 0x01, 0x02, 0x03, 0x05, 0x08, 0x0D };
+			actual = message.ToByteArray();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message[0], actualMessage[0]);
+			
+			message = new OscMessage("/a", new byte[] { 0, 1, 1, 2, 3, 5, 8 });
+			//                         /     a                 ,     i                                   8     0     1     1     2     3     5     8
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x62, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00, 0x01, 0x01, 0x02, 0x03, 0x05, 0x08, 0x00 };
+			actual = message.ToByteArray();
+			actual.Dump();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message[0], actualMessage[0]);
+			
+			message = new OscMessage("/a", new byte[] { 0, 1, 1, 2, 3, 5, 8, 13 }, Guid.Parse("0354FF2E-508C-4CF6-8BEA-2A2870E78A9B"));
+			//                         /     a                 ,     i     s                             8     0     1     1     2     3     5     8    13     0     3     5     4     F     F     2     E     -     5     0     8     C     -     4     C     F     6     -     8     B     E     A     -     2     A     2     8     7     0     E     7     8     A     9     B
+			expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x62, 0x73, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x01, 0x01, 0x02, 0x03, 0x05, 0x08, 0x0D, 0x30, 0x33, 0x35, 0x34, 0x66, 0x66, 0x32, 0x65, 0x2D, 0x35, 0x30, 0x38, 0x63, 0x2D, 0x34, 0x63, 0x66, 0x36, 0x2D, 0x38, 0x62, 0x65, 0x61, 0x2D, 0x32, 0x61, 0x32, 0x38, 0x37, 0x30, 0x65, 0x37, 0x38, 0x61, 0x39, 0x62, 0x00, 0x00, 0x00, 0x00 };
+			actual = message.ToByteArray();
+			actual.Dump();
+			Extensions.AreEqual(expected, actual);
+			actualMessage = OscPacket.Parse(message.Time, actual) as OscMessage;
+			Assert.IsNotNull(actualMessage);
+			Extensions.AreEqual(message[0], actualMessage[0]);
+			Assert.AreEqual(message[1].ToString(), actualMessage[1]);
 		}
 
 		[TestMethod]

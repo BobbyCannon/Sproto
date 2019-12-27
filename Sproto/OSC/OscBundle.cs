@@ -3,7 +3,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using Sproto.Internal;
@@ -120,13 +119,68 @@ namespace Sproto.OSC
 			}
 		}
 
+		public override byte[] ToByteArray()
+		{
+			var outMessages = new List<byte[]>();
+
+			lock (_packets)
+			{
+				foreach (var packets in _packets)
+				{
+					outMessages.Add(packets.ToByteArray());
+				}
+			}
+
+			// 16 (8 header string, 8 time tag)
+			var total = 16 + outMessages.Sum(x => x.Length + 4) + (IsExtended ? 4 : 0);
+			var response = new byte[total];
+			var responseIndex = 0;
+
+			// Add header string
+			if (IsExtended)
+			{
+				_extendedBundleBytes.CopyTo(response, responseIndex);
+				responseIndex += _extendedBundleBytes.Length;
+			}
+			else
+			{
+				_bundleBytes.CopyTo(response, responseIndex);
+				responseIndex += _bundleBytes.Length;
+			}
+
+			// Add the time tag
+			var time = SetULong(Time.Value);
+			time.CopyTo(response, responseIndex);
+			responseIndex += time.Length;
+
+			foreach (var msg in outMessages)
+			{
+				var size = SetInt(msg.Length);
+				size.CopyTo(response, responseIndex);
+				responseIndex += size.Length;
+
+				// msg size is always a multiple of 4
+				msg.CopyTo(response, responseIndex);
+				responseIndex += msg.Length;
+			}
+
+			if (IsExtended)
+			{
+				var crc = response.CalculateCrc16(total - 4);
+				var data = BitConverter.GetBytes(crc);
+				data.CopyTo(response, responseIndex);
+			}
+
+			return response;
+		}
+
 		/// <summary>
 		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
 		/// </summary>
 		/// <param name="bundle"> </param>
 		/// <param name="length"> </param>
 		/// <returns> Bundle containing elements and a time tag </returns>
-		public static OscPacket Parse(byte[] bundle, int length)
+		internal static OscPacket ParseBundle(byte[] bundle, int length)
 		{
 			var index = 0;
 			var messages = new List<OscPacket>();
@@ -154,7 +208,7 @@ namespace Sproto.OSC
 				index += 4;
 
 				var messageBytes = bundle.SubArray(index, size);
-				var packet = OscMessage.Parse(timeTag, messageBytes);
+				var packet = Parse(timeTag, messageBytes);
 				if (packet is OscError error)
 				{
 					return error;
@@ -192,22 +246,12 @@ namespace Sproto.OSC
 		}
 
 		/// <summary>
-		/// Parse a bundle from a string using the default provider InvariantCulture.
-		/// </summary>
-		/// <param name="value"> A string containing the OSC bundle data. </param>
-		/// <returns> The parsed OSC bundle. </returns>
-		public new static OscPacket Parse(string value)
-		{
-			return Parse(value, CultureInfo.InvariantCulture);
-		}
-
-		/// <summary>
 		/// Parse a bundle from a string using the supplied provider.
 		/// </summary>
 		/// <param name="value"> A string containing the OSC bundle data. </param>
 		/// <param name="provider"> The format provider to use during parsing. </param>
 		/// <returns> The parsed OSC bundle. </returns>
-		public new static OscPacket Parse(string value, IFormatProvider provider)
+		internal static OscPacket ParseBundle(string value, IFormatProvider provider)
 		{
 			if (string.IsNullOrWhiteSpace(value))
 			{
@@ -268,7 +312,7 @@ namespace Sproto.OSC
 			while (start > 0 && start < value.Length)
 			{
 				end = Extensions.ScanForwardObject(value, start);
-				messages.Add(OscPacket.Parse(value.Substring(start + 1, end - (start + 1)).Trim(), provider));
+				messages.Add(Parse(value.Substring(start + 1, end - (start + 1)).Trim(), provider));
 				start = end + 1;
 				end = value.IndexOf('{', start);
 
@@ -288,61 +332,6 @@ namespace Sproto.OSC
 			}
 
 			return new OscBundle(timeStamp, messages.ToArray());
-		}
-
-		public override byte[] ToByteArray()
-		{
-			var outMessages = new List<byte[]>();
-
-			lock (_packets)
-			{
-				foreach (var packets in _packets)
-				{
-					outMessages.Add(packets.ToByteArray());
-				}
-			}
-
-			// 16 (8 header string, 8 time tag)
-			var total = 16 + outMessages.Sum(x => x.Length + 4) + (IsExtended ? 4 : 0);
-			var response = new byte[total];
-			var responseIndex = 0;
-
-			// Add header string
-			if (IsExtended)
-			{
-				_extendedBundleBytes.CopyTo(response, responseIndex);
-				responseIndex += _extendedBundleBytes.Length;
-			}
-			else
-			{
-				_bundleBytes.CopyTo(response, responseIndex);
-				responseIndex += _bundleBytes.Length;
-			}
-
-			// Add the time tag
-			var time = SetULong(Time.Value);
-			time.CopyTo(response, responseIndex);
-			responseIndex += time.Length;
-
-			foreach (var msg in outMessages)
-			{
-				var size = SetInt(msg.Length);
-				size.CopyTo(response, responseIndex);
-				responseIndex += size.Length;
-
-				// msg size is always a multiple of 4
-				msg.CopyTo(response, responseIndex);
-				responseIndex += msg.Length;
-			}
-
-			if (IsExtended)
-			{
-				var crc = response.CalculateCrc16(total - 4);
-				var data = BitConverter.GetBytes(crc);
-				data.CopyTo(response, responseIndex);
-			}
-
-			return response;
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
