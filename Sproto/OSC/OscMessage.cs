@@ -135,229 +135,14 @@ namespace Sproto.OSC
 			return Arguments.GetEnumerator();
 		}
 
-
 		/// <summary>
-		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
+		/// Sets the arguments for the message.
 		/// </summary>
-		/// <param name="time"> The created time of the message. </param>
-		/// <param name="data"> The data for the message. </param>
-		/// <param name="length"> The length for the message. </param>
-		/// <returns> Message containing various arguments and an address </returns>
-		internal static OscPacket ParseMessage(OscTimeTag time, byte[] data, int length)
+		/// <param name="arguments"> The arguments to be set. </param>
+		public void SetArguments(params object[] arguments)
 		{
-			var index = 0;
-			var arguments = new List<object>();
-			var mainArray = arguments; // used as a reference when we are parsing arrays to Get the main array back
-
-			// Get address
-			var address = GetAddress(data, index);
-			index += data.FirstIndexAfter(address.Length, x => x == ',');
-
-			if (index % 4 != 0)
-			{
-				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidMessageAddressMisAligned);
-			}
-
-			// Get type tags
-			var types = GetTypes(data, index);
-			index += types.Length;
-
-			while (index % 4 != 0)
-			{
-				index++;
-			}
-
-			var commaParsed = false;
-
-			foreach (var type in types)
-			{
-				// skip leading comma
-				if (type == ',' && !commaParsed)
-				{
-					commaParsed = true;
-					continue;
-				}
-
-				switch (type)
-				{
-					case '\0':
-						break;
-
-					case 'i':
-						var iValue = GetInt(data, index);
-						arguments.Add(iValue);
-						index += 4;
-						break;
-					
-					case 'u':
-						var uValue = GetUInt(data, index);
-						arguments.Add(uValue);
-						index += 4;
-						break;
-
-					case 'f':
-						var fValue = GetFloat(data, index);
-						arguments.Add(fValue);
-						index += 4;
-						break;
-
-					case 's':
-						var sValue = GetString(data, ref index);
-						arguments.Add(sValue);
-						break;
-
-					case 'b':
-						var bValue = GetBlob(data, index);
-						arguments.Add(bValue);
-						index += 4 + bValue.Length;
-						break;
-
-					case 'h':
-						var hValue = GetLong(data, index);
-						arguments.Add(hValue);
-						index += 8;
-						break;
-					
-					case 'H':
-						var ulValue = GetULong(data, index);
-						arguments.Add(ulValue);
-						index += 8;
-						break;
-
-					case 't':
-						var tValue = GetULong(data, index);
-						arguments.Add(new OscTimeTag(tValue));
-						index += 8;
-						break;
-
-					case 'd':
-						var dValue = GetDouble(data, index);
-						arguments.Add(dValue);
-						index += 8;
-						break;
-
-					case 'S':
-						var s2Value = GetString(data, ref index);
-						arguments.Add(new OscSymbol(s2Value));
-						break;
-
-					case 'c':
-						var cValue = GetChar(data, index);
-						arguments.Add(cValue);
-						index += 4;
-						break;
-
-					case 'r':
-						var rValue = GetRgba(data, index);
-						arguments.Add(rValue);
-						index += 4;
-						break;
-
-					case 'm':
-						var mValue = GetMidi(data, index);
-						arguments.Add(mValue);
-						index += 4;
-						break;
-
-					case 'T':
-						arguments.Add(true);
-						break;
-
-					case 'F':
-						arguments.Add(false);
-						break;
-
-					case 'N':
-						arguments.Add(null);
-						break;
-
-					case 'I':
-						arguments.Add(double.PositiveInfinity);
-						break;
-
-					case 'C':
-						var crcValue = GetCrc(data, index);
-						arguments.Add(crcValue);
-						index += 2;
-						break;
-
-					case '[':
-						if (arguments != mainArray)
-						{
-							return new OscError(OscTimeTag.UtcNow, OscError.Message.UnsupportedNestedArrays);
-						}
-						arguments = new List<object>(); // make arguments point to a new object array
-						break;
-
-					case ']':
-						mainArray.Add(arguments); // add the array to the main array
-						arguments = mainArray; // make arguments point back to the main array
-						break;
-
-					default:
-						return new OscError(OscTimeTag.UtcNow, OscError.Message.UnknownTagType, type);
-				}
-
-				while (index % 4 != 0)
-				{
-					index++;
-				}
-
-				if (index > length)
-				{
-					break;
-				}
-			}
-
-			return new OscMessage(time, address, arguments.ToArray());
-		}
-
-		/// <summary>
-		/// Parse a message from a string using the supplied provider.
-		/// </summary>
-		/// <param name="time"> The time to represent the message. </param>
-		/// <param name="value"> A string containing the OSC message data. </param>
-		/// <param name="provider"> The format provider to use during parsing. </param>
-		/// <returns> The parsed OSC message. </returns>
-		internal static OscPacket ParseMessage(OscTimeTag time, string value, IFormatProvider provider)
-		{
-			if (string.IsNullOrWhiteSpace(value))
-			{
-				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidParseOscPacketInput);
-			}
-
-			var index = value.IndexOf(',');
-
-			if (index <= 0)
-			{
-				// could be an argument less message				
-				index = value.Length;
-			}
-
-			var address = value.Substring(0, index).Trim();
-
-			if (string.IsNullOrWhiteSpace(address))
-			{
-				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidMessageAddressWasEmpty);
-			}
-
-			if (OscAddress.IsValidAddress(address) == false)
-			{
-				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidMessageAddress);
-			}
-
-			var arguments = new List<object>();
-
-			try
-			{
-				Extensions.ParseArguments(value, arguments, index + 1, provider);
-			}
-			catch (Exception ex)
-			{
-				return new OscError(OscTimeTag.UtcNow, OscError.Message.FailedParsingArguments, ex.Message);
-			}
-
-			return new OscMessage(time, address, arguments.ToArray());
+			Arguments.Clear();
+			Arguments.AddRange(arguments);
 		}
 
 		public override byte[] ToByteArray()
@@ -377,7 +162,7 @@ namespace Sproto.OSC
 						typeString += "i";
 						parts.Add(SetInt(iArg));
 						break;
-					
+
 					case uint uiArg:
 						typeString += "u";
 						parts.Add(SetUInt(uiArg));
@@ -447,7 +232,7 @@ namespace Sproto.OSC
 						typeString += "c";
 						parts.Add(SetChar((char) bValue));
 						break;
-						
+
 					case char character:
 						typeString += "c";
 						parts.Add(SetChar(character));
@@ -594,11 +379,11 @@ namespace Sproto.OSC
 					case int i:
 						sb.Append(hex ? $"0x{i.ToString("X8", provider)}" : i.ToString(provider));
 						break;
-					
+
 					case uint u:
 						sb.Append(hex ? $"0x{u.ToString("X8", provider)}u" : $"{u.ToString(provider)}u");
 						break;
-					
+
 					case long l:
 						sb.Append(hex ? $"0x{l.ToString("X16", provider)}L" : $"{l.ToString(provider)}L");
 						break;
@@ -629,7 +414,7 @@ namespace Sproto.OSC
 					case byte b:
 						sb.Append($"'{(char) b}'");
 						break;
-					
+
 					case char c:
 						sb.Append($"'{c}'");
 						break;
@@ -679,6 +464,230 @@ namespace Sproto.OSC
 						throw new Exception($"Unsupported argument type '{obj.GetType()}'");
 				}
 			}
+		}
+
+		/// <summary>
+		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
+		/// </summary>
+		/// <param name="time"> The created time of the message. </param>
+		/// <param name="data"> The data for the message. </param>
+		/// <param name="length"> The length for the message. </param>
+		/// <returns> Message containing various arguments and an address </returns>
+		internal static OscPacket ParseMessage(OscTimeTag time, byte[] data, int length)
+		{
+			var index = 0;
+			var arguments = new List<object>();
+			var mainArray = arguments; // used as a reference when we are parsing arrays to Get the main array back
+
+			// Get address
+			var address = GetAddress(data, index);
+			index += data.FirstIndexAfter(address.Length, x => x == ',');
+
+			if (index % 4 != 0)
+			{
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidMessageAddressMisAligned);
+			}
+
+			// Get type tags
+			var types = GetTypes(data, index);
+			index += types.Length;
+
+			while (index % 4 != 0)
+			{
+				index++;
+			}
+
+			var commaParsed = false;
+
+			foreach (var type in types)
+			{
+				// skip leading comma
+				if (type == ',' && !commaParsed)
+				{
+					commaParsed = true;
+					continue;
+				}
+
+				switch (type)
+				{
+					case '\0':
+						break;
+
+					case 'i':
+						var iValue = GetInt(data, index);
+						arguments.Add(iValue);
+						index += 4;
+						break;
+
+					case 'u':
+						var uValue = GetUInt(data, index);
+						arguments.Add(uValue);
+						index += 4;
+						break;
+
+					case 'f':
+						var fValue = GetFloat(data, index);
+						arguments.Add(fValue);
+						index += 4;
+						break;
+
+					case 's':
+						var sValue = GetString(data, ref index);
+						arguments.Add(sValue);
+						break;
+
+					case 'b':
+						var bValue = GetBlob(data, index);
+						arguments.Add(bValue);
+						index += 4 + bValue.Length;
+						break;
+
+					case 'h':
+						var hValue = GetLong(data, index);
+						arguments.Add(hValue);
+						index += 8;
+						break;
+
+					case 'H':
+						var ulValue = GetULong(data, index);
+						arguments.Add(ulValue);
+						index += 8;
+						break;
+
+					case 't':
+						var tValue = GetULong(data, index);
+						arguments.Add(new OscTimeTag(tValue));
+						index += 8;
+						break;
+
+					case 'd':
+						var dValue = GetDouble(data, index);
+						arguments.Add(dValue);
+						index += 8;
+						break;
+
+					case 'S':
+						var s2Value = GetString(data, ref index);
+						arguments.Add(new OscSymbol(s2Value));
+						break;
+
+					case 'c':
+						var cValue = GetChar(data, index);
+						arguments.Add(cValue);
+						index += 4;
+						break;
+
+					case 'r':
+						var rValue = GetRgba(data, index);
+						arguments.Add(rValue);
+						index += 4;
+						break;
+
+					case 'm':
+						var mValue = GetMidi(data, index);
+						arguments.Add(mValue);
+						index += 4;
+						break;
+
+					case 'T':
+						arguments.Add(true);
+						break;
+
+					case 'F':
+						arguments.Add(false);
+						break;
+
+					case 'N':
+						arguments.Add(null);
+						break;
+
+					case 'I':
+						arguments.Add(double.PositiveInfinity);
+						break;
+
+					case 'C':
+						var crcValue = GetCrc(data, index);
+						arguments.Add(crcValue);
+						index += 2;
+						break;
+
+					case '[':
+						if (arguments != mainArray)
+						{
+							return new OscError(OscTimeTag.UtcNow, OscError.Message.UnsupportedNestedArrays);
+						}
+						arguments = new List<object>(); // make arguments point to a new object array
+						break;
+
+					case ']':
+						mainArray.Add(arguments); // add the array to the main array
+						arguments = mainArray; // make arguments point back to the main array
+						break;
+
+					default:
+						return new OscError(OscTimeTag.UtcNow, OscError.Message.UnknownTagType, type);
+				}
+
+				while (index % 4 != 0)
+				{
+					index++;
+				}
+
+				if (index > length)
+				{
+					break;
+				}
+			}
+
+			return new OscMessage(time, address, arguments.ToArray());
+		}
+
+		/// <summary>
+		/// Parse a message from a string using the supplied provider.
+		/// </summary>
+		/// <param name="time"> The time to represent the message. </param>
+		/// <param name="value"> A string containing the OSC message data. </param>
+		/// <param name="provider"> The format provider to use during parsing. </param>
+		/// <returns> The parsed OSC message. </returns>
+		internal static OscPacket ParseMessage(OscTimeTag time, string value, IFormatProvider provider)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidParseOscPacketInput);
+			}
+
+			var index = value.IndexOf(',');
+
+			if (index <= 0)
+			{
+				// could be an argument less message				
+				index = value.Length;
+			}
+
+			var address = value.Substring(0, index).Trim();
+
+			if (string.IsNullOrWhiteSpace(address))
+			{
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidMessageAddressWasEmpty);
+			}
+
+			if (OscAddress.IsValidAddress(address) == false)
+			{
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.InvalidMessageAddress);
+			}
+
+			var arguments = new List<object>();
+
+			try
+			{
+				Extensions.ParseArguments(value, arguments, index + 1, provider);
+			}
+			catch (Exception ex)
+			{
+				return new OscError(OscTimeTag.UtcNow, OscError.Message.FailedParsingArguments, ex.Message);
+			}
+
+			return new OscMessage(time, address, arguments.ToArray());
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()

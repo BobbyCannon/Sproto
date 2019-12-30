@@ -20,7 +20,7 @@ namespace OSC.Tests.OSC
 		public void AddressEmpty()
 		{
 			var command = "/";
-			var message = (OscError) OscMessage.Parse(command);
+			var message = (OscError) OscPacket.Parse(command);
 			Assert.AreEqual(OscError.Message.InvalidMessageAddress, message.Code);
 		}
 
@@ -56,7 +56,7 @@ namespace OSC.Tests.OSC
 		public void MissingAddressPrefix()
 		{
 			var command = "name";
-			var message = (OscError) OscMessage.Parse(command);
+			var message = (OscError) OscPacket.Parse(command);
 			Assert.AreEqual(OscError.Message.InvalidMessageAddress, message.Code);
 		}
 
@@ -64,7 +64,7 @@ namespace OSC.Tests.OSC
 		public void Parse()
 		{
 			var command = "/name";
-			var message = (OscMessage) OscMessage.Parse(command);
+			var message = (OscMessage) OscPacket.Parse(command);
 			Assert.AreEqual("/name", message.Address);
 		}
 
@@ -81,7 +81,7 @@ namespace OSC.Tests.OSC
 			foreach (var e in values)
 			{
 				var command = $"/system/time, {{ Time: {e.Key} }}";
-				var message = (OscMessage) OscMessage.Parse(command);
+				var message = (OscMessage) OscPacket.Parse(command);
 				Assert.AreEqual("/system/time", message.Address);
 				Assert.AreEqual(1, message.Arguments.Count);
 				Assert.AreEqual(e.Value, ((OscTimeTag) message.Arguments[0]).Value);
@@ -266,7 +266,7 @@ namespace OSC.Tests.OSC
 
 			Extensions.AreEqual(expected, actual);
 
-			ValidateOscMessage(OscMessage.Parse(actual) as OscMessage, true);
+			ValidateOscMessage(OscPacket.Parse(actual) as OscMessage, true);
 		}
 
 		[TestMethod]
@@ -278,7 +278,7 @@ namespace OSC.Tests.OSC
 
 			Assert.AreEqual(expected, actual);
 
-			ValidateOscMessage(OscMessage.Parse(actual) as OscMessage, false);
+			ValidateOscMessage(OscPacket.Parse(actual) as OscMessage, false);
 		}
 
 		[TestMethod]
@@ -378,7 +378,7 @@ namespace OSC.Tests.OSC
 			Assert.AreEqual(allInfinityTheSame ? double.PositiveInfinity : double.NegativeInfinity, actual.Arguments[index++]);
 			Extensions.AreEqual(new OscSymbol("Test"), actual.Arguments[index++]);
 			Extensions.AreEqual(new OscRgba(1, 2, 3, 4), actual.Arguments[index++]);
-			Extensions.AreEqual(new OscMidi(80, 76, 42, 24), actual.Arguments[index++]);
+			Extensions.AreEqual(new OscMidi(80, 76, 42, 24), actual.Arguments[index]);
 		}
 
 		#endregion

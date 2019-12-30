@@ -47,11 +47,6 @@ namespace Sproto.OSC
 		public bool HasBeenUpdated { get; set; }
 
 		/// <summary>
-		/// The message that represents this command.
-		/// </summary>
-		protected OscMessage OscMessage { get; set; }
-
-		/// <summary>
 		/// Gets the time of the
 		/// </summary>
 		public OscTimeTag Time
@@ -59,6 +54,11 @@ namespace Sproto.OSC
 			get => OscMessage.Time;
 			set => OscMessage.Time = value;
 		}
+
+		/// <summary>
+		/// The message that represents this command.
+		/// </summary>
+		protected OscMessage OscMessage { get; set; }
 
 		#endregion
 
@@ -642,6 +642,15 @@ namespace Sproto.OSC
 		}
 
 		/// <summary>
+		/// Sets the arguments of the OscMessage.
+		/// </summary>
+		/// <param name="arguments"> The arguments for the OscMessage. </param>
+		public void SetArguments(params object[] arguments)
+		{
+			OscMessage.SetArguments(arguments);
+		}
+
+		/// <summary>
 		/// Resets the index for sequential argument processing. Call this before calling "GetArgument" methods that do *not* provide an index.
 		/// </summary>
 		public void StartArgumentProcessing()
@@ -656,7 +665,7 @@ namespace Sproto.OSC
 		/// <returns> The OscBundle containing this OscCommand as an OscMessage. </returns>
 		public virtual OscBundle ToBundle(OscTimeTag? time = null)
 		{
-			return new OscBundle(time ?? OscTimeTag.UtcNow, ToMessage());
+			return new OscBundle(time ?? Time, ToMessage());
 		}
 
 		/// <summary>
@@ -668,12 +677,13 @@ namespace Sproto.OSC
 		{
 			if (!includeArguments)
 			{
-				return new OscMessage(OscTimeTag.UtcNow, Address);
+				return new OscMessage(Time, Address);
 			}
 
 			if (!_loadingMessage)
 			{
 				UpdateMessage();
+				OscMessage.Time = Time;
 			}
 
 			return OscMessage;
