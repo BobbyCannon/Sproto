@@ -211,6 +211,11 @@ namespace Sproto.OSC
 						parts.Add(SetULong(timeTag.Value));
 						break;
 
+					case TimeSpan timeSpan:
+						typeString += "p";
+						parts.Add(SetLong(timeSpan.Ticks));
+						break;
+
 					case double dValue:
 						if (double.IsPositiveInfinity(dValue) || double.IsNegativeInfinity(dValue))
 						{
@@ -261,12 +266,15 @@ namespace Sproto.OSC
 						typeString += "N";
 						break;
 
-					//
-					// All types that are just converted to strings and back.
-					//
+					// Guid types that are just converted to strings and back.
 					case Guid value:
 						typeString += "s";
 						parts.Add(SetString(value.ToString()));
+						break;
+
+					case Enum eArg:
+						typeString += "i";
+						parts.Add(SetInt(Convert.ToInt32(eArg)));
 						break;
 
 					// This part handles arrays. It points currentList to the array and reSets i
@@ -432,6 +440,10 @@ namespace Sproto.OSC
 						sb.Append($"{{ Time: {tag} }}");
 						break;
 
+					case TimeSpan timeSpan:
+						sb.Append($"{{ TimeSpan: {timeSpan} }}");
+						break;
+
 					case OscMidi midi:
 						sb.Append($"{{ Midi: {midi} }}");
 						break;
@@ -458,6 +470,10 @@ namespace Sproto.OSC
 
 					case Guid value:
 						sb.Append($"\"{value.ToString()}\"");
+						break;
+
+					case Enum eValue:
+						sb.Append(Convert.ToInt32(eValue));
 						break;
 
 					default:
@@ -557,6 +573,12 @@ namespace Sproto.OSC
 					case 't':
 						var tValue = GetULong(data, index);
 						arguments.Add(new OscTimeTag(tValue));
+						index += 8;
+						break;
+
+					case 'p':
+						var tsValue = GetLong(data, index);
+						arguments.Add(new TimeSpan(tsValue));
 						index += 8;
 						break;
 

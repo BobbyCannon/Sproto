@@ -110,6 +110,7 @@ namespace Sproto.OSC
 				long dValue => (T) (object) GetArgumentAsLong(index, dValue),
 				OscTimeTag dValue => (T) (object) GetArgumentAsOscTimeTag(index, dValue),
 				string dValue => (T) (object) GetArgumentAsString(index, dValue),
+				TimeSpan dValue => (T) (object) GetArgumentAsTimeSpan(index, dValue),
 				uint dValue => (T) (object) GetArgumentAsUnsignedInteger(index, dValue),
 				ulong dValue => (T) (object) GetArgumentAsUnsignedLong(index, dValue),
 				_ => (OscMessage.Arguments.Count <= index ? defaultValue : (T) OscMessage.Arguments[index])
@@ -416,6 +417,7 @@ namespace Sproto.OSC
 				int iValue => iValue,
 				DateTime time => (int) time.Ticks,
 				OscTimeTag time => (int) time.Value,
+				Enum eValue => Convert.ToInt32(eValue),
 				byte bValue => bValue,
 				char cValue => cValue,
 				uint uiValue => (int) uiValue,
@@ -456,6 +458,7 @@ namespace Sproto.OSC
 				long lValue => lValue,
 				DateTime time => time.Ticks,
 				OscTimeTag time => (long) time.Value,
+				Enum eValue => Convert.ToInt64(eValue),
 				byte bValue => bValue,
 				char cValue => cValue,
 				int iValue => iValue,
@@ -537,6 +540,46 @@ namespace Sproto.OSC
 		/// Gets the argument or returns the default value if the index is not found.
 		/// </summary>
 		/// <returns> The argument if found or default value if not. </returns>
+		public TimeSpan GetArgumentAsTimeSpan()
+		{
+			return GetArgumentAsTimeSpan(_argumentIndex++);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public TimeSpan GetArgumentAsTimeSpan(int index, TimeSpan defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			return value switch
+			{
+				DateTime time => time.TimeOfDay,
+				OscTimeTag time => time.ToDateTime().TimeOfDay,
+				byte bValue => new TimeSpan(bValue),
+				char cValue => new TimeSpan(cValue),
+				int iValue => new TimeSpan(iValue),
+				uint uiValue => new TimeSpan(uiValue),
+				long lValue => new TimeSpan(lValue),
+				ulong ulValue => new TimeSpan((long) ulValue),
+				float fValue => new TimeSpan((long) fValue),
+				double dValue => new TimeSpan((long) dValue),
+				_ => (TimeSpan.TryParse(value.ToString(), out var result) ? result : defaultValue)
+			};
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <returns> The argument if found or default value if not. </returns>
 		public uint GetArgumentAsUnsignedInteger()
 		{
 			return GetArgumentAsUnsignedInteger(_argumentIndex++);
@@ -562,6 +605,7 @@ namespace Sproto.OSC
 				uint uiValue => uiValue,
 				DateTime time => (uint) time.Ticks,
 				OscTimeTag time => (uint) time.Value,
+				Enum eValue => Convert.ToUInt32(eValue),
 				byte bValue => bValue,
 				char cValue => cValue,
 				int iValue => (uint) iValue,
@@ -602,6 +646,7 @@ namespace Sproto.OSC
 				ulong ulValue => ulValue,
 				DateTime time => (ulong) time.Ticks,
 				OscTimeTag time => time.Value,
+				Enum eValue => Convert.ToUInt64(eValue),
 				byte bValue => bValue,
 				char cValue => cValue,
 				int iValue => (ulong) iValue,

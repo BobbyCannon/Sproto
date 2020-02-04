@@ -930,6 +930,10 @@ namespace Sproto
 				case "time":
 				case "t":
 					return OscTimeTag.Parse(strTrimmed.Substring(colon + 1).Trim(), provider);
+				
+				case "timespan":
+				case "ts":
+					return TimeSpan.Parse(strTrimmed.Substring(colon + 1).Trim(), provider);
 
 				case "color":
 				case "c":
