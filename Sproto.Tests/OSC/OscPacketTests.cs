@@ -93,7 +93,7 @@ namespace OSC.Tests.OSC
 		public void ParseAllTypes()
 		{
 			var command = "/command,\"value1, value2\",0.1234d";
-			var packet = OscMessage.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
+			var packet = OscPacket.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
 			var actual = packet as OscMessage;
 
 			Assert.IsNotNull(actual);
@@ -112,7 +112,7 @@ namespace OSC.Tests.OSC
 
 			Assert.AreEqual(command, actualString);
 
-			var packet = OscMessage.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
+			var packet = OscPacket.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
 			var actual = packet as OscMessage;
 
 			Assert.IsNotNull(actual);
@@ -126,7 +126,7 @@ namespace OSC.Tests.OSC
 		{
 			var data = "/command,0x0000007B, 0x00000000000004D2";
 			var expected = new OscMessage("/command", 123, 1234L);
-			var actual = (OscMessage) OscMessage.Parse(data);
+			var actual = (OscMessage) OscPacket.Parse(data);
 
 			Extensions.AreEqual(expected, actual, false, null, nameof(OscMessage.Time));
 		}
@@ -143,7 +143,7 @@ namespace OSC.Tests.OSC
 
 			foreach (var command in commands)
 			{
-				var packet = OscMessage.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
+				var packet = OscPacket.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
 				var actual = packet as OscMessage;
 
 				Assert.IsNotNull(actual);
@@ -162,7 +162,7 @@ namespace OSC.Tests.OSC
 
 			foreach (var command in commands)
 			{
-				var packet = OscMessage.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
+				var packet = OscPacket.Parse(DateTime.UtcNow.ToOscTimeTag(), command, CultureInfo.CurrentCulture);
 				var actual = packet as OscMessage;
 
 				Assert.IsNotNull(actual);
@@ -170,6 +170,28 @@ namespace OSC.Tests.OSC
 				Assert.AreEqual(2, actual.Arguments.Count);
 				Assert.AreEqual(0.1234, actual.Arguments[0]);
 				Assert.AreEqual("value1, value2", actual.Arguments[1]);
+			}
+		}
+
+		[TestMethod]
+		public void ParseSymbol()
+		{
+			var values = new Dictionary<string, string>
+			{
+				{ "foo", "foo" },
+				{ " foo", "foo" },
+				{ " foo ", "foo" },
+				{ " foo bar", "foo bar" },
+				{ " foo bar ", "foo bar" },
+			};
+
+			foreach (var item in values)
+			{
+				var command = $"/system/time, {item.Key}";
+				var message = (OscMessage) OscPacket.Parse(command);
+				Assert.AreEqual("/system/time", message.Address);
+				Assert.AreEqual(1, message.Arguments.Count);
+				Assert.AreEqual(item.Value, ((OscSymbol) message.Arguments[0]).Value);
 			}
 		}
 
@@ -194,6 +216,31 @@ namespace OSC.Tests.OSC
 		}
 
 		[TestMethod]
+		public void ParseUnknownCommand()
+		{
+			var message = (OscMessage) OscPacket.Parse("/some/command/name, {{ Unknown: FooBar }}");
+			Assert.AreEqual("/some/command/name", message.Address);
+			Assert.AreEqual(1, message.Arguments.Count);
+			Assert.AreEqual("FooBar", message.Arguments[0]);
+
+			message = (OscMessage) OscPacket.Parse("/some/command/name, {{Unknown: FooBar}}");
+			Assert.AreEqual("/some/command/name", message.Address);
+			Assert.AreEqual(1, message.Arguments.Count);
+			Assert.AreEqual("FooBar", message.Arguments[0]);
+
+			message = (OscMessage) OscPacket.Parse("/some/command/name,{{Unknown:FooBar}}");
+			Assert.AreEqual("/some/command/name", message.Address);
+			Assert.AreEqual(1, message.Arguments.Count);
+			Assert.AreEqual("FooBar", message.Arguments[0]);
+
+			message = (OscMessage) OscPacket.Parse("/some/command/name,foo bar ,32");
+			Assert.AreEqual("/some/command/name", message.Address);
+			Assert.AreEqual(2, message.Arguments.Count);
+			Assert.AreEqual(new OscSymbol("foo bar"), message.Arguments[0]);
+			Assert.AreEqual(32, message.Arguments[1]);
+		}
+
+		[TestMethod]
 		public void ToStringAllTypes()
 		{
 			var oscMessage = new OscMessage("/command",
@@ -214,14 +261,14 @@ namespace OSC.Tests.OSC
 			var expected = "/command,123,456u,4321L,8765U,12.34f,123.456d,\"123456\",True,False,{ Blob: 0x000102 },[-123,456u,-4321L,8765U,-12.34f,-123.456d,True,False]";
 			var actualString = oscMessage.ToString();
 			Assert.AreEqual(expected, actualString);
-			var actualMessage = OscMessage.Parse(expected) as OscMessage;
+			var actualMessage = OscPacket.Parse(expected) as OscMessage;
 			Extensions.AreEqual(oscMessage, actualMessage, false, null, nameof(OscMessage.Time));
 
 			// The hex version
 			expected = "/command,0x0000007B,0x000001C8u,0x00000000000010E1L,0x000000000000223DU,12.34f,123.456d,\"123456\",True,False,{ Blob: 0x000102 },[0xFFFFFF85,0x000001C8u,0xFFFFFFFFFFFFEF1FL,0x000000000000223DU,-12.34f,-123.456d,True,False]";
 			actualString = oscMessage.ToHexString();
 			Assert.AreEqual(expected, actualString);
-			actualMessage = OscMessage.Parse(expected) as OscMessage;
+			actualMessage = OscPacket.Parse(expected) as OscMessage;
 			Extensions.AreEqual(oscMessage, actualMessage, false, null, nameof(OscMessage.Time));
 		}
 
@@ -234,25 +281,25 @@ namespace OSC.Tests.OSC
 
 			Assert.AreEqual(expected, actualString);
 
-			var actualMessage = OscMessage.Parse(expected) as OscMessage;
+			var actualMessage = OscPacket.Parse(expected) as OscMessage;
 			Extensions.AreEqual(oscMessage, actualMessage, false, null, nameof(OscMessage.Time));
-			
+
 			oscMessage = new OscMessage("/command", int.MinValue, long.MinValue);
 			expected = "/command,0x80000000,0x8000000000000000L";
 			actualString = oscMessage.ToHexString();
 
 			Assert.AreEqual(expected, actualString);
 
-			actualMessage = OscMessage.Parse(expected) as OscMessage;
+			actualMessage = OscPacket.Parse(expected) as OscMessage;
 			Extensions.AreEqual(oscMessage, actualMessage, false, null, nameof(OscMessage.Time));
-			
+
 			oscMessage = new OscMessage("/command", int.MaxValue, long.MaxValue);
 			expected = "/command,0x7FFFFFFF,0x7FFFFFFFFFFFFFFFL";
 			actualString = oscMessage.ToHexString();
 
 			Assert.AreEqual(expected, actualString);
 
-			actualMessage = OscMessage.Parse(expected) as OscMessage;
+			actualMessage = OscPacket.Parse(expected) as OscMessage;
 			Extensions.AreEqual(oscMessage, actualMessage, false, null, nameof(OscMessage.Time));
 		}
 

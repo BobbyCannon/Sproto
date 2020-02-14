@@ -72,7 +72,7 @@ namespace Sproto.OSC
 
 			var diff = Total - _lastTotal;
 			Rate = diff / (float) time.TotalSeconds;
-			
+
 			_lastTotal = Total;
 			_lastUpdate = now;
 		}

@@ -149,13 +149,13 @@ namespace Sproto.OSC
 			}
 
 			// Add the time tag
-			var time = SetULong(Time.Value);
+			var time = OscBitConverter.GetBytes(Time.Value);
 			time.CopyTo(response, responseIndex);
 			responseIndex += time.Length;
 
 			foreach (var msg in outMessages)
 			{
-				var size = SetInt(msg.Length);
+				var size = OscBitConverter.GetBytes(msg.Length);
 				size.CopyTo(response, responseIndex);
 				responseIndex += size.Length;
 
@@ -177,8 +177,8 @@ namespace Sproto.OSC
 		/// <summary>
 		/// Takes in an OSC bundle package in byte form and parses it into a more usable OscBundle object
 		/// </summary>
-		/// <param name="bundle"> </param>
-		/// <param name="length"> </param>
+		/// <param name="bundle"> The bundle data in byte format. </param>
+		/// <param name="length"> The length of the data. </param>
 		/// <returns> Bundle containing elements and a time tag </returns>
 		internal static OscPacket ParseBundle(byte[] bundle, int length)
 		{
@@ -187,7 +187,7 @@ namespace Sproto.OSC
 			var bundleTag = Encoding.ASCII.GetString(bundle.SubArray(0, 8));
 			index += 8;
 
-			var time = GetULong(bundle, index);
+			var time = OscBitConverter.ToUInt64(bundle, index);
 			var timeTag = new OscTimeTag(time);
 			index += 8;
 
@@ -204,7 +204,7 @@ namespace Sproto.OSC
 
 			while (index < length)
 			{
-				var size = GetInt(bundle, index);
+				var size = OscBitConverter.ToInt32(bundle, index);
 				index += 4;
 
 				var messageBytes = bundle.SubArray(index, size);

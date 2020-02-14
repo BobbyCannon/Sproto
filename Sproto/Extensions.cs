@@ -282,11 +282,11 @@ namespace Sproto
 				// Tries to find a DescriptionAttribute for a potential friendly name for the enum
 				var memberInfo = type.GetMember(enumerationValue.ToString());
 
-				if (memberInfo != null && memberInfo.Length > 0)
+				if (memberInfo.Length > 0)
 				{
 					var attrs = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
 
-					if (attrs != null && attrs.Length > 0)
+					if (attrs.Length > 0)
 					{
 						// Pull out the description value
 						return ((DescriptionAttribute) attrs[0]).Description;
@@ -318,10 +318,6 @@ namespace Sproto
 		/// <returns> the parsed argument </returns>
 		public static object ParseArgument(this string str, IFormatProvider provider)
 		{
-			long value64;
-			float valueFloat;
-			double valueDouble;
-
 			var argString = str.Trim();
 
 			if (argString.Length == 0)
@@ -334,85 +330,95 @@ namespace Sproto
 			{
 				var hexString = argString.Substring(2);
 
-				if (hexString.Length <= 8)
+				if (hexString.Length <= 8 && int.TryParse(hexString, NumberStyles.HexNumber, provider, out var iValue))
 				{
-					// parse a int32
-					if (uint.TryParse(hexString, NumberStyles.HexNumber, provider, out var value))
+					return iValue;
+				}
+				
+				if (hexString.Length <= 9 && hexString[hexString.Length - 1] == 'u' && uint.TryParse(hexString.Substring(0, hexString.Length - 1), NumberStyles.HexNumber, provider, out var uiValue))
+				{
+					return uiValue;
+				}
+
+				if (hexString.Length <= 16 && long.TryParse(hexString, NumberStyles.HexNumber, provider, out var lValue))
+				{
+					return lValue;
+				}
+				
+				if (hexString.Length <= 17 && hexString[hexString.Length - 1] == 'L' && long.TryParse(hexString.Substring(0, hexString.Length - 1), NumberStyles.HexNumber, provider, out var lValue2))
+				{
+					return lValue2;
+				}
+				
+				if (ulong.TryParse(hexString.Substring(0, hexString.Length - 1), NumberStyles.HexNumber, provider, out var value))
+				{
+					return value;
+				}
+
+				return -1;
+			}
+
+			switch (argString[argString.Length - 1])
+			{
+				case 'u':
+				{
+					if (uint.TryParse(argString.Substring(0, argString.Length - 1), NumberStyles.Integer, provider, out var u32))
 					{
-						return unchecked((int) value);
+						return u32;
 					}
+					break;
 				}
-				else
+				case 'U':
 				{
-					// parse a int64
-					if (ulong.TryParse(hexString, NumberStyles.HexNumber, provider, out var value))
+					if (ulong.TryParse(argString.Substring(0, argString.Length - 1), NumberStyles.Integer, provider, out var u64))
 					{
-						return unchecked((long) value);
+						return u64;
 					}
+					break;
 				}
-			}
-
-			// parse uint64
-			if (argString.EndsWith("U"))
-			{
-				if (ulong.TryParse(argString.Substring(0, argString.Length - 1), NumberStyles.Integer, provider, out var u64))
+				case 'L':
 				{
-					return u64;
+					if (long.TryParse(argString.Substring(0, argString.Length - 1), NumberStyles.Integer, provider, out var value64))
+					{
+						return value64;
+					}
+					break;
 				}
-			}
-
-			// parse int64
-			if (argString.EndsWith("L"))
-			{
-				if (long.TryParse(argString.Substring(0, argString.Length - 1), NumberStyles.Integer, provider, out value64))
+				case 'f':
 				{
-					return value64;
+					var argument = argString.Substring(0, argString.Length - 1);
+					if (float.TryParse(argument, NumberStyles.Float, provider, out var valueFloat))
+					{
+						return valueFloat;
+					}
+					break;
 				}
-			}
-
-			// parse uint32
-			if (argString.EndsWith("u"))
-			{
-				if (uint.TryParse(argString.Substring(0, argString.Length - 1), NumberStyles.Integer, provider, out var u32))
+				case 'd':
 				{
-					return u32;
+					var argument = argString.Substring(0, argString.Length - 1);
+					if (double.TryParse(argument, NumberStyles.Float, provider, out var valueDouble))
+					{
+						return valueDouble;
+					}
+
+					if (double.TryParse(argument, out valueDouble))
+					{
+						return valueDouble;
+					}
+					break;
 				}
-			}
-
-			// parse int32
-			if (int.TryParse(argString, NumberStyles.Integer, provider, out var value32))
-			{
-				return value32;
-			}
-
-			// parse int64
-			if (long.TryParse(argString, NumberStyles.Integer, provider, out value64))
-			{
-				return value64;
-			}
-
-			// parse double
-			if (argString.EndsWith("d"))
-			{
-				var argument = argString.Substring(0, argString.Length - 1);
-				if (double.TryParse(argument, NumberStyles.Float, provider, out valueDouble))
+				default:
 				{
-					return valueDouble;
-				}
-
-				if (double.TryParse(argument, out valueDouble))
-				{
-					return valueDouble;
-				}
-			}
-
-			// parse float
-			if (argString.EndsWith("f"))
-			{
-				var argument = argString.Substring(0, argString.Length - 1);
-				if (float.TryParse(argument, NumberStyles.Float, provider, out valueFloat))
-				{
-					return valueFloat;
+					if (int.TryParse(argString, NumberStyles.Integer, provider, out var value32))
+					{
+						return value32;
+					}
+					
+					if (long.TryParse(argString, NumberStyles.Integer, provider, out var value64))
+					{
+						return value64;
+					}
+					break;
 				}
 			}
 
@@ -429,18 +435,6 @@ namespace Sproto
 			if (argString.Equals(float.NaN.ToString(provider)))
 			{
 				return float.NaN;
-			}
-
-			// parse float 
-			if (float.TryParse(argString, NumberStyles.Float, provider, out valueFloat))
-			{
-				return valueFloat;
-			}
-
-			// parse double
-			if (double.TryParse(argString, NumberStyles.Float, provider, out valueDouble))
-			{
-				return valueDouble;
 			}
 
 			// parse bool
@@ -476,7 +470,7 @@ namespace Sproto
 				return Unescape(argString.Substring(1, argString.Length - 2));
 			}
 
-			// if all else fails then its a symbol i guess (?!?) 
+			// If all else fails just return on OscSymbol (AlternateString)
 			return new OscSymbol(Unescape(argString));
 		}
 
@@ -504,7 +498,6 @@ namespace Sproto
 				}
 
 				var length = trimmed.Length / 2;
-
 				var bytes = new byte[length];
 
 				for (var i = 0; i < bytes.Length; i++)
@@ -517,7 +510,6 @@ namespace Sproto
 			else
 			{
 				var parts = str.Split(',');
-
 				var bytes = new byte[parts.Length];
 
 				for (var i = 0; i < bytes.Length; i++)
@@ -752,7 +744,8 @@ namespace Sproto
 		/// <param name="arguments"> the list to put the parsed arguments into </param>
 		/// <param name="index"> the current index within the string </param>
 		/// <param name="provider"> the format to use </param>
-		internal static void ParseArguments(string str, List<object> arguments, int index, IFormatProvider provider)
+		/// <param name="parsers"> An optional set of OSC argument parsers. </param>
+		internal static void ParseArguments(string str, List<object> arguments, int index, IFormatProvider provider, params OscArgumentParser[] parsers)
 		{
 			while (true)
 			{
@@ -834,7 +827,7 @@ namespace Sproto
 					{
 						var end = ScanForwardObject(str, controlChar);
 
-						arguments.Add(ParseObject(str.Substring(controlChar + 1, end - (controlChar + 1)), provider));
+						arguments.Add(ParseObject(str.Substring(controlChar + 1, end - (controlChar + 1)), provider, parsers));
 
 						end++;
 
@@ -892,12 +885,13 @@ namespace Sproto
 		}
 
 		/// <summary>
-		/// Parse an object
+		/// Parse an object value.
 		/// </summary>
-		/// <param name="str"> string contain the object to parse </param>
-		/// <param name="provider"> format provider to use </param>
-		/// <returns> the parsed argument </returns>
-		private static object ParseObject(string str, IFormatProvider provider)
+		/// <param name="str"> The string contain the object to parse. </param>
+		/// <param name="provider"> The format provider to use. </param>
+		/// <param name="parsers"> An optional set of OSC argument parsers. </param>
+		/// <returns> The parsed argument or a string if unknown type. </returns>
+		private static object ParseObject(string str, IFormatProvider provider, params OscArgumentParser[] parsers)
 		{
 			var strTrimmed = str.Trim();
 
@@ -909,7 +903,6 @@ namespace Sproto
 			}
 
 			var name = strTrimmed.Substring(0, colon).Trim();
-			var nameLower = name.ToLowerInvariant();
 
 			if (name.Length == 0)
 			{
@@ -921,32 +914,54 @@ namespace Sproto
 				throw new Exception($"Malformed object '{strTrimmed}'");
 			}
 
-			switch (nameLower)
+			var value = strTrimmed.Substring(colon + 1).Trim();
+			if (value.EndsWith("}"))
 			{
+				value = value.Substring(0, value.Length - 1).Trim();
+			}
+
+			switch (name)
+			{
+				case OscMidi.Name:
 				case "midi":
 				case "m":
-					return OscMidi.Parse(strTrimmed.Substring(colon + 1).Trim(), provider);
+					return OscMidi.Parse(value, provider);
 
+				case OscTimeTag.Name:
 				case "time":
 				case "t":
-					return OscTimeTag.Parse(strTrimmed.Substring(colon + 1).Trim(), provider);
-				
+					return OscTimeTag.Parse(value, provider);
+
+				case "TimeSpan":
 				case "timespan":
 				case "ts":
-					return TimeSpan.Parse(strTrimmed.Substring(colon + 1).Trim(), provider);
+					return TimeSpan.Parse(value, provider);
 
+				case OscRgba.Name:
 				case "color":
 				case "c":
-					return OscRgba.Parse(strTrimmed.Substring(colon + 1).Trim(), provider);
+					return OscRgba.Parse(value, provider);
 
+				case "Blob":
 				case "blob":
 				case "b":
+				case "Data":
 				case "data":
 				case "d":
-					return ParseBlob(strTrimmed.Substring(colon + 1).Trim(), provider);
+					return ParseBlob(value, provider);
 
 				default:
-					throw new Exception($"Unknown object type '{name}'");
+					foreach (var parser in parsers)
+					{
+						if (!parser.CanParse(name))
+						{
+							continue;
+						}
+
+						return parser.Parse(value);
+					}
+
+					return value;
 			}
 		}
 

@@ -10,7 +10,7 @@ namespace Sproto.OSC
 	public class OscError : OscPacket
 	{
 		#region Constructors
-		
+
 		public OscError(OscTimeTag time, Message message, params object[] arguments)
 		{
 			Code = message;
@@ -57,7 +57,7 @@ namespace Sproto.OSC
 
 			[Description("Invalid bundle indent. %s")]
 			InvalidBundleIdent,
-			
+
 			[Description("Invalid bundle start.")]
 			InvalidBundleStart,
 

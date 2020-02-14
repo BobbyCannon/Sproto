@@ -2,53 +2,57 @@
 
 using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
 
 #endregion
 
 namespace Sproto.OSC
 {
-	[StructLayout(LayoutKind.Explicit)]
-	public struct OscMidi
+	public struct OscMidi : IOscArgument, IEquatable<OscMidi>
 	{
+		#region Constants
+
+		public const string Name = "Midi";
+
+		#endregion
+
 		#region Constructors
 
-		public OscMidi(uint value)
+		public OscMidi(uint value) : this(OscBitConverter.GetBytes(value))
 		{
-			Port = 0;
-			Status = 0;
-			Data1 = 0;
-			Data2 = 0;
-			FullMessage = value;
 		}
 
 		public OscMidi(byte port, byte status, byte data1, byte data2)
 		{
-			FullMessage = 0;
 			Port = port;
 			Status = status;
 			Data1 = data1;
 			Data2 = data2;
 		}
 
+		public OscMidi(params byte[] values)
+		{
+			if (values.Length < 4)
+			{
+				throw new ArgumentOutOfRangeException(nameof(values), "Not enough data");
+			}
+
+			Port = values[0];
+			Status = values[1];
+			Data1 = values[2];
+			Data2 = values[3];
+		}
+
 		#endregion
 
 		#region Properties
 
-		[FieldOffset(0)]
-		public readonly uint FullMessage;
+		public byte Data1 { get; set; }
 
-		[FieldOffset(3)]
-		public readonly byte Port;
+		public byte Data2 { get; set; }
 
-		[FieldOffset(2)]
-		public readonly byte Status;
+		public byte Port { get; set; }
 
-		[FieldOffset(1)]
-		public readonly byte Data1;
-
-		[FieldOffset(0)]
-		public readonly byte Data2;
+		public byte Status { get; set; }
 
 		#endregion
 
@@ -58,20 +62,59 @@ namespace Sproto.OSC
 		{
 			switch (obj)
 			{
-				case uint u:
-					return FullMessage.Equals(u);
-
 				case OscMidi midi:
-					return FullMessage.Equals(midi.FullMessage);
+					return Equals(midi);
+
+				case byte[] bytes:
+					if (bytes.Length < 4)
+					{
+						return false;
+					}
+					return Port == bytes[0]
+						&& Status == bytes[1]
+						&& Data1 == bytes[2]
+						&& Data2 == bytes[3];
 
 				default:
-					return FullMessage.Equals(obj);
+					return false;
 			}
+		}
+
+		public bool Equals(OscMidi other)
+		{
+			return Data1 == other.Data1 && Data2 == other.Data2 && Port == other.Port && Status == other.Status;
 		}
 
 		public override int GetHashCode()
 		{
-			return FullMessage.GetHashCode();
+			unchecked
+			{
+				var hashCode = Port.GetHashCode();
+				hashCode = (hashCode * 397) ^ Status.GetHashCode();
+				hashCode = (hashCode * 397) ^ Data1.GetHashCode();
+				hashCode = (hashCode * 397) ^ Data2.GetHashCode();
+				return hashCode;
+			}
+		}
+
+		public char GetOscBinaryType()
+		{
+			return 'm';
+		}
+
+		public string GetOscStringType()
+		{
+			return Name;
+		}
+
+		public byte[] GetOscValueBytes()
+		{
+			return new[] { Port, Status, Data1, Data2 };
+		}
+
+		public string GetOscValueString()
+		{
+			return $"{Port},{Status},{Data1},{Data2}";
 		}
 
 		public static bool operator ==(OscMidi a, OscMidi b)
@@ -82,6 +125,11 @@ namespace Sproto.OSC
 		public static bool operator !=(OscMidi a, OscMidi b)
 		{
 			return !a.Equals(b);
+		}
+
+		public static OscMidi Parse(string value)
+		{
+			return Parse(value, CultureInfo.InvariantCulture);
 		}
 
 		public static OscMidi Parse(string value, IFormatProvider provider)
@@ -122,11 +170,33 @@ namespace Sproto.OSC
 			return new OscMidi(port, status, data1, data2);
 		}
 
+		public void ParseOscValue(byte[] value, int index)
+		{
+			if (value.Length <= index + 3)
+			{
+				throw new IndexOutOfRangeException();
+			}
+
+			Port = value[index];
+			Status = value[index + 1];
+			Data1 = value[index + 2];
+			Data2 = value[index + 3];
+		}
+
+		public void ParseOscValue(string value)
+		{
+			var midi = Parse(value);
+			Port = midi.Port;
+			Status = midi.Status;
+			Data1 = midi.Data1;
+			Data2 = midi.Data2;
+		}
+
 		public override string ToString()
 		{
-			return $"{Port},{Status},{Data1},{Data2}";
+			return $"{Name}: {Port},{Status},{Data1},{Data2}";
 		}
-		
+
 		#endregion
 	}
 }

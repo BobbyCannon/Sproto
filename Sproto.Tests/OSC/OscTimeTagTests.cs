@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sproto.OSC;
 
@@ -14,6 +13,16 @@ namespace OSC.Tests.OSC
 	public class OscTimeTagTests
 	{
 		#region Methods
+
+		[TestMethod]
+		public void GetHashCodeShouldSucceed()
+		{
+			Assert.AreEqual(0, new OscTimeTag().GetHashCode());
+			Assert.AreEqual(0, OscTimeTag.MinValue.GetHashCode());
+			Assert.AreEqual(1895321856, new OscTimeTag(new DateTime(2020, 02, 14, 04, 35, 12, DateTimeKind.Utc)).GetHashCode());
+			Assert.AreEqual(1878481506, new OscTimeTag(16136033268821655552).GetHashCode());
+			Assert.AreEqual(2147483647, OscTimeTag.MaxValue.GetHashCode());
+		}
 
 		[TestMethod]
 		public void AddTimeSpan()
@@ -39,12 +48,12 @@ namespace OSC.Tests.OSC
 			time2 = OscTimeTag.MaxValue;
 			Assert.IsTrue(time1 < time2);
 			Assert.IsFalse(time1 > time2);
-			
+
 			time1 = OscTimeTag.MinValue;
 			time2 = OscTimeTag.MinValue;
 			Assert.IsTrue(time1 == time2);
 			Assert.IsFalse(time1 != time2);
-			
+
 			time1 = OscTimeTag.MinValue;
 			time2 = OscTimeTag.MinValue;
 			Assert.IsTrue(time1 >= time2);
@@ -98,28 +107,6 @@ namespace OSC.Tests.OSC
 		}
 
 		[TestMethod]
-		public void ToMillisecond()
-		{
-			var t = OscTimeTag.FromMilliseconds(1.234f);
-			Assert.AreEqual(5299989643u, t.Value);
-		}
-
-		[TestMethod]
-		public void ToMinimalDate()
-		{
-			var actual = new OscTimeTag(0);
-			Assert.AreEqual(OscTimeTag.MinValue, actual);
-		}
-
-		[TestMethod]
-		public void ToSmallTime()
-		{
-			var time = new OscTimeTag(5304284610u);
-			time.Value.Dump();
-			Assert.AreEqual(1235, time.ToMilliseconds());
-		}
-
-		[TestMethod]
 		public void MaxValue()
 		{
 			var expected = new OscTimeTag(0xffffffffffffffff);
@@ -170,18 +157,40 @@ namespace OSC.Tests.OSC
 			var time = OscTimeTag.UtcNow;
 			var text = time.ToString();
 			var time2 = OscTimeTag.Parse(text);
-			
+
 			time.Dump();
 			time2.Dump();
 			Assert.AreEqual(time.ToString(), time2.ToString());
-			
+
 			time = OscTimeTag.Now;
 			text = time.ToString();
 			time2 = OscTimeTag.Parse(text);
-			
+
 			time.Dump();
 			time2.Dump();
 			Assert.AreEqual(time.ToString(), time2.ToString());
+		}
+
+		[TestMethod]
+		public void ToMillisecond()
+		{
+			var t = OscTimeTag.FromMilliseconds(1.234f);
+			Assert.AreEqual(5299989643u, t.Value);
+		}
+
+		[TestMethod]
+		public void ToMinimalDate()
+		{
+			var actual = new OscTimeTag(0);
+			Assert.AreEqual(OscTimeTag.MinValue, actual);
+		}
+
+		[TestMethod]
+		public void ToSmallTime()
+		{
+			var time = new OscTimeTag(5304284610u);
+			time.Value.Dump();
+			Assert.AreEqual(1235, time.ToMilliseconds());
 		}
 
 		#endregion

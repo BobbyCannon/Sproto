@@ -78,6 +78,7 @@ typedef enum
 	OscTypeTagInt64 = 'h',
 	OscTypeTagUInt64 = 'H',
 	OscTypeTagTimeTag = 't',
+	OscTypeTagTimeSpan = 'p',
 	OscTypeTagDouble = 'd',
 	OscTypeTagAlternateString = 'S',
 	OscTypeTagCharacter = 'c',

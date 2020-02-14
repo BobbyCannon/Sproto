@@ -4,6 +4,7 @@ using System;
 using System.IO.Ports;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OSC.Tests.Samples;
 using Sproto;
 using Sproto.OSC;
 
@@ -19,12 +20,12 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void GetArgumentWithAllTypes()
 		{
-			var message = new OscMessage(TestCommand.Command, 1, (ulong) 23, "John", 20, new DateTime(2000, 01, 15), 5.11f, 164.32,
+			var message = new OscMessage(TestOscCommand.Command, 1, (ulong) 23, "John", 20, new DateTime(2000, 01, 15), 5.11f, 164.32,
 				(byte) 4, new byte[] { 0, 1, 1, 2, 3, 5, 8, 13 }, true, Guid.Parse("E3966202-40FA-443D-B21F-E1528A1E6DFE"),
 				uint.MaxValue, long.MaxValue, TimeSpan.Parse("12:34:56"), SerialError.Overrun
 			);
 
-			var command = new TestCommand();
+			var command = new TestOscCommand();
 			command.Load(message);
 			command.StartArgumentProcessing();
 			Assert.AreEqual(1, command.GetArgument<int>());
@@ -47,12 +48,12 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void SequentialProcessingOfArguments()
 		{
-			var message = new OscMessage(TestCommand.Command, 2, (ulong) 23, "John", 20, new DateTime(2000, 01, 15), 5.11f, 164.32,
+			var message = new OscMessage(TestOscCommand.Command, 2, (ulong) 23, "John", 20, new DateTime(2000, 01, 15), 5.11f, 164.32,
 				(byte) 4, new byte[] { 0, 1, 1, 2, 3, 5, 8, 13 }, true, Guid.Parse("E3966202-40FA-443D-B21F-E1528A1E6DFE"),
 				uint.MaxValue, long.MaxValue, TimeSpan.Parse("12:34:56"), SerialError.Frame
 			);
 
-			var command = new TestCommand();
+			var command = new TestOscCommand();
 			command.Load(message);
 			command.StartArgumentProcessing();
 			Assert.AreEqual(2, command.GetArgumentAsInteger());
@@ -84,7 +85,7 @@ namespace OSC.Tests.OSC
 			var actualMessage = OscPacket.Parse(command.Time, actual) as OscMessage;
 			Assert.IsNotNull(actualMessage, "Failed to parse the byte data.");
 
-			var actualCommand = new TestCommand();
+			var actualCommand = new TestOscCommand();
 			actualCommand.Load(actualMessage);
 
 			Extensions.AreEqual(command, actualCommand, membersToIgnore: new[] { nameof(OscCommand.HasBeenRead) });
@@ -101,7 +102,7 @@ namespace OSC.Tests.OSC
 			var actualMessage = OscPacket.Parse(command.Time, actual) as OscMessage;
 			Assert.IsNotNull(actualMessage);
 
-			var actualCommand = new TestCommand();
+			var actualCommand = new TestOscCommand();
 			actualCommand.Load(actualMessage);
 
 			Extensions.AreEqual(command, actualCommand, membersToIgnore: new[] { nameof(OscCommand.HasBeenRead) });
@@ -128,7 +129,7 @@ namespace OSC.Tests.OSC
 				x.Name = "Johnny";
 				x.Age = 21;
 			});
-			
+
 			var expectedTime = command.Time;
 			var expected = "/test,1,23U,\"Johnny\",21,{ Time: 2000-01-15T00:00:00.0000Z },5.11f,164.32d,'',{ Blob: 0x000101020305080D },True,\"e3966202-40fa-443d-b21f-e1528a1e6dfe\",4294967295u,9223372036854775807L";
 			var actual = command.ToString();
@@ -155,9 +156,9 @@ namespace OSC.Tests.OSC
 			Assert.AreEqual(expected, actual);
 		}
 
-		private static TestCommand GetTestCommand(Action<TestCommand> update = null)
+		private static TestOscCommand GetTestCommand(Action<TestOscCommand> update = null)
 		{
-			var response = new TestCommand
+			var response = new TestOscCommand
 			{
 				Name = "John",
 				Age = 20,
@@ -179,101 +180,6 @@ namespace OSC.Tests.OSC
 			update?.Invoke(response);
 
 			return response;
-		}
-
-		#endregion
-
-		#region Classes
-
-		public class TestCommand : OscCommand
-		{
-			#region Constants
-
-			public const string Command = "/test";
-
-			#endregion
-
-			#region Constructors
-
-			public TestCommand() : base(Command)
-			{
-				Version = 2;
-			}
-
-			#endregion
-
-			#region Properties
-
-			public int Age { get; set; }
-
-			public DateTime BirthDate { get; set; }
-
-			public TimeSpan Elapsed { get; set; }
-
-			public bool Enable { get; set; }
-
-			public SerialError Error { get; set; }
-
-			public float Height { get; set; }
-
-			public ulong Id { get; set; }
-
-			public string Name { get; set; }
-
-			public byte Rating { get; set; }
-
-			public Guid SyncId { get; set; }
-
-			public byte[] Values { get; set; }
-
-			public int Version { get; set; }
-
-			public uint Visits { get; set; }
-
-			public long VoteId { get; set; }
-
-			public double Weight { get; set; }
-
-			#endregion
-
-			#region Methods
-
-			protected override void LoadMessage()
-			{
-				StartArgumentProcessing();
-
-				Version = GetArgument<int>();
-				Id = GetArgument<ulong>();
-				Name = GetArgument<string>();
-				Age = GetArgument<int>();
-				BirthDate = GetArgument<DateTime>();
-				Height = GetArgument<float>();
-				Weight = GetArgument<double>();
-				Rating = GetArgument<byte>();
-				Values = GetArgument<byte[]>();
-				Enable = GetArgument<bool>();
-				SyncId = GetArgument<Guid>();
-				Visits = GetArgument<uint>();
-				VoteId = GetArgument<long>();
-				Elapsed = GetArgument<TimeSpan>();
-				Error = GetArgument<SerialError>();
-			}
-
-			protected override void UpdateMessage()
-			{
-				switch (Version)
-				{
-					case 1:
-						OscMessage = new OscMessage(Time, Command, Version, Id, Name, Age, BirthDate, Height, Weight, Rating, Values, Enable, SyncId, Visits, VoteId);
-						break;
-
-					default:
-						SetArguments(Version, Id, Name, Age, BirthDate, Height, Weight, Rating, Values, Enable, SyncId, Visits, VoteId, Elapsed, Error);
-						break;
-				}
-			}
-
-			#endregion
 		}
 
 		#endregion

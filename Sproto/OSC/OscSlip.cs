@@ -71,23 +71,6 @@ namespace Sproto.OSC
 			}
 		}
 
-		public IEnumerable<OscPacket> ProcessStream(Stream stream)
-		{
-			if (stream.CanSeek)
-			{
-				stream.Position = 0;
-			}
-
-			while (stream.Position < stream.Length)
-			{
-				var packet = ProcessByte((byte) stream.ReadByte());
-				if (packet != null)
-				{
-					yield return packet;
-				}
-			}
-		}
-
 		public OscPacket ProcessByte(byte b)
 		{
 			// Add byte to buffer
@@ -128,6 +111,23 @@ namespace Sproto.OSC
 			}
 
 			return null;
+		}
+
+		public IEnumerable<OscPacket> ProcessStream(Stream stream)
+		{
+			if (stream.CanSeek)
+			{
+				stream.Position = 0;
+			}
+
+			while (stream.Position < stream.Length)
+			{
+				var packet = ProcessByte((byte) stream.ReadByte());
+				if (packet != null)
+				{
+					yield return packet;
+				}
+			}
 		}
 
 		public void Reset()

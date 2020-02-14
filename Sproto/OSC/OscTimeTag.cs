@@ -7,8 +7,33 @@ using System.Globalization;
 
 namespace Sproto.OSC
 {
-	public struct OscTimeTag : IComparable<OscTimeTag>, IComparable, IEquatable<OscTimeTag>
+	public struct OscTimeTag : IOscArgument, IComparable<OscTimeTag>, IComparable, IEquatable<OscTimeTag>
 	{
+		#region Constants
+
+		public const string Name = "Time";
+
+		#endregion
+
+		#region Fields
+
+		/// <summary>
+		/// The maximum OSC date time for any OscTimeTag.
+		/// </summary>
+		public static readonly OscTimeTag MaxValue;
+
+		/// <summary>
+		/// The minimum date for any OscTimeTag.
+		/// </summary>
+		public static readonly DateTime MinDateTime;
+
+		/// <summary>
+		/// The minimum OSC date time for any OscTimeTag.
+		/// </summary>
+		public static readonly OscTimeTag MinValue;
+
+		#endregion
+
 		#region Constructors
 
 		public OscTimeTag(ulong value)
@@ -21,24 +46,26 @@ namespace Sproto.OSC
 		{
 		}
 
+		static OscTimeTag()
+		{
+			MaxValue = new OscTimeTag(0xffffffffffffffff);
+			MinDateTime = new DateTime(1900, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+			MinValue = new OscTimeTag(0);
+		}
+
 		#endregion
 
 		#region Properties
 
 		/// <summary>
-		/// The minimum date for any OscTimeTag.
+		/// Gets a OscTimeTag object that is set to the current date and time on this computer, expressed as the local time.
 		/// </summary>
-		public static readonly DateTime MinDateTime = new DateTime(1900, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+		public static OscTimeTag Now => FromDateTime(DateTime.Now);
 
 		/// <summary>
-		/// The minimum OSC date time for any OscTimeTag.
+		/// Gets the number of seconds including fractional parts since midnight on January 1, 1900.
 		/// </summary>
-		public static readonly OscTimeTag MinValue = new OscTimeTag(0);
-
-		/// <summary>
-		/// The maximum OSC date time for any OscTimeTag.
-		/// </summary>
-		public static readonly OscTimeTag MaxValue = new OscTimeTag(0xffffffffffffffff);
+		public decimal PreciseValue => Seconds + (decimal) (SubSeconds / (double) uint.MaxValue);
 
 		/// <summary>
 		/// Gets the number of seconds since midnight on January 1, 1900. This is the first 32 bits of the 64 bit fixed point OscTimeTag value.
@@ -51,11 +78,6 @@ namespace Sproto.OSC
 		public uint SubSeconds => (uint) Value;
 
 		/// <summary>
-		/// Gets a OscTimeTag object that is set to the current date and time on this computer, expressed as the local time.
-		/// </summary>
-		public static OscTimeTag Now => FromDateTime(DateTime.Now);
-
-		/// <summary>
 		/// Gets a OscTimeTag object that is set to the current date and time on this computer, expressed as the Coordinated Universal Time (UTC).
 		/// </summary>
 		public static OscTimeTag UtcNow => FromDateTime(DateTime.UtcNow);
@@ -64,11 +86,6 @@ namespace Sproto.OSC
 		/// Gets or set the value of the tag.
 		/// </summary>
 		public ulong Value { get; set; }
-
-		/// <summary>
-		/// Gets the number of seconds including fractional parts since midnight on January 1, 1900.
-		/// </summary>
-		public decimal PreciseValue => Seconds + (decimal) (SubSeconds / (double) uint.MaxValue);
 
 		#endregion
 
@@ -86,6 +103,16 @@ namespace Sproto.OSC
 		}
 
 		/// <summary>
+		/// Adds milliseconds to this time tag.
+		/// </summary>
+		/// <param name="value"> The milliseconds to be added. </param>
+		/// <returns> The adjusted time. </returns>
+		public OscTimeTag AddMilliseconds(double value)
+		{
+			return Add(TimeSpan.FromMilliseconds(value));
+		}
+
+		/// <summary>
 		/// Adds seconds to this time tag.
 		/// </summary>
 		/// <param name="value"> The seconds to be added. </param>
@@ -95,14 +122,170 @@ namespace Sproto.OSC
 			return Add(TimeSpan.FromSeconds(value));
 		}
 
-		/// <summary>
-		/// Adds milliseconds to this time tag.
-		/// </summary>
-		/// <param name="value"> The milliseconds to be added. </param>
-		/// <returns> The adjusted time. </returns>
-		public OscTimeTag AddMilliseconds(double value)
+		public int CompareTo(object obj)
 		{
-			return Add(TimeSpan.FromMilliseconds(value));
+			return CompareTo((OscTimeTag) obj);
+		}
+
+		public int CompareTo(OscTimeTag other)
+		{
+			if (PreciseValue == other.PreciseValue)
+			{
+				return 0;
+			}
+
+			if (PreciseValue < other.PreciseValue)
+			{
+				return -1;
+			}
+
+			return 1;
+		}
+
+		public override bool Equals(object obj)
+		{
+			switch (obj)
+			{
+				case OscTimeTag tag:
+					return Value == tag.Value;
+
+				case ulong value:
+					return Value == value;
+
+				default:
+					return false;
+			}
+		}
+
+		public bool Equals(OscTimeTag other)
+		{
+			return PreciseValue == other.PreciseValue;
+		}
+
+		/// <summary>
+		/// Get a OscTimeTag from a DateTime value.
+		/// </summary>
+		/// <param name="datetime"> DateTime value. </param>
+		/// <returns> The equivalent value as an osc time tag. </returns>
+		public static OscTimeTag FromDateTime(DateTime datetime)
+		{
+			var span = datetime.Subtract(MinDateTime);
+			return FromTimeSpan(span);
+		}
+
+		public static OscTimeTag FromMilliseconds(float value)
+		{
+			var span = TimeSpan.FromSeconds(value);
+			return FromTimeSpan(span);
+		}
+
+		/// <summary>
+		/// Get a OscTimeTag from a TimeSpan value.
+		/// </summary>
+		/// <param name="span"> The span of time. </param>
+		/// <returns> The equivalent value as an osc time tag. </returns>
+		public static OscTimeTag FromTimeSpan(TimeSpan span)
+		{
+			var seconds = span.TotalSeconds;
+			var secondsUInt = (uint) seconds;
+			var milliseconds = span.TotalMilliseconds - (double) secondsUInt * 1000;
+			var fraction = milliseconds / 1000 * uint.MaxValue;
+			return new OscTimeTag(((ulong) (secondsUInt & 0xFFFFFFFF) << 32) | ((ulong) fraction & 0xFFFFFFFF));
+		}
+
+		public override int GetHashCode()
+		{
+			return (int) (((uint) (Value >> 32) + (uint) (Value & 0x00000000FFFFFFFF)) / 2);
+		}
+
+		public char GetOscBinaryType()
+		{
+			return 't';
+		}
+
+		public string GetOscStringType()
+		{
+			return Name;
+		}
+
+		public byte[] GetOscValueBytes()
+		{
+			return OscBitConverter.GetBytes(Value);
+		}
+
+		public string GetOscValueString()
+		{
+			return ToString();
+		}
+
+		public static OscTimeTag operator +(OscTimeTag a, TimeSpan b)
+		{
+			return new OscTimeTag(a.ToDateTime().Add(b));
+		}
+
+		public static bool operator ==(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue == b.PreciseValue;
+		}
+
+		public static bool operator >(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue > b.PreciseValue;
+		}
+
+		public static bool operator >=(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue >= b.PreciseValue;
+		}
+
+		public static bool operator !=(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue != b.PreciseValue;
+		}
+
+		public static bool operator <(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue < b.PreciseValue;
+		}
+
+		public static bool operator <=(OscTimeTag a, OscTimeTag b)
+		{
+			return a.PreciseValue <= b.PreciseValue;
+		}
+
+		public static OscTimeTag operator -(OscTimeTag a, TimeSpan b)
+		{
+			return new OscTimeTag(a.ToDateTime().Subtract(b));
+		}
+
+		public static TimeSpan operator -(OscTimeTag d1, OscTimeTag d2)
+		{
+			return d1.ToDateTime() - d2.ToDateTime();
+		}
+
+		public static OscTimeTag Parse(string value)
+		{
+			return Parse(value, CultureInfo.InvariantCulture);
+		}
+
+		public static OscTimeTag Parse(string value, IFormatProvider provider)
+		{
+			if (TryParse(value, provider, out var result))
+			{
+				return result;
+			}
+
+			throw new Exception($"Invalid OscTimeTag string \'{value}\'");
+		}
+
+		public void ParseOscValue(byte[] value, int index)
+		{
+			Value = BitConverter.ToUInt64(value, index);
+		}
+
+		public void ParseOscValue(string value)
+		{
+			Value = Parse(value).Value;
 		}
 
 		/// <summary>
@@ -121,70 +304,19 @@ namespace Sproto.OSC
 			return datetime;
 		}
 
-		/// <summary>
-		/// Get a OscTimeTag from a DateTime value.
-		/// </summary>
-		/// <param name="datetime"> DateTime value. </param>
-		/// <returns> The equivalent value as an osc time tag. </returns>
-		public static OscTimeTag FromDateTime(DateTime datetime)
+		public double ToMilliseconds()
 		{
-			var span = datetime.Subtract(MinDateTime);
-			return FromTimeSpan(span);
+			return ToDateTime().Subtract(MinDateTime).TotalMilliseconds;
 		}
 
-		/// <summary>
-		/// Get a OscTimeTag from a TimeSpan value.
-		/// </summary>
-		/// <param name="span"> The span of time. </param>
-		/// <returns> The equivalent value as an osc time tag. </returns>
-		public static OscTimeTag FromTimeSpan(TimeSpan span)
+		public override string ToString()
 		{
-			var seconds = span.TotalSeconds;
-			var secondsUInt = (uint) seconds;
-			var milliseconds = span.TotalMilliseconds - (double) secondsUInt * 1000;
-			var fraction = milliseconds / 1000 * uint.MaxValue;
-			return new OscTimeTag(((ulong) (secondsUInt & 0xFFFFFFFF) << 32) | ((ulong) fraction & 0xFFFFFFFF));
+			return ToString("yyyy-MM-ddTHH:mm:ss.ffffZ");
 		}
 
-		public static OscTimeTag FromMilliseconds(float value)
+		public string ToString(string format)
 		{
-			var span = TimeSpan.FromSeconds(value);
-			return FromTimeSpan(span);
-		}
-
-		public override bool Equals(object obj)
-		{
-			switch (obj)
-			{
-				case OscTimeTag tag:
-					return Value == tag.Value;
-
-				case ulong value:
-					return Value == value;
-
-				default:
-					return false;
-			}
-		}
-
-		public override int GetHashCode()
-		{
-			return (int) (((uint) (Value >> 32) + (uint) (Value & 0x00000000FFFFFFFF)) / 2);
-		}
-
-		public static OscTimeTag Parse(string value)
-		{
-			return Parse(value, CultureInfo.InvariantCulture);
-		}
-
-		public static OscTimeTag Parse(string value, IFormatProvider provider)
-		{
-			if (TryParse(value, provider, out var result))
-			{
-				return result;
-			}
-
-			throw new Exception($"Invalid OscTimeTag string \'{value}\'");
+			return ToDateTime().ToString(format);
 		}
 
 		public static bool TryParse(string value, out OscTimeTag result)
@@ -255,91 +387,6 @@ namespace Sproto.OSC
 
 			result = default;
 			return false;
-		}
-
-		public double ToMilliseconds()
-		{
-			return ToDateTime().Subtract(MinDateTime).TotalMilliseconds;
-		}
-
-		public override string ToString()
-		{
-			return ToString("yyyy-MM-ddTHH:mm:ss.ffffZ");
-		}
-
-		public string ToString(string format)
-		{
-			return ToDateTime().ToString(format);
-		}
-
-		public int CompareTo(object obj)
-		{
-			return CompareTo((OscTimeTag) obj);
-		}
-
-		public int CompareTo(OscTimeTag other)
-		{
-			if (PreciseValue == other.PreciseValue)
-			{
-				return 0;
-			}
-
-			if (PreciseValue < other.PreciseValue)
-			{
-				return -1;
-			}
-
-			return 1;
-		}
-
-		public bool Equals(OscTimeTag other)
-		{
-			return PreciseValue == other.PreciseValue;
-		}
-
-		public static OscTimeTag operator +(OscTimeTag a, TimeSpan b)
-		{
-			return new OscTimeTag(a.ToDateTime().Add(b));
-		}
-
-		public static OscTimeTag operator -(OscTimeTag a, TimeSpan b)
-		{
-			return new OscTimeTag(a.ToDateTime().Subtract(b));
-		}
-
-		public static TimeSpan operator -(OscTimeTag d1, OscTimeTag d2)
-		{
-			return d1.ToDateTime() - d2.ToDateTime();
-		}
-
-		public static bool operator ==(OscTimeTag a, OscTimeTag b)
-		{
-			return a.PreciseValue == b.PreciseValue;
-		}
-
-		public static bool operator !=(OscTimeTag a, OscTimeTag b)
-		{
-			return a.PreciseValue != b.PreciseValue;
-		}
-
-		public static bool operator <(OscTimeTag a, OscTimeTag b)
-		{
-			return a.PreciseValue < b.PreciseValue;
-		}
-
-		public static bool operator >(OscTimeTag a, OscTimeTag b)
-		{
-			return a.PreciseValue > b.PreciseValue;
-		}
-
-		public static bool operator <=(OscTimeTag a, OscTimeTag b)
-		{
-			return a.PreciseValue <= b.PreciseValue;
-		}
-
-		public static bool operator >=(OscTimeTag a, OscTimeTag b)
-		{
-			return a.PreciseValue >= b.PreciseValue;
 		}
 
 		#endregion

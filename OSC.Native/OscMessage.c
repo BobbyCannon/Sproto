@@ -1065,7 +1065,7 @@ OscError OscMessageGetUInt32(OscMessage* const oscMessage, uint32_t* const uint3
 	{
 		return OscErrorNoArgumentsAvailable; // error: end of type tag string
 	}
-	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] != OscTypeTagInt32)
+	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] != OscTypeTagUInt32)
 	{
 		return OscErrorUnexpectedArgumentType; // error: unexpected argument type
 	}
@@ -1384,7 +1384,7 @@ OscError OscMessageGetUInt64(OscMessage* const oscMessage, uint64_t* const uint6
 	{
 		return OscErrorNoArgumentsAvailable; // error: end of type tag string
 	}
-	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] != OscTypeTagInt64)
+	if (oscMessage->oscTypeTagString[oscMessage->oscTypeTagStringIndex] != OscTypeTagUInt64)
 	{
 		return OscErrorUnexpectedArgumentType; // error: unexpected argument type
 	}
@@ -2395,11 +2395,11 @@ OscError OscMessageGetArgumentAsTimeTag(OscMessage* const oscMessage, OscTimeTag
 			oscTimeTag->value = (uint64_t) int32;
 			return oscError;
 		}
-		case OscTypeTagFloat32:
+		case OscTypeTagUInt32:
 		{
-			float float32;
-			const OscError oscError = OscMessageGetFloat32(oscMessage, &float32);
-			oscTimeTag->value = (uint64_t) float32;
+			uint32_t uint32;
+			const OscError oscError = OscMessageGetUInt32(oscMessage, &uint32);
+			oscTimeTag->value = (uint64_t) uint32;
 			return oscError;
 		}
 		case OscTypeTagInt64:
@@ -2409,9 +2409,23 @@ OscError OscMessageGetArgumentAsTimeTag(OscMessage* const oscMessage, OscTimeTag
 			oscTimeTag->value = (uint64_t) int64;
 			return oscError;
 		}
+		case OscTypeTagUInt64:
+		{
+			uint64_t uint64;
+			const OscError oscError = OscMessageGetUInt64(oscMessage, &uint64);
+			oscTimeTag->value = uint64;
+			return oscError;
+		}
 		case OscTypeTagTimeTag:
 		{
 			return OscMessageGetTimeTag(oscMessage, oscTimeTag);
+		}
+		case OscTypeTagFloat32:
+		{
+			float float32;
+			const OscError oscError = OscMessageGetFloat32(oscMessage, &float32);
+			oscTimeTag->value = (uint64_t) float32;
+			return oscError;
 		}
 		case OscTypeTagDouble:
 		{

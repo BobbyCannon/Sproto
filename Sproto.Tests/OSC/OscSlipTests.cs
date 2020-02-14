@@ -105,7 +105,7 @@ namespace OSC.Tests.OSC
 			Extensions.AreEqual(new OscRgba(1, 2, 3, 4), actual.Arguments[index++]);
 			Extensions.AreEqual(new OscMidi(), actual.Arguments[index++]);
 		}
-		
+
 		[TestMethod]
 		public void DecodeOscMessageWithDoubleArgument()
 		{
@@ -237,7 +237,7 @@ namespace OSC.Tests.OSC
 			var stream = new MemoryStream(data);
 			var processor = new OscSlip();
 			var packets = processor.ProcessStream(stream).ToList();
-			
+
 			Assert.AreEqual(1, packets.Count);
 
 			var actual = packets[0] as OscBundle;

@@ -206,7 +206,7 @@ namespace Sproto.OSC
 				OnSettingUpdated(s);
 			}
 		}
-		
+
 		/// <summary>
 		/// Update a manager setting with a new value.
 		/// </summary>

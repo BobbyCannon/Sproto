@@ -1,6 +1,12 @@
-﻿namespace Sproto.OSC
+﻿#region References
+
+using System;
+
+#endregion
+
+namespace Sproto.OSC
 {
-	public struct OscCrc
+	public struct OscCrc : IEquatable<OscCrc>
 	{
 		#region Constructors
 
@@ -24,7 +30,7 @@
 			switch (obj)
 			{
 				case OscCrc crc:
-					return Value == crc.Value;
+					return Equals(crc);
 
 				case ushort value:
 					return Value == value;
@@ -32,6 +38,11 @@
 				default:
 					return false;
 			}
+		}
+
+		public bool Equals(OscCrc other)
+		{
+			return Value == other.Value;
 		}
 
 		public override int GetHashCode()

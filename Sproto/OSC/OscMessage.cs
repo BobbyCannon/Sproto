@@ -160,12 +160,22 @@ namespace Sproto.OSC
 				{
 					case int iArg:
 						typeString += "i";
-						parts.Add(SetInt(iArg));
+						parts.Add(OscBitConverter.GetBytes(iArg));
 						break;
 
 					case uint uiArg:
 						typeString += "u";
-						parts.Add(SetUInt(uiArg));
+						parts.Add(OscBitConverter.GetBytes(uiArg));
+						break;
+
+					case long i64:
+						typeString += "h";
+						parts.Add(OscBitConverter.GetBytes(i64));
+						break;
+
+					case ulong ui64:
+						typeString += "H";
+						parts.Add(OscBitConverter.GetBytes(ui64));
 						break;
 
 					case float sArg:
@@ -176,44 +186,8 @@ namespace Sproto.OSC
 						else
 						{
 							typeString += "f";
-							parts.Add(SetFloat(sArg));
+							parts.Add(OscBitConverter.GetBytes(sArg));
 						}
-						break;
-
-					case string s:
-						typeString += "s";
-						parts.Add(SetString(s));
-						break;
-
-					case byte[] b:
-						typeString += "b";
-						parts.Add(SetBlob(b));
-						break;
-
-					case long i64:
-						typeString += "h";
-						parts.Add(SetLong(i64));
-						break;
-
-					case ulong ui64:
-						typeString += "H";
-						parts.Add(SetULong(ui64));
-						break;
-
-					case DateTime time:
-						typeString += "t";
-						var oscTime = new OscTimeTag(time);
-						parts.Add(SetULong(oscTime.Value));
-						break;
-
-					case OscTimeTag timeTag:
-						typeString += "t";
-						parts.Add(SetULong(timeTag.Value));
-						break;
-
-					case TimeSpan timeSpan:
-						typeString += "p";
-						parts.Add(SetLong(timeSpan.Ticks));
 						break;
 
 					case double dValue:
@@ -224,38 +198,18 @@ namespace Sproto.OSC
 						else
 						{
 							typeString += "d";
-							parts.Add(SetDouble(dValue));
+							parts.Add(OscBitConverter.GetBytes(dValue));
 						}
-						break;
-
-					case OscSymbol s2Value:
-						typeString += "S";
-						parts.Add(SetString(s2Value.Value));
 						break;
 
 					case byte bValue:
 						typeString += "c";
-						parts.Add(SetChar((char) bValue));
+						parts.Add(OscBitConverter.GetBytes((char) bValue));
 						break;
 
 					case char character:
 						typeString += "c";
-						parts.Add(SetChar(character));
-						break;
-
-					case OscRgba rgba:
-						typeString += "r";
-						parts.Add(SetRgba(rgba));
-						break;
-
-					case OscMidi midi:
-						typeString += "m";
-						parts.Add(SetMidi(midi));
-						break;
-
-					case OscCrc crc:
-						typeString += "C";
-						parts.Add(SetCrc(crc));
+						parts.Add(OscBitConverter.GetBytes(character));
 						break;
 
 					case bool boolean:
@@ -266,33 +220,63 @@ namespace Sproto.OSC
 						typeString += "N";
 						break;
 
+					case string s:
+						typeString += "s";
+						parts.Add(OscBitConverter.GetBytes(s));
+						break;
+
+					case IOscArgument oscType:
+						typeString += oscType.GetOscBinaryType();
+						parts.Add(oscType.GetOscValueBytes());
+						break;
+
+					case DateTime time:
+						typeString += "t";
+						var oscTime = new OscTimeTag(time);
+						parts.Add(OscBitConverter.GetBytes(oscTime.Value));
+						break;
+
+					case TimeSpan timeSpan:
+						typeString += "p";
+						parts.Add(OscBitConverter.GetBytes(timeSpan.Ticks));
+						break;
+
+					case OscSymbol s2Value:
+						typeString += "S";
+						parts.Add(OscBitConverter.GetBytes(s2Value.Value));
+						break;
+
+					case OscCrc crc:
+						typeString += "C";
+						parts.Add(OscBitConverter.GetBytes(crc));
+						break;
+
+					case byte[] b:
+						typeString += "b";
+						parts.Add(OscBitConverter.GetBytes(b));
+						break;
+
 					// Guid types that are just converted to strings and back.
 					case Guid value:
 						typeString += "s";
-						parts.Add(SetString(value.ToString()));
+						parts.Add(OscBitConverter.GetBytes(value.ToString()));
 						break;
 
 					case Enum eArg:
 						typeString += "i";
-						parts.Add(SetInt(Convert.ToInt32(eArg)));
+						parts.Add(OscBitConverter.GetBytes(Convert.ToInt32(eArg)));
 						break;
 
 					// This part handles arrays. It points currentList to the array and reSets i
 					// The array is processed like normal and when it is finished we replace  
 					// currentList back with Arguments and continue from where we left off
-					case object[] _:
-					case List<object> _:
-						if (arg.GetType() == typeof(object[]))
-						{
-							arg = ((object[]) arg).ToList();
-						}
-
+					case IEnumerable<object> objects:
 						if (Arguments != currentList)
 						{
 							throw new Exception("Nested Arrays are not supported");
 						}
 						typeString += "[";
-						currentList = (List<object>) arg;
+						currentList = objects.ToList();
 						argumentsIndex = i;
 						i = 0;
 						continue;
@@ -378,12 +362,6 @@ namespace Sproto.OSC
 
 				switch (obj)
 				{
-					case object[] objects:
-						sb.Append('[');
-						ArgumentsToString(sb, hex, provider, objects);
-						sb.Append(']');
-						break;
-
 					case int i:
 						sb.Append(hex ? $"0x{i.ToString("X8", provider)}" : i.ToString(provider));
 						break;
@@ -427,27 +405,6 @@ namespace Sproto.OSC
 						sb.Append($"'{c}'");
 						break;
 
-					case OscRgba rgba:
-						sb.Append($"{{ Color: {rgba} }}");
-						break;
-
-					case DateTime dateTime:
-						var oscTime = dateTime.ToOscTimeTag();
-						sb.Append($"{{ Time: {oscTime} }}");
-						break;
-
-					case OscTimeTag tag:
-						sb.Append($"{{ Time: {tag} }}");
-						break;
-
-					case TimeSpan timeSpan:
-						sb.Append($"{{ TimeSpan: {timeSpan} }}");
-						break;
-
-					case OscMidi midi:
-						sb.Append($"{{ Midi: {midi} }}");
-						break;
-
 					case bool b:
 						sb.Append(b.ToString());
 						break;
@@ -458,6 +415,19 @@ namespace Sproto.OSC
 
 					case string value:
 						sb.Append($"\"{value.Escape()}\"");
+						break;
+
+					case IOscArgument oscType:
+						sb.Append($"{{ {oscType.GetOscStringType()}: {oscType.GetOscValueString()} }}");
+						break;
+
+					case DateTime dateTime:
+						var oscTime = dateTime.ToOscTimeTag();
+						sb.Append($"{{ Time: {oscTime} }}");
+						break;
+
+					case TimeSpan timeSpan:
+						sb.Append($"{{ TimeSpan: {timeSpan} }}");
 						break;
 
 					case OscSymbol symbol:
@@ -476,8 +446,15 @@ namespace Sproto.OSC
 						sb.Append(Convert.ToInt32(eValue));
 						break;
 
+					case IEnumerable<object> objects:
+						sb.Append('[');
+						ArgumentsToString(sb, hex, provider, objects);
+						sb.Append(']');
+						break;
+
 					default:
-						throw new Exception($"Unsupported argument type '{obj.GetType()}'");
+						sb.Append(obj.ToString().Escape());
+						break;
 				}
 			}
 		}
@@ -488,8 +465,9 @@ namespace Sproto.OSC
 		/// <param name="time"> The created time of the message. </param>
 		/// <param name="data"> The data for the message. </param>
 		/// <param name="length"> The length for the message. </param>
+		/// <param name="parsers"> An optional set of OSC argument parsers. </param>
 		/// <returns> Message containing various arguments and an address </returns>
-		internal static OscPacket ParseMessage(OscTimeTag time, byte[] data, int length)
+		internal static OscPacket ParseMessage(OscTimeTag time, byte[] data, int length, params OscArgumentParser[] parsers)
 		{
 			var index = 0;
 			var arguments = new List<object>();
@@ -530,83 +508,83 @@ namespace Sproto.OSC
 						break;
 
 					case 'i':
-						var iValue = GetInt(data, index);
+						var iValue = OscBitConverter.ToInt32(data, index);
 						arguments.Add(iValue);
 						index += 4;
 						break;
 
 					case 'u':
-						var uValue = GetUInt(data, index);
+						var uValue = OscBitConverter.ToUInt32(data, index);
 						arguments.Add(uValue);
 						index += 4;
 						break;
 
 					case 'f':
-						var fValue = GetFloat(data, index);
+						var fValue = OscBitConverter.ToFloat(data, index);
 						arguments.Add(fValue);
 						index += 4;
 						break;
 
 					case 's':
-						var sValue = GetString(data, ref index);
+						var sValue = OscBitConverter.ToString(data, ref index);
 						arguments.Add(sValue);
 						break;
 
 					case 'b':
-						var bValue = GetBlob(data, index);
+						var bValue = OscBitConverter.ToBlob(data, index);
 						arguments.Add(bValue);
 						index += 4 + bValue.Length;
 						break;
 
 					case 'h':
-						var hValue = GetLong(data, index);
+						var hValue = OscBitConverter.ToInt64(data, index);
 						arguments.Add(hValue);
 						index += 8;
 						break;
 
 					case 'H':
-						var ulValue = GetULong(data, index);
+						var ulValue = OscBitConverter.ToUInt64(data, index);
 						arguments.Add(ulValue);
 						index += 8;
 						break;
 
 					case 't':
-						var tValue = GetULong(data, index);
+						var tValue = OscBitConverter.ToUInt64(data, index);
 						arguments.Add(new OscTimeTag(tValue));
 						index += 8;
 						break;
 
 					case 'p':
-						var tsValue = GetLong(data, index);
+						var tsValue = OscBitConverter.ToInt64(data, index);
 						arguments.Add(new TimeSpan(tsValue));
 						index += 8;
 						break;
 
 					case 'd':
-						var dValue = GetDouble(data, index);
+						var dValue = OscBitConverter.ToDouble(data, index);
 						arguments.Add(dValue);
 						index += 8;
 						break;
 
 					case 'S':
-						var s2Value = GetString(data, ref index);
+						var s2Value = OscBitConverter.ToString(data, ref index);
 						arguments.Add(new OscSymbol(s2Value));
 						break;
 
 					case 'c':
-						var cValue = GetChar(data, index);
+						var cValue = OscBitConverter.ToChar(data, index);
 						arguments.Add(cValue);
 						index += 4;
 						break;
 
 					case 'r':
-						var rValue = GetRgba(data, index);
+						var rValue = OscBitConverter.ToOscType<OscRgba>(data, index);
 						arguments.Add(rValue);
 						index += 4;
 						break;
 
 					case 'm':
-						var mValue = GetMidi(data, index);
+						var mValue = OscBitConverter.ToOscType<OscMidi>(data, index);
 						arguments.Add(mValue);
 						index += 4;
 						break;
@@ -628,7 +606,7 @@ namespace Sproto.OSC
 						break;
 
 					case 'C':
-						var crcValue = GetCrc(data, index);
+						var crcValue = OscBitConverter.ToCrc(data, index);
 						arguments.Add(crcValue);
 						index += 2;
 						break;
@@ -647,7 +625,26 @@ namespace Sproto.OSC
 						break;
 
 					default:
-						return new OscError(OscTimeTag.UtcNow, OscError.Message.UnknownTagType, type);
+						var parsed = false;
+
+						foreach (var parser in parsers)
+						{
+							if (!parser.CanParse(type))
+							{
+								continue;
+							}
+
+							arguments.Add(parser.Parse(data, index));
+							parsed = true;
+							break;
+						}
+
+						if (!parsed)
+						{
+							return new OscError(OscTimeTag.UtcNow, OscError.Message.UnknownTagType, type);
+						}
+
+						break;
 				}
 
 				while (index % 4 != 0)
@@ -670,8 +667,9 @@ namespace Sproto.OSC
 		/// <param name="time"> The time to represent the message. </param>
 		/// <param name="value"> A string containing the OSC message data. </param>
 		/// <param name="provider"> The format provider to use during parsing. </param>
+		/// <param name="parsers"> An optional set of OSC argument parsers. </param>
 		/// <returns> The parsed OSC message. </returns>
-		internal static OscPacket ParseMessage(OscTimeTag time, string value, IFormatProvider provider)
+		internal static OscPacket ParseMessage(OscTimeTag time, string value, IFormatProvider provider, params OscArgumentParser[] parsers)
 		{
 			if (string.IsNullOrWhiteSpace(value))
 			{
@@ -702,7 +700,7 @@ namespace Sproto.OSC
 
 			try
 			{
-				Extensions.ParseArguments(value, arguments, index + 1, provider);
+				Extensions.ParseArguments(value, arguments, index + 1, provider, parsers);
 			}
 			catch (Exception ex)
 			{

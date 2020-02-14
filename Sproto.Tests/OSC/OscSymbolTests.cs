@@ -1,0 +1,41 @@
+﻿#region References
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Sproto.OSC;
+
+#endregion
+
+namespace OSC.Tests.OSC
+{
+	[TestClass]
+	public class OscSymbolTests
+	{
+		#region Methods
+
+		[TestMethod]
+		public void Equals()
+		{
+			var expected = new OscSymbol { Value = "Foo Bar" };
+			var actual = new OscSymbol("Foo Bar");
+			Assert.IsTrue(expected == actual);
+			Assert.IsTrue(expected.Equals(actual));
+			// ReSharper disable once SuspiciousTypeConversion.Global
+			Assert.IsTrue(expected.Equals("Foo Bar"));
+			Assert.AreEqual(-1226249167, expected.GetHashCode());
+			Assert.AreEqual(-1226249167, actual.GetHashCode());
+		}
+
+		[TestMethod]
+		public void NotEquals()
+		{
+			var notExpected = new OscSymbol { Value = "Foo Bar" };
+			var actual = new OscSymbol("foo bar");
+			Assert.AreEqual(-1226250191, actual.GetHashCode());
+			Assert.IsTrue(notExpected != actual);
+			// ReSharper disable once SuspiciousTypeConversion.Global
+			Assert.IsFalse(actual.Equals(true));
+		}
+
+		#endregion
+	}
+}

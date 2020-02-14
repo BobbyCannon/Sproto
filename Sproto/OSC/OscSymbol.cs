@@ -1,9 +1,19 @@
-﻿namespace Sproto.OSC
+﻿#region References
+
+using System;
+
+#endregion
+
+namespace Sproto.OSC
 {
-	public struct OscSymbol
+	public struct OscSymbol : IEquatable<OscSymbol>
 	{
 		#region Constructors
 
+		/// <summary>
+		/// Represents an alternate type for systems that differentiate "symbols" from "strings".
+		/// </summary>
+		/// <param name="value"> The symbol value. </param>
 		public OscSymbol(string value)
 		{
 			Value = value;
@@ -23,8 +33,8 @@
 		{
 			switch (obj)
 			{
-				case OscSymbol s1:
-					return Value == s1.Value;
+				case OscSymbol symbol:
+					return Equals(symbol);
 
 				case string s2:
 					return Value == s2;
@@ -34,9 +44,14 @@
 			}
 		}
 
+		public bool Equals(OscSymbol other)
+		{
+			return Value == other.Value;
+		}
+
 		public override int GetHashCode()
 		{
-			return Value.GetHashCode();
+			return Value != null ? Value.GetHashCode() : 0;
 		}
 
 		public static bool operator ==(OscSymbol a, OscSymbol b)

@@ -44,14 +44,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions.cs" />
+    <Compile Include="OSC\OscSymbolTests.cs" />
+    <Compile Include="OSC\SampleOscCommandTests.cs" />
+    <Compile Include="Samples\SampleOscCommand.cs" />
+    <Compile Include="OSC\OscMidiTests.cs" />
+    <Compile Include="OSC\OscRgbaTests.cs" />
     <Compile Include="OSC\OscSlipTests.cs" />
     <Compile Include="OSC\OscCommandTests.cs" />
+    <Compile Include="OSC\OscCommunicationHandlerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OSC\OscBundleTests.cs" />
     <Compile Include="OSC\OscPacketTests.cs" />
     <Compile Include="ExtensionTests.cs" />
     <Compile Include="OSC\OscTimeTagTests.cs" />
     <Compile Include="OSC\OscMessageTests.cs" />
+    <Compile Include="Samples\TestOscCommand.cs" />
+    <Compile Include="Samples\SampleCustomValue.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sproto\Sproto.csproj">
@@ -76,6 +84,7 @@
       <Version>12.0.2</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -19,10 +19,11 @@ namespace Sproto.OSC
 
 		#region Constructors
 
-		protected OscCommand(string address)
+		protected OscCommand(string address, int version = 1)
 		{
 			Address = address;
 			OscMessage = new OscMessage(Address);
+			Version = version;
 
 			StartArgumentProcessing();
 		}
@@ -54,6 +55,11 @@ namespace Sproto.OSC
 			get => OscMessage.Time;
 			set => OscMessage.Time = value;
 		}
+
+		/// <summary>
+		/// An optional version for tracking command changes.
+		/// </summary>
+		public int Version { get; set; }
 
 		/// <summary>
 		/// The message that represents this command.
@@ -115,6 +121,44 @@ namespace Sproto.OSC
 				ulong dValue => (T) (object) GetArgumentAsUnsignedLong(index, dValue),
 				_ => (OscMessage.Arguments.Count <= index ? defaultValue : (T) OscMessage.Arguments[index])
 			};
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <typeparam name="T"> The type of the argument expected. </typeparam>
+		/// <param name="parser"> The parser to be used to process the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public T GetArgument<T>(OscArgumentParser<T> parser, T defaultValue = default) where T : IOscArgument, new()
+		{
+			return GetArgument(_argumentIndex++, parser, defaultValue);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <typeparam name="T"> The type of the argument expected. </typeparam>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="parser"> The parser to be used to process the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public T GetArgument<T>(int index, OscArgumentParser<T> parser, T defaultValue = default) where T : IOscArgument, new()
+		{
+			switch (OscMessage.Arguments[index])
+			{
+				case T typeArgument:
+					return typeArgument;
+
+				case string value:
+					return (T) parser.Parse(value);
+
+				case byte[] value:
+					return (T) parser.Parse(value, 0);
+
+				default:
+					return defaultValue;
+			}
 		}
 
 		/// <summary>
