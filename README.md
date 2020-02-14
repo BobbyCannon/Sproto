@@ -39,7 +39,7 @@ C# Additions
 
 *Custom Data Types*
 
-Samples for adding custome OSC types can be found in the Sproto.Tests project. See "TestOScType.cs" for an example.
+Samples for adding custom OSC types can be found in the Sproto.Tests project. See "SampleCustomValue.cs" for an example used in "SampleOscCommand.cs" command.
 
 ### References
 
