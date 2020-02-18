@@ -19,7 +19,7 @@ namespace Sproto.OSC
 
 		#region Constructors
 
-		protected OscCommand(string address, int version = 1)
+		protected OscCommand(string address, int version)
 		{
 			Address = address;
 			OscMessage = new OscMessage(Address);

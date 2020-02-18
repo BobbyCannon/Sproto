@@ -18,9 +18,8 @@ namespace OSC.Tests.Samples
 
 		#region Constructors
 
-		public TestOscCommand() : base(Command)
+		public TestOscCommand() : base(Command, 2)
 		{
-			Version = 2;
 		}
 
 		#endregion

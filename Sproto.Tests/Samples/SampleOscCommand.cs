@@ -17,7 +17,7 @@ namespace OSC.Tests.Samples
 
 		#region Constructors
 
-		public SampleOscCommand() : base(Command)
+		public SampleOscCommand() : base(Command, 1)
 		{
 		}
 

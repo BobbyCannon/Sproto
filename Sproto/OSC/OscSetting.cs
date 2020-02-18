@@ -10,7 +10,7 @@ namespace Sproto.OSC
 	{
 		#region Constructors
 
-		protected OscSetting(string address, bool canRead = true, bool canWrite = true) : base(address)
+		protected OscSetting(string address, int version, bool canRead = true, bool canWrite = true) : base(address, version)
 		{
 			CanRead = canRead;
 			CanWrite = canWrite;
