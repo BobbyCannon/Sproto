@@ -241,9 +241,12 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void ToBytesForTimeTag()
 		{
-			var message = new OscMessage("/a", new OscTimeTag(new DateTime(2020, 02, 13, 01, 45, 13, DateTimeKind.Local)));
+			var message = new OscMessage("/a", new OscTimeTag(new DateTime(2020, 02, 13, 01, 45, 13, DateTimeKind.Utc)));
+			((OscTimeTag)message.Arguments[0]).Value.Dump();
+
 			//                             /     a                 ,     t     
 			var expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x74, 0x00, 0x00, 0xE1, 0xEF, 0x28, 0xA9, 0x00, 0x00, 0x00, 0x00 };
+			//                             0,    1,    2,    3,    4,    5,    6,    7,    8,    9,    0,    1,    2,    3,    4,    5,
 			var actual = message.ToByteArray();
 			actual.Dump();
 			Extensions.AreEqual(expected, actual);
@@ -311,7 +314,7 @@ namespace OSC.Tests.OSC
 		public void ToFromStringOscMessageWithAllTypes()
 		{
 			var message = GetOscMessage();
-			var expected = "/Address,123,456u,\"Boom\",{ Blob: 0x010203 },321L,654U,16136018769012064256U,{ Time: 2019-01-20T08:50:12.0000Z },[True,123,\"fox\",null],'A',True,False,123.45f,Infinity,-Infinity,null,54.321d,Infinityd,-Infinityd,Test,{ Color: 1,2,3,4 },{ Midi: 80,76,42,24 },{ TimeSpan: 13.10:56:44.2340000 }";
+			var expected = "/Address,123,456u,\"Boom\",{ Blob: 0x010203 },321L,654U,16136018769012064256U,{ Time: 2019-01-20T08:50:12.000Z },[True,123,\"fox\",null],'A',True,False,123.45f,Infinity,-Infinity,null,54.321d,Infinityd,-Infinityd,Test,{ Color: 1,2,3,4 },{ Midi: 80,76,42,24 },{ TimeSpan: 13.10:56:44.2340000 }";
 			var actual = message.ToString();
 
 			actual.Escape().Dump();
@@ -361,8 +364,8 @@ namespace OSC.Tests.OSC
 			message.Arguments.Add(new byte[] { 1, 2, 3 });
 			message.Arguments.Add((long) 321);
 			message.Arguments.Add((ulong) 654);
-			message.Arguments.Add(new OscTimeTag(new DateTime(2019, 1, 20, 07, 53, 56, DateTimeKind.Local)).Value);
-			message.Arguments.Add(new OscTimeTag(new DateTime(2019, 1, 20, 08, 50, 12, DateTimeKind.Local)));
+			message.Arguments.Add(new OscTimeTag(new DateTime(2019, 1, 20, 07, 53, 56, DateTimeKind.Utc)).Value);
+			message.Arguments.Add(new OscTimeTag(new DateTime(2019, 1, 20, 08, 50, 12, DateTimeKind.Utc)));
 			message.Arguments.Add(new object[] { true, 123, "fox", null });
 			message.Arguments.Add('A');
 			message.Arguments.Add(true);
@@ -393,9 +396,9 @@ namespace OSC.Tests.OSC
 			Extensions.AreEqual(new byte[] { 1, 2, 3 }, actual.Arguments[index++]);
 			Assert.AreEqual((long) 321, actual.Arguments[index++]);
 			Assert.AreEqual((ulong) 654, actual.Arguments[index++]);
-			Assert.AreEqual(new OscTimeTag(new DateTime(2019, 1, 20, 07, 53, 56, DateTimeKind.Local)).Value, actual.Arguments[index]);
+			Assert.AreEqual(new OscTimeTag(new DateTime(2019, 1, 20, 07, 53, 56, DateTimeKind.Utc)).Value, actual.Arguments[index]);
 			Assert.AreEqual(16136018769012064256, (ulong) actual.Arguments[index++]);
-			Assert.AreEqual(new OscTimeTag(new DateTime(2019, 1, 20, 08, 50, 12, DateTimeKind.Local)), actual.Arguments[index]);
+			Assert.AreEqual(new OscTimeTag(new DateTime(2019, 1, 20, 08, 50, 12, DateTimeKind.Utc)), actual.Arguments[index]);
 			Assert.AreEqual(16136033268821655552, ((OscTimeTag) actual.Arguments[index++]).Value);
 			Extensions.AreEqual(new object[] { true, 123, "fox", null }, actual.Arguments[index++]);
 			Assert.AreEqual('A', actual.Arguments[index++]);

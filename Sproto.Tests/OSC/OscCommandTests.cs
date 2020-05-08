@@ -20,7 +20,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void GetArgumentWithAllTypes()
 		{
-			var message = new OscMessage(TestOscCommand.Command, 1, (ulong) 23, "John", 20, new DateTime(2000, 01, 15), 5.11f, 164.32,
+			var message = new OscMessage(TestOscCommand.Command, 1, (ulong) 23, "John", 20, new DateTime(2000, 01, 15, 0, 0, 0, DateTimeKind.Utc), 5.11f, 164.32,
 				(byte) 4, new byte[] { 0, 1, 1, 2, 3, 5, 8, 13 }, true, Guid.Parse("E3966202-40FA-443D-B21F-E1528A1E6DFE"),
 				uint.MaxValue, long.MaxValue, TimeSpan.Parse("12:34:56"), SerialError.Overrun
 			);
@@ -48,7 +48,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void SequentialProcessingOfArguments()
 		{
-			var message = new OscMessage(TestOscCommand.Command, 2, (ulong) 23, "John", 20, new DateTime(2000, 01, 15), 5.11f, 164.32,
+			var message = new OscMessage(TestOscCommand.Command, 2, (ulong) 23, "John", 20, new DateTime(2000, 01, 15, 0, 0, 0, DateTimeKind.Utc), 5.11f, 164.32,
 				(byte) 4, new byte[] { 0, 1, 1, 2, 3, 5, 8, 13 }, true, Guid.Parse("E3966202-40FA-443D-B21F-E1528A1E6DFE"),
 				uint.MaxValue, long.MaxValue, TimeSpan.Parse("12:34:56"), SerialError.Frame
 			);
@@ -97,7 +97,7 @@ namespace OSC.Tests.OSC
 			var command = GetTestCommand();
 			var actual = command.ToString();
 			actual.Escape().Dump();
-			Assert.AreEqual("/test,2,23U,\"John\",20,{ Time: 2000-01-15T00:00:00.0000Z },5.11f,164.32d,\'\u0004\',{ Blob: 0x000101020305080D },True,\"e3966202-40fa-443d-b21f-e1528a1e6dfe\",4294967295u,9223372036854775807L,{ TimeSpan: 12:34:56 },2", actual);
+			Assert.AreEqual("/test,2,23U,\"John\",20,{ Time: 2000-01-15T00:00:00.000Z },5.11f,164.32d,\'\u0004\',{ Blob: 0x000101020305080D },True,\"e3966202-40fa-443d-b21f-e1528a1e6dfe\",4294967295u,9223372036854775807L,{ TimeSpan: 12:34:56 },2", actual);
 
 			var actualMessage = OscPacket.Parse(command.Time, actual) as OscMessage;
 			Assert.IsNotNull(actualMessage);
@@ -131,7 +131,7 @@ namespace OSC.Tests.OSC
 			});
 
 			var expectedTime = command.Time;
-			var expected = "/test,1,23U,\"Johnny\",21,{ Time: 2000-01-15T00:00:00.0000Z },5.11f,164.32d,'',{ Blob: 0x000101020305080D },True,\"e3966202-40fa-443d-b21f-e1528a1e6dfe\",4294967295u,9223372036854775807L";
+			var expected = "/test,1,23U,\"Johnny\",21,{ Time: 2000-01-15T00:00:00.000Z },5.11f,164.32d,'',{ Blob: 0x000101020305080D },True,\"e3966202-40fa-443d-b21f-e1528a1e6dfe\",4294967295u,9223372036854775807L";
 			var actual = command.ToString();
 			actual.Dump();
 			Assert.AreEqual(expectedTime, command.Time);
@@ -144,7 +144,7 @@ namespace OSC.Tests.OSC
 				x.Age = 23;
 			});
 
-			expected = "/test,2,23U,\"Jon\",23,{ Time: 2000-01-15T00:00:00.0000Z },5.11f,164.32d,'',{ Blob: 0x000101020305080D },True,\"e3966202-40fa-443d-b21f-e1528a1e6dfe\",4294967295u,9223372036854775807L,{ TimeSpan: 12:34:56 },2";
+			expected = "/test,2,23U,\"Jon\",23,{ Time: 2000-01-15T00:00:00.000Z },5.11f,164.32d,'',{ Blob: 0x000101020305080D },True,\"e3966202-40fa-443d-b21f-e1528a1e6dfe\",4294967295u,9223372036854775807L,{ TimeSpan: 12:34:56 },2";
 			actual = command.ToString();
 			actual.Dump();
 			Assert.AreEqual(expectedTime, command.Time);
@@ -162,7 +162,7 @@ namespace OSC.Tests.OSC
 			{
 				Name = "John",
 				Age = 20,
-				BirthDate = new DateTime(2000, 01, 15),
+				BirthDate = new DateTime(2000, 01, 15, 0, 0, 0, DateTimeKind.Utc),
 				Elapsed = new TimeSpan(12, 34, 56),
 				Enable = true,
 				Error = SerialError.Overrun,

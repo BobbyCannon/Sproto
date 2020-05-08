@@ -7,6 +7,11 @@ using System.Globalization;
 
 namespace Sproto.OSC
 {
+	/// <summary>
+	/// Time tags are represented by a 64 bit fixed point number. The first 32 bits specify the number of seconds since midnight on January 1, 1900, and 
+	/// the last 32 bits specify fractional parts of a second to a precision of about 200 picoseconds. This is the representation used by Internet NTP 
+	/// timestamps.The time tag value consisting of 63 zero bits followed by a one in the least signifigant bit is a special case meaning "immediately."
+	/// </summary>
 	public struct OscTimeTag : IOscArgument, IComparable<OscTimeTag>, IComparable, IEquatable<OscTimeTag>
 	{
 		#region Constants
@@ -22,6 +27,11 @@ namespace Sproto.OSC
 		/// </summary>
 		public static readonly OscTimeTag MaxValue;
 
+		/// <summary>
+		/// The minimum date for any OscTimeTag.
+		/// </summary>
+		public static readonly DateTime MaxDateTime;
+		
 		/// <summary>
 		/// The minimum date for any OscTimeTag.
 		/// </summary>
@@ -48,6 +58,7 @@ namespace Sproto.OSC
 
 		static OscTimeTag()
 		{
+			MaxDateTime = new DateTime(2036, 2, 7, 6, 28, 16, 0, DateTimeKind.Utc);
 			MaxValue = new OscTimeTag(0xffffffffffffffff);
 			MinDateTime = new DateTime(1900, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 			MinValue = new OscTimeTag(0);
@@ -169,16 +180,16 @@ namespace Sproto.OSC
 		/// <returns> The equivalent value as an osc time tag. </returns>
 		public static OscTimeTag FromDateTime(DateTime datetime)
 		{
-			var span = datetime.Subtract(MinDateTime);
+			var span = datetime.ToUniversalTime().Subtract(MinDateTime);
 			return FromTimeSpan(span);
 		}
 
 		public static OscTimeTag FromMilliseconds(float value)
 		{
-			var span = TimeSpan.FromSeconds(value);
+			var span = TimeSpan.FromMilliseconds(value);
 			return FromTimeSpan(span);
 		}
-
+		
 		/// <summary>
 		/// Get a OscTimeTag from a TimeSpan value.
 		/// </summary>
@@ -191,6 +202,12 @@ namespace Sproto.OSC
 			var milliseconds = span.TotalMilliseconds - (double) secondsUInt * 1000;
 			var fraction = milliseconds / 1000 * uint.MaxValue;
 			return new OscTimeTag(((ulong) (secondsUInt & 0xFFFFFFFF) << 32) | ((ulong) fraction & 0xFFFFFFFF));
+		}
+
+		public static OscTimeTag FromTicks(long value)
+		{
+			var span = TimeSpan.FromTicks(value);
+			return FromTimeSpan(span);
 		}
 
 		public override int GetHashCode()
@@ -311,12 +328,17 @@ namespace Sproto.OSC
 
 		public override string ToString()
 		{
-			return ToString("yyyy-MM-ddTHH:mm:ss.ffffZ");
+			return ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
 		}
 
 		public string ToString(string format)
 		{
 			return ToDateTime().ToString(format);
+		}
+
+		public TimeSpan ToTimeSpan()
+		{
+			return this < MinValue ? TimeSpan.Zero : this - MinValue;
 		}
 
 		public static bool TryParse(string value, out OscTimeTag result)
@@ -326,11 +348,11 @@ namespace Sproto.OSC
 
 		public static bool TryParse(string value, IFormatProvider provider, out OscTimeTag result)
 		{
-			var style = DateTimeStyles.AssumeLocal;
+			var style = DateTimeStyles.AssumeUniversal;
 
 			if (value.Trim().EndsWith("Z"))
 			{
-				style = DateTimeStyles.AdjustToUniversal;
+				style = DateTimeStyles.AssumeUniversal;
 				value = value.Trim().TrimEnd('Z');
 			}
 
@@ -361,9 +383,15 @@ namespace Sproto.OSC
 				"yyyy-MM-dd",
 				"HH:mm",
 				"HH:mm:ss",
+				"HH:mm:ss.f",
+				"HH:mm:ss.ff",
+				"HH:mm:ss.fff",
 				"HH:mm:ss.ffff",
 				"yyyy-MM-ddTHH:mm:ss",
 				"yyyy-MM-ddTHH:mm",
+				"yyyy-MM-ddTHH:mm:ss.f",
+				"yyyy-MM-ddTHH:mm:ss.ff",
+				"yyyy-MM-ddTHH:mm:ss.fff",
 				"yyyy-MM-ddTHH:mm:ss.ffff"
 			};
 

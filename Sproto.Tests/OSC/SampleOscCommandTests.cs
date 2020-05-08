@@ -17,14 +17,14 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void DowngradeCommand()
 		{
-			var data = "/sample,3,\"Bob\",{ Time: 2020-02-14T11:36:15.0000Z },True,{ SampleValue: 1,2,3 }";
+			var data = "/sample,3,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True,{ SampleValue: 1,2,3 }";
 			var parser = new OscArgumentParser<SampleCustomValue>();
 			var message = OscPacket.Parse(data, parser) as OscMessage;
 			Assert.IsNotNull(message);
 
 			var command = OscCommand.FromMessage<SampleOscCommand>(message);
 			command.Version = 2;
-			var expected = "/sample,2,\"Bob\",{ Time: 2020-02-14T11:36:15.0000Z },True";
+			var expected = "/sample,2,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True";
 			var actual = command.ToString();
 			Assert.AreEqual(expected, actual);
 
@@ -38,7 +38,7 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void ParseWithoutArgumentParser()
 		{
-			var data = "/sample,3,\"Bob\",{ Time: 2020-02-14T11:36:15.0000Z },True,{ SampleValue: 1,2,3 }";
+			var data = "/sample,3,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True,{ SampleValue: 1,2,3 }";
 			var message = OscPacket.Parse(data) as OscMessage;
 			Assert.IsNotNull(message);
 
@@ -69,7 +69,7 @@ namespace OSC.Tests.OSC
 		public void Version2()
 		{
 			var command = new SampleOscCommand { Version = 2, Name = "Bob", BirthDate = new DateTime(2020, 02, 14, 11, 36, 15, DateTimeKind.Utc), Enabled = true };
-			var expected = "/sample,2,\"Bob\",{ Time: 2020-02-14T11:36:15.0000Z },True";
+			var expected = "/sample,2,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True";
 			var actual = command.ToString();
 			Assert.AreEqual(expected, actual);
 
@@ -89,7 +89,7 @@ namespace OSC.Tests.OSC
 		public void Version3()
 		{
 			var command = new SampleOscCommand { Version = 3, Name = "Bob", BirthDate = new DateTime(2020, 02, 14, 11, 36, 15, DateTimeKind.Utc), Enabled = true, Value = new SampleCustomValue(1, 2, 3) };
-			var expected = "/sample,3,\"Bob\",{ Time: 2020-02-14T11:36:15.0000Z },True,{ SampleValue: 1,2,3 }";
+			var expected = "/sample,3,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True,{ SampleValue: 1,2,3 }";
 			var actual = command.ToString();
 			Assert.AreEqual(expected, actual);
 
