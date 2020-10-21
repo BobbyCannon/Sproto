@@ -158,6 +158,16 @@ namespace Sproto.OSC
 				var arg = currentList[i];
 				switch (arg)
 				{
+					case short sArg:
+						typeString += "i";
+						parts.Add(OscBitConverter.GetBytes(sArg));
+						break;
+					
+					case ushort usArg:
+						typeString += "i";
+						parts.Add(OscBitConverter.GetBytes(usArg));
+						break;
+					
 					case int iArg:
 						typeString += "i";
 						parts.Add(OscBitConverter.GetBytes(iArg));
@@ -203,6 +213,11 @@ namespace Sproto.OSC
 						break;
 
 					case byte bValue:
+						typeString += "c";
+						parts.Add(OscBitConverter.GetBytes((char) bValue));
+						break;
+					
+					case sbyte bValue:
 						typeString += "c";
 						parts.Add(OscBitConverter.GetBytes((char) bValue));
 						break;

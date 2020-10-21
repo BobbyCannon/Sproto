@@ -108,18 +108,21 @@ namespace Sproto.OSC
 				byte[] dValue => (T) (object) GetArgumentAsBlob(index, dValue),
 				bool dValue => (T) (object) GetArgumentAsBoolean(index, dValue),
 				byte dValue => (T) (object) GetArgumentAsByte(index, dValue),
-				DateTime dValue => (T) (object) GetArgumentAsDateTime(index, dValue),
-				double dValue => (T) (object) GetArgumentAsDouble(index, dValue),
-				float dValue => (T) (object) GetArgumentAsFloat(index, dValue),
-				Guid dValue => (T) (object) GetArgumentAsGuid(index, dValue),
+				sbyte dValue => (T) (object) GetArgumentAsSByte(index, dValue),
+				short dValue => (T) (object) GetArgumentAsShort(index, dValue),
+				ushort dValue => (T) (object) GetArgumentAsUnsignedShort(index, dValue),
 				int dValue => (T) (object) GetArgumentAsInteger(index, dValue),
+				uint dValue => (T) (object) GetArgumentAsUnsignedInteger(index, dValue),
 				long dValue => (T) (object) GetArgumentAsLong(index, dValue),
+				ulong dValue => (T) (object) GetArgumentAsUnsignedLong(index, dValue),
+				float dValue => (T) (object) GetArgumentAsFloat(index, dValue),
+				double dValue => (T) (object) GetArgumentAsDouble(index, dValue),
+				DateTime dValue => (T) (object) GetArgumentAsDateTime(index, dValue),
+				TimeSpan dValue => (T) (object) GetArgumentAsTimeSpan(index, dValue),
 				OscTimeTag dValue => (T) (object) GetArgumentAsOscTimeTag(index, dValue),
 				string dValue => (T) (object) GetArgumentAsString(index, dValue),
-				TimeSpan dValue => (T) (object) GetArgumentAsTimeSpan(index, dValue),
-				uint dValue => (T) (object) GetArgumentAsUnsignedInteger(index, dValue),
-				ulong dValue => (T) (object) GetArgumentAsUnsignedLong(index, dValue),
-				_ => (OscMessage.Arguments.Count <= index ? defaultValue : (T) OscMessage.Arguments[index])
+				Guid dValue => (T) (object) GetArgumentAsGuid(index, dValue),
+				_ => OscMessage.Arguments.Count <= index ? defaultValue : (T) OscMessage.Arguments[index]
 			};
 		}
 
@@ -244,17 +247,20 @@ namespace Sproto.OSC
 
 			return value switch
 			{
-				byte bValue => bValue,
 				DateTime time => (byte) time.Ticks,
 				OscTimeTag time => (byte) time.Value,
+				byte bValue => bValue,
+				sbyte bValue => (byte) bValue,
 				char cValue => (byte) cValue,
+				short sValue => (byte) sValue,
+				ushort sValue => (byte) sValue,
 				int iValue => (byte) iValue,
 				uint uiValue => (byte) uiValue,
 				long lValue => (byte) lValue,
 				ulong ulValue => (byte) ulValue,
 				float fValue => (byte) fValue,
 				double dValue => (byte) dValue,
-				_ => (byte.TryParse(value.ToString(), out var result) ? result : defaultValue)
+				_ => byte.TryParse(value.ToString(), out var result) ? result : defaultValue
 			};
 		}
 
@@ -294,7 +300,7 @@ namespace Sproto.OSC
 				ulong ulValue => new DateTime((long) ulValue),
 				float fValue => new DateTime((long) fValue),
 				double dValue => new DateTime((long) dValue),
-				_ => (DateTime.TryParse(value.ToString(), out var result) ? result : defaultValue)
+				_ => DateTime.TryParse(value.ToString(), out var result) ? result : defaultValue
 			};
 		}
 
@@ -348,7 +354,7 @@ namespace Sproto.OSC
 				long lValue => lValue,
 				ulong ulValue => ulValue,
 				float fValue => fValue,
-				_ => (double.TryParse(value.ToString(), out var result) ? result : defaultValue)
+				_ => double.TryParse(value.ToString(), out var result) ? result : defaultValue
 			};
 		}
 
@@ -402,7 +408,7 @@ namespace Sproto.OSC
 				long lValue => lValue,
 				ulong ulValue => ulValue,
 				double dValue => (float) dValue,
-				_ => (float.TryParse(value.ToString(), out var result) ? result : defaultValue)
+				_ => float.TryParse(value.ToString(), out var result) ? result : defaultValue
 			};
 		}
 
@@ -458,18 +464,21 @@ namespace Sproto.OSC
 
 			return value switch
 			{
-				int iValue => iValue,
 				DateTime time => (int) time.Ticks,
 				OscTimeTag time => (int) time.Value,
 				Enum eValue => Convert.ToInt32(eValue),
 				byte bValue => bValue,
+				sbyte bValue => bValue,
 				char cValue => cValue,
+				short sValue => sValue,
+				ushort sValue => sValue,
+				int iValue => iValue,
 				uint uiValue => (int) uiValue,
 				long lValue => (int) lValue,
 				ulong ulValue => (int) ulValue,
 				float fValue => (int) fValue,
 				double dValue => (int) dValue,
-				_ => (int.TryParse(value.ToString(), out var result) ? result : defaultValue)
+				_ => int.TryParse(value.ToString(), out var result) ? result : defaultValue
 			};
 		}
 
@@ -499,18 +508,21 @@ namespace Sproto.OSC
 
 			return value switch
 			{
-				long lValue => lValue,
 				DateTime time => time.Ticks,
 				OscTimeTag time => (long) time.Value,
 				Enum eValue => Convert.ToInt64(eValue),
 				byte bValue => bValue,
+				sbyte bValue => bValue,
 				char cValue => cValue,
+				short sValue => sValue,
+				ushort sValue => sValue,
 				int iValue => iValue,
 				uint uiValue => uiValue,
+				long lValue => lValue,
 				ulong ulValue => (long) ulValue,
 				float fValue => (long) fValue,
 				double dValue => (long) dValue,
-				_ => (long.TryParse(value.ToString(), out var result) ? result : defaultValue)
+				_ => long.TryParse(value.ToString(), out var result) ? result : defaultValue
 			};
 		}
 
@@ -550,7 +562,75 @@ namespace Sproto.OSC
 				ulong ulValue => new OscTimeTag(ulValue),
 				float fValue => new OscTimeTag((ulong) fValue),
 				double dValue => new OscTimeTag((ulong) dValue),
-				_ => (OscTimeTag.TryParse(value.ToString(), out var result) ? result : defaultValue)
+				_ => OscTimeTag.TryParse(value.ToString(), out var result) ? result : defaultValue
+			};
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public sbyte GetArgumentAsSByte(int index, sbyte defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			return value switch
+			{
+				DateTime time => (sbyte) time.Ticks,
+				OscTimeTag time => (sbyte) time.Value,
+				byte bValue => (sbyte) bValue,
+				sbyte bValue => bValue,
+				char cValue => (sbyte) cValue,
+				short sValue => (sbyte) sValue,
+				ushort sValue => (sbyte) sValue,
+				int iValue => (sbyte) iValue,
+				uint uiValue => (sbyte) uiValue,
+				long lValue => (sbyte) lValue,
+				ulong ulValue => (sbyte) ulValue,
+				float fValue => (sbyte) fValue,
+				double dValue => (sbyte) dValue,
+				_ => sbyte.TryParse(value.ToString(), out var result) ? result : defaultValue
+			};
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public short GetArgumentAsShort(int index, short defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			return value switch
+			{
+				DateTime time => (short) time.Ticks,
+				OscTimeTag time => (short) time.Value,
+				Enum eValue => Convert.ToInt16(eValue),
+				byte bValue => bValue,
+				sbyte bValue => bValue,
+				char cValue => (short) cValue,
+				short uValue => uValue,
+				ushort uValue => (short) uValue,
+				int iValue => (short) iValue,
+				long lValue => (short) lValue,
+				ulong ulValue => (short) ulValue,
+				float fValue => (short) fValue,
+				double dValue => (short) dValue,
+				_ => short.TryParse(value.ToString(), out var result) ? result : defaultValue
 			};
 		}
 
@@ -609,14 +689,17 @@ namespace Sproto.OSC
 				DateTime time => time.TimeOfDay,
 				OscTimeTag time => time.ToDateTime().TimeOfDay,
 				byte bValue => new TimeSpan(bValue),
+				sbyte bValue => new TimeSpan(bValue),
 				char cValue => new TimeSpan(cValue),
+				short sValue => new TimeSpan(sValue),
+				ushort sValue => new TimeSpan(sValue),
 				int iValue => new TimeSpan(iValue),
 				uint uiValue => new TimeSpan(uiValue),
 				long lValue => new TimeSpan(lValue),
 				ulong ulValue => new TimeSpan((long) ulValue),
 				float fValue => new TimeSpan((long) fValue),
 				double dValue => new TimeSpan((long) dValue),
-				_ => (TimeSpan.TryParse(value.ToString(), out var result) ? result : defaultValue)
+				_ => TimeSpan.TryParse(value.ToString(), out var result) ? result : defaultValue
 			};
 		}
 
@@ -646,18 +729,21 @@ namespace Sproto.OSC
 
 			return value switch
 			{
-				uint uiValue => uiValue,
 				DateTime time => (uint) time.Ticks,
 				OscTimeTag time => (uint) time.Value,
 				Enum eValue => Convert.ToUInt32(eValue),
 				byte bValue => bValue,
+				sbyte bValue => (uint) bValue,
 				char cValue => cValue,
+				short sValue => (uint) sValue,
+				ushort sValue => sValue,
 				int iValue => (uint) iValue,
+				uint uiValue => uiValue,
 				long lValue => (uint) lValue,
 				ulong ulValue => (uint) ulValue,
 				float fValue => (uint) fValue,
 				double dValue => (uint) dValue,
-				_ => (uint.TryParse(value.ToString(), out var result) ? result : defaultValue)
+				_ => uint.TryParse(value.ToString(), out var result) ? result : defaultValue
 			};
 		}
 
@@ -687,18 +773,55 @@ namespace Sproto.OSC
 
 			return value switch
 			{
-				ulong ulValue => ulValue,
 				DateTime time => (ulong) time.Ticks,
 				OscTimeTag time => time.Value,
 				Enum eValue => Convert.ToUInt64(eValue),
 				byte bValue => bValue,
+				sbyte bValue => (ulong) bValue,
 				char cValue => cValue,
+				short sValue => (ulong) sValue,
+				ushort sValue => sValue,
 				int iValue => (ulong) iValue,
 				uint uiValue => uiValue,
 				long lValue => (ulong) lValue,
+				ulong ulValue => ulValue,
 				float fValue => (ulong) fValue,
 				double dValue => (ulong) dValue,
-				_ => (ulong.TryParse(value.ToString(), out var result) ? result : defaultValue)
+				_ => ulong.TryParse(value.ToString(), out var result) ? result : defaultValue
+			};
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public ushort GetArgumentAsUnsignedShort(int index, ushort defaultValue = default)
+		{
+			if (OscMessage.Arguments.Count <= index)
+			{
+				return defaultValue;
+			}
+
+			var value = OscMessage.Arguments[index];
+
+			return value switch
+			{
+				DateTime time => (ushort) time.Ticks,
+				OscTimeTag time => (ushort) time.Value,
+				Enum eValue => Convert.ToUInt16(eValue),
+				byte bValue => bValue,
+				sbyte bValue => (ushort) bValue,
+				char cValue => cValue,
+				short sValue => (ushort) sValue,
+				ushort sValue => sValue,
+				int iValue => (ushort) iValue,
+				long lValue => (ushort) lValue,
+				ulong ulValue => (ushort) ulValue,
+				float fValue => (ushort) fValue,
+				double dValue => (ushort) dValue,
+				_ => ushort.TryParse(value.ToString(), out var result) ? result : defaultValue
 			};
 		}
 

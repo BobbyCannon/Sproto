@@ -235,6 +235,19 @@ namespace OSC.Tests.OSC
 		}
 
 		[TestMethod]
+		public void ToFromDateTime()
+		{
+			var dateTime1  = new DateTime(2020, 05, 14, 11, 49, 47, 231, DateTimeKind.Utc);
+			var oscTime = OscTimeTag.FromDateTime(dateTime1);
+			var dateTime2 = oscTime.ToDateTime();
+
+			dateTime1.Dump();
+			dateTime2.Dump();
+
+			Assert.AreEqual(dateTime1, dateTime2);			
+		}
+		
+		[TestMethod]
 		public void ToFromUtcNowUsingParse()
 		{
 			var time = OscTimeTag.UtcNow;

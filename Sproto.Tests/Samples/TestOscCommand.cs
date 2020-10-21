@@ -18,7 +18,7 @@ namespace OSC.Tests.Samples
 
 		#region Constructors
 
-		public TestOscCommand() : base(Command, 2)
+		public TestOscCommand() : base(Command, 3)
 		{
 		}
 
@@ -44,7 +44,11 @@ namespace OSC.Tests.Samples
 
 		public byte Rating { get; set; }
 
+		public short ShortId { get; set; }
+
 		public Guid SyncId { get; set; }
+
+		public ushort UShortId { get; set; }
 
 		public byte[] Values { get; set; }
 
@@ -75,8 +79,24 @@ namespace OSC.Tests.Samples
 			SyncId = GetArgument<Guid>();
 			Visits = GetArgument<uint>();
 			VoteId = GetArgument<long>();
-			Elapsed = GetArgument<TimeSpan>();
-			Error = GetArgument<SerialError>();
+
+			if (Version >= 2)
+			{
+				Elapsed = GetArgument<TimeSpan>();
+				Error = GetArgument<SerialError>();
+			}
+			else
+			{
+				// Default to whatever you want
+				Elapsed = TimeSpan.FromSeconds(3);
+				Error = SerialError.Overrun;
+			}
+
+			if (Version >= 3)
+			{
+				ShortId = GetArgument<short>();
+				UShortId = GetArgument<ushort>();
+			}
 		}
 
 		protected override void UpdateMessage()
@@ -89,9 +109,14 @@ namespace OSC.Tests.Samples
 					break;
 
 				case 2:
-				default:
 					// You can also use "SetArguments" to only set values
 					SetArguments(Version, Id, Name, Age, BirthDate, Height, Weight, Rating, Values, Enable, SyncId, Visits, VoteId, Elapsed, Error);
+					break;
+				
+				case 3:
+				default:
+					// You can also use "SetArguments" to only set values
+					SetArguments(Version, Id, Name, Age, BirthDate, Height, Weight, Rating, Values, Enable, SyncId, Visits, VoteId, Elapsed, Error, ShortId, UShortId);
 					break;
 			}
 		}
