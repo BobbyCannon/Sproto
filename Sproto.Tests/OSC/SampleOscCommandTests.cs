@@ -36,6 +36,91 @@ namespace OSC.Tests.OSC
 		}
 
 		[TestMethod]
+		public void DateTimeMinMaxTests()
+		{
+			var originalZone = TimeZoneHelper.GetSystemTimeZone();
+
+			try
+			{
+				var timeZones = new[] { "Pacific Standard Time", "Central Standard Time", "Eastern Standard Time" };
+
+				foreach (var zone in timeZones)
+				{
+					zone.Dump();
+
+					TimeZoneHelper.SetSystemTimeZone(zone);
+
+					var command = new SampleOscCommand { BirthDate = DateTime.MinValue };
+					var expected = "/sample,3,null,{ Time: 1900-01-01T00:00:00.000Z },False,{ SampleValue: 0,0,0 }";
+					var actual = command.ToMessage().ToString();
+					Assert.AreEqual(expected, actual);
+
+					var actualMessage = OscPacket.Parse(expected, new OscArgumentParser<SampleCustomValue>()) as OscMessage;
+					var actualCommand = OscCommand.FromMessage<SampleOscCommand>(actualMessage);
+					Assert.AreEqual(DateTime.MinValue, actualCommand.BirthDate);
+
+					command = new SampleOscCommand { BirthDate = DateTime.MaxValue };
+					expected = "/sample,3,null,{ Time: 2036-02-07T06:28:16.000Z },False,{ SampleValue: 0,0,0 }";
+					actual = command.ToMessage().ToString();
+					Assert.AreEqual(expected, actual);
+
+					actualMessage = OscPacket.Parse(expected, new OscArgumentParser<SampleCustomValue>()) as OscMessage;
+					actualCommand = OscCommand.FromMessage<SampleOscCommand>(actualMessage);
+					Assert.AreEqual(DateTime.MaxValue, actualCommand.BirthDate);
+				}
+			}
+			finally
+			{
+				TimeZoneHelper.SetSystemTimeZone(originalZone);
+			}
+		}
+
+		[TestMethod]
+		public void DateTimeZoneTest()
+		{
+			var originalZone = TimeZoneHelper.GetSystemTimeZone();
+
+			try
+			{
+				TimeZoneHelper.SetSystemTimeZone("Pacific Standard Time");
+
+				var command = new SampleOscCommand { BirthDate = new DateTime(1970, 01, 02, 0, 0, 0, DateTimeKind.Local) };
+				var expected = "/sample,3,null,{ Time: 1970-01-02T08:00:00.000Z },False,{ SampleValue: 0,0,0 }";
+				var actual = command.ToMessage().ToString();
+				Assert.AreEqual(expected, actual);
+
+				TimeZoneHelper.SetSystemTimeZone("Central Standard Time");
+				var value = DateTime.Now.IsDaylightSavingTime() ? 3 : 2;
+
+				command = new SampleOscCommand { BirthDate = new DateTime(1970, 01, 02, value, 0, 0, DateTimeKind.Local) };
+				actual = command.ToMessage().ToString();
+				Assert.AreEqual(expected, actual);
+				
+				TimeZoneHelper.SetSystemTimeZone("Eastern Standard Time");
+				value = DateTime.Now.IsDaylightSavingTime() ? 4 : 3;
+
+				command = new SampleOscCommand { BirthDate = new DateTime(1970, 01, 02, value, 0, 0, DateTimeKind.Local) };
+				actual = command.ToMessage().ToString();
+				Assert.AreEqual(expected, actual);
+			}
+			finally
+			{
+				TimeZoneHelper.SetSystemTimeZone(originalZone);
+			}
+		}
+
+		[TestMethod]
+		public void ParseWithArgumentParser()
+		{
+			var data = "/sample,3,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True,{ SampleValue: 1,2,3 }";
+			var message = OscPacket.Parse(data, new OscArgumentParser<SampleCustomValue>()) as OscMessage;
+			Assert.IsNotNull(message);
+
+			var actual = OscCommand.FromMessage<SampleOscCommand>(message);
+			Assert.AreEqual(new SampleCustomValue(1, 2, 3), actual.Value);
+		}
+		
+		[TestMethod]
 		public void ParseWithoutArgumentParser()
 		{
 			var data = "/sample,3,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True,{ SampleValue: 1,2,3 }";

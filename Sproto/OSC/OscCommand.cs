@@ -291,7 +291,6 @@ namespace Sproto.OSC
 			return value switch
 			{
 				DateTime time => time,
-				OscTimeTag time => time.ToDateTime(),
 				byte bValue => new DateTime(bValue),
 				char cValue => new DateTime(cValue),
 				int iValue => new DateTime(iValue),
@@ -300,6 +299,11 @@ namespace Sproto.OSC
 				ulong ulValue => new DateTime((long) ulValue),
 				float fValue => new DateTime((long) fValue),
 				double dValue => new DateTime((long) dValue),
+				OscTimeTag time => time <= OscTimeTag.MinValue
+					? DateTime.MinValue
+					: time >= OscTimeTag.MaxValue
+						? DateTime.MaxValue
+						: time.ToDateTime(),
 				_ => DateTime.TryParse(value.ToString(), out var result) ? result : defaultValue
 			};
 		}

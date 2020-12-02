@@ -10,7 +10,7 @@ namespace Sproto.OSC
 	/// <summary>
 	/// Time tags are represented by a 64 bit fixed point number. The first 32 bits specify the number of seconds since midnight on January 1, 1900, and 
 	/// the last 32 bits specify fractional parts of a second to a precision of about 200 picoseconds. This is the representation used by Internet NTP 
-	/// timestamps.The time tag value consisting of 63 zero bits followed by a one in the least signifigant bit is a special case meaning "immediately."
+	/// timestamps.The time tag value consisting of 63 zero bits followed by a one in the least significant bit is a special case meaning "immediately."
 	/// </summary>
 	public struct OscTimeTag : IOscArgument, IComparable<OscTimeTag>, IComparable, IEquatable<OscTimeTag>
 	{
@@ -180,6 +180,22 @@ namespace Sproto.OSC
 		/// <returns> The equivalent value as an osc time tag. </returns>
 		public static OscTimeTag FromDateTime(DateTime datetime)
 		{
+			if (datetime <= DateTime.MinValue 
+				|| datetime <= MinDateTime
+				|| datetime.ToUniversalTime() == DateTime.MinValue
+				|| datetime.ToUniversalTime() == MinDateTime)
+			{
+				return MinValue;
+			}
+			
+			if (datetime >= DateTime.MaxValue 
+				|| datetime >= MaxDateTime
+				|| datetime.ToUniversalTime() == DateTime.MaxValue
+				|| datetime.ToUniversalTime() == MaxDateTime)
+			{
+				return MaxValue;
+			}
+
 			var span = datetime.ToUniversalTime().Subtract(MinDateTime);
 			return FromTimeSpan(span);
 		}
@@ -200,7 +216,7 @@ namespace Sproto.OSC
 			var seconds = span.TotalSeconds;
 			var secondsUInt = (uint) seconds;
 			var milliseconds = span.TotalMilliseconds - (double) secondsUInt * 1000;
-			var fraction = milliseconds / 1000 * uint.MaxValue;
+			var fraction = milliseconds / 1000.0 * uint.MaxValue;
 			return new OscTimeTag(((ulong) (secondsUInt & 0xFFFFFFFF) << 32) | ((ulong) fraction & 0xFFFFFFFF));
 		}
 
