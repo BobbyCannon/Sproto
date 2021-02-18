@@ -8,7 +8,7 @@ using Sproto.OSC;
 namespace OSC.Tests.OSC
 {
 	[TestClass]
-	public class OscSymbolTests
+	public class OscSymbolTests : BaseTests
 	{
 		#region Methods
 

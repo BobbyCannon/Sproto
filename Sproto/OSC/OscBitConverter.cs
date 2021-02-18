@@ -220,10 +220,10 @@ namespace Sproto.OSC
 			return BitConverter.ToInt64(var, 0);
 		}
 
-		public static T ToOscType<T>(byte[] buffer, int index) where T : IOscArgument, new()
+		public static T ToOscType<T>(byte[] buffer, ref int index) where T : IOscArgument, new()
 		{
 			var response = new T();
-			response.ParseOscValue(buffer, index);
+			response.ParseOscValue(buffer, ref index);
 			return response;
 		}
 

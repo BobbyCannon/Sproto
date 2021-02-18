@@ -454,7 +454,7 @@ namespace Sproto.OSC
 						break;
 
 					case Guid value:
-						sb.Append($"\"{value.ToString()}\"");
+						sb.Append($"\"{value}\"");
 						break;
 
 					case Enum eValue:
@@ -593,15 +593,13 @@ namespace Sproto.OSC
 						break;
 
 					case 'r':
-						var rValue = OscBitConverter.ToOscType<OscRgba>(data, index);
+						var rValue = OscBitConverter.ToOscType<OscRgba>(data, ref index);
 						arguments.Add(rValue);
-						index += 4;
 						break;
 
 					case 'm':
-						var mValue = OscBitConverter.ToOscType<OscMidi>(data, index);
+						var mValue = OscBitConverter.ToOscType<OscMidi>(data, ref index);
 						arguments.Add(mValue);
-						index += 4;
 						break;
 
 					case 'T':
@@ -649,7 +647,8 @@ namespace Sproto.OSC
 								continue;
 							}
 
-							arguments.Add(parser.Parse(data, index));
+							var value = parser.Parse(data, ref index);
+							arguments.Add(value);
 							parsed = true;
 							break;
 						}

@@ -170,17 +170,17 @@ namespace Sproto.OSC
 			return new OscMidi(port, status, data1, data2);
 		}
 
-		public void ParseOscValue(byte[] value, int index)
+		public void ParseOscValue(byte[] value, ref int index)
 		{
 			if (value.Length <= index + 3)
 			{
 				throw new IndexOutOfRangeException();
 			}
 
-			Port = value[index];
-			Status = value[index + 1];
-			Data1 = value[index + 2];
-			Data2 = value[index + 3];
+			Port = value[index++];
+			Status = value[index++];
+			Data1 = value[index++];
+			Data2 = value[index++];
 		}
 
 		public void ParseOscValue(string value)

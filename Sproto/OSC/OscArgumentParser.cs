@@ -12,10 +12,10 @@
 
 		#region Methods
 
-		public override object Parse(byte[] buffer, int index)
+		public override object Parse(byte[] buffer, ref int index)
 		{
 			var response = new T();
-			response.ParseOscValue(buffer, index);
+			response.ParseOscValue(buffer, ref index);
 			return response;
 		}
 
@@ -60,7 +60,7 @@
 			return _stringType == value;
 		}
 
-		public abstract object Parse(byte[] buffer, int index);
+		public abstract object Parse(byte[] buffer, ref int index);
 
 		public abstract object Parse(string value);
 

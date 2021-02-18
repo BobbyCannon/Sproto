@@ -148,12 +148,12 @@ namespace Sproto.OSC
 			return new OscRgba(r, g, b, a);
 		}
 
-		public void ParseOscValue(byte[] value, int index)
+		public void ParseOscValue(byte[] value, ref int index)
 		{
-			R = value[index];
-			G = value[index + 1];
-			B = value[index + 2];
-			A = value[index + 3];
+			R = value[index++];
+			G = value[index++];
+			B = value[index++];
+			A = value[index++];
 		}
 
 		public void ParseOscValue(string value)

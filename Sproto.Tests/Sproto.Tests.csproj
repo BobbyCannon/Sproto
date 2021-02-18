@@ -43,6 +43,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseTests.cs" />
     <Compile Include="TimeZoneHelper.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="OSC\OscSymbolTests.cs" />

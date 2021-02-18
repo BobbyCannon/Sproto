@@ -2,6 +2,7 @@
 
 using System;
 using System.Globalization;
+using Speedy;
 
 #endregion
 
@@ -71,7 +72,7 @@ namespace Sproto.OSC
 		/// <summary>
 		/// Gets a OscTimeTag object that is set to the current date and time on this computer, expressed as the local time.
 		/// </summary>
-		public static OscTimeTag Now => FromDateTime(DateTime.Now);
+		public static OscTimeTag Now => FromDateTime(TimeService.Now);
 
 		/// <summary>
 		/// Gets the number of seconds including fractional parts since midnight on January 1, 1900.
@@ -91,7 +92,7 @@ namespace Sproto.OSC
 		/// <summary>
 		/// Gets a OscTimeTag object that is set to the current date and time on this computer, expressed as the Coordinated Universal Time (UTC).
 		/// </summary>
-		public static OscTimeTag UtcNow => FromDateTime(DateTime.UtcNow);
+		public static OscTimeTag UtcNow => FromDateTime(TimeService.UtcNow);
 
 		/// <summary>
 		/// Gets or set the value of the tag.
@@ -155,17 +156,12 @@ namespace Sproto.OSC
 
 		public override bool Equals(object obj)
 		{
-			switch (obj)
+			return obj switch
 			{
-				case OscTimeTag tag:
-					return Value == tag.Value;
-
-				case ulong value:
-					return Value == value;
-
-				default:
-					return false;
-			}
+				OscTimeTag tag => Value == tag.Value,
+				ulong value => Value == value,
+				_ => false
+			};
 		}
 
 		public bool Equals(OscTimeTag other)
@@ -311,9 +307,10 @@ namespace Sproto.OSC
 			throw new Exception($"Invalid OscTimeTag string \'{value}\'");
 		}
 
-		public void ParseOscValue(byte[] value, int index)
+		public void ParseOscValue(byte[] value, ref int index)
 		{
 			Value = BitConverter.ToUInt64(value, index);
+			index += 8;
 		}
 
 		public void ParseOscValue(string value)

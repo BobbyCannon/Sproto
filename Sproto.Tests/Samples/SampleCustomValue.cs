@@ -64,11 +64,6 @@ namespace OSC.Tests.Samples
 			}
 		}
 
-		public int CompareTo(object obj)
-		{
-			throw new NotImplementedException();
-		}
-
 		public char GetOscBinaryType()
 		{
 			return 'a';
@@ -135,11 +130,12 @@ namespace OSC.Tests.Samples
 			return new SampleCustomValue(start, end, volume);
 		}
 
-		public void ParseOscValue(byte[] value, int index)
+		public void ParseOscValue(byte[] value, ref int index)
 		{
 			Start = End = OscBitConverter.ToByte(value, index);
 			End = OscBitConverter.ToByte(value, index + 4);
 			Volume = OscBitConverter.ToInt32(value, index + 8);
+			index += 12;
 		}
 
 		public void ParseOscValue(string value)

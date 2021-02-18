@@ -12,7 +12,7 @@
 
 		string GetOscValueString();
 
-		void ParseOscValue(byte[] value, int index);
+		void ParseOscValue(byte[] value, ref int index);
 
 		void ParseOscValue(string value);
 

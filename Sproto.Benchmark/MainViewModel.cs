@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using PropertyChanged;
+using Speedy;
 using Sproto.OSC;
 
 #endregion
@@ -89,9 +90,9 @@ namespace OSC.Benchmark
 			{
 				if (row.Enabled)
 				{
-					var timeStart = DateTime.Now.Ticks;
+					var timeStart = TimeService.Now.Ticks;
 					row.TestMethod(row.Iterations);
-					var timeEnd = DateTime.Now.Ticks;
+					var timeEnd = TimeService.Now.Ticks;
 
 					var diff = timeEnd - (double) timeStart;
 					var av = diff / row.Iterations;
@@ -111,7 +112,7 @@ namespace OSC.Benchmark
 		{
 			for (var i = 0; i < count; i++)
 			{
-				var bundle = new OscBundle(DateTime.UtcNow, Packets);
+				var bundle = new OscBundle(TimeService.UtcNow, Packets);
 			}
 		}
 
@@ -132,7 +133,7 @@ namespace OSC.Benchmark
 		{
 			for (var i = 0; i < count; i++)
 			{
-				var bundle = new OscBundle(DateTime.UtcNow, Packets);
+				var bundle = new OscBundle(TimeService.UtcNow, Packets);
 				var buffer = bundle.ToByteArray();
 			}
 		}
@@ -141,7 +142,7 @@ namespace OSC.Benchmark
 		{
 			for (var i = 0; i < count; i++)
 			{
-				var bundle = new OscBundle(DateTime.UtcNow, Packets) { IsExtended = true };
+				var bundle = new OscBundle(TimeService.UtcNow, Packets) { IsExtended = true };
 				var buffer = bundle.ToByteArray();
 			}
 		}

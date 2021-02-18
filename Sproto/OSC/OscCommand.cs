@@ -75,6 +75,20 @@ namespace Sproto.OSC
 		/// </summary>
 		/// <typeparam name="T"> The type to be returned. </typeparam>
 		/// <param name="message"> The message to be loaded. </param>
+		/// <param name="parsers"> The optional parsers to load the message. </param>
+		/// <returns> The OscCommand with the message loaded. </returns>
+		public static T FromMessage<T>(string message, params OscArgumentParser[] parsers) where T : OscCommand, new()
+		{
+			var t = new T();
+			t.Load(OscPacket.Parse(message, parsers) as OscMessage);
+			return t;
+		}
+		
+		/// <summary>
+		/// Gets an OscCommand from an OscMessage
+		/// </summary>
+		/// <typeparam name="T"> The type to be returned. </typeparam>
+		/// <param name="message"> The message to be loaded. </param>
 		/// <returns> The OscCommand with the message loaded. </returns>
 		public static T FromMessage<T>(OscMessage message) where T : OscCommand, new()
 		{
@@ -148,20 +162,13 @@ namespace Sproto.OSC
 		/// <returns> The argument if found or default value if not. </returns>
 		public T GetArgument<T>(int index, OscArgumentParser<T> parser, T defaultValue = default) where T : IOscArgument, new()
 		{
-			switch (OscMessage.Arguments[index])
+			return OscMessage.Arguments[index] switch
 			{
-				case T typeArgument:
-					return typeArgument;
-
-				case string value:
-					return (T) parser.Parse(value);
-
-				case byte[] value:
-					return (T) parser.Parse(value, 0);
-
-				default:
-					return defaultValue;
-			}
+				T typeArgument => typeArgument,
+				string value => (T) parser.Parse(value),
+				byte[] value => (T) parser.Parse(value, ref index),
+				_ => defaultValue
+			};
 		}
 
 		/// <summary>

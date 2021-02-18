@@ -31,6 +31,8 @@ namespace OSC.Tests.Samples
 
 		public string Name { get; set; }
 
+		public OscTimeTag Timestamp { get; set; }
+
 		public SampleCustomValue Value { get; set; }
 
 		#endregion
@@ -65,11 +67,13 @@ namespace OSC.Tests.Samples
 			if (Version >= 3)
 			{
 				Value = GetArgument<SampleCustomValue>();
+				Timestamp = GetArgument<OscTimeTag>();
 			}
 			else
 			{
 				// Load old version defaults here!
 				Value = new SampleCustomValue(0, 0, 0);
+				Timestamp = OscTimeTag.MinValue;
 			}
 		}
 
@@ -89,7 +93,7 @@ namespace OSC.Tests.Samples
 				// Always default to the latest
 				case 3:
 				default:
-					SetArguments(Version, Name, BirthDate, Enabled, Value);
+					SetArguments(Version, Name, BirthDate, Enabled, Value, Timestamp);
 					break;
 			}
 		}

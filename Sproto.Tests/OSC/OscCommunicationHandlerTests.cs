@@ -10,7 +10,7 @@ using Sproto.OSC;
 namespace OSC.Tests.OSC
 {
 	[TestClass]
-	public class OscCommunicationHandlerTests
+	public class OscCommunicationHandlerTests : BaseTests
 	{
 		#region Methods
 

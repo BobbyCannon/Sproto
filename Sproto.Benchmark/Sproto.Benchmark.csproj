@@ -99,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="PropertyChanged.Fody">
+      <PrivateAssets>All</PrivateAssets> 
       <Version>3.3.1</Version>
     </PackageReference>
   </ItemGroup>

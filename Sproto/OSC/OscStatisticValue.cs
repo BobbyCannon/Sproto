@@ -3,6 +3,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Speedy;
 
 #endregion
 
@@ -62,7 +63,7 @@ namespace Sproto.OSC
 
 		public void UpdateRate()
 		{
-			var now = DateTime.Now;
+			var now = TimeService.Now;
 			var time = now - _lastUpdate;
 
 			if (time < UpdateInterval)

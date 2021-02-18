@@ -23,19 +23,19 @@ namespace Sproto.Internal
 			return len;
 		}
 
-		public static int FirstIndexAfter<T>(this IEnumerable<T> items, int start, Func<T, bool> predicate)
+		public static int FirstIndexAfter<T>(this T[] items, int start, Func<T, bool> predicate)
 		{
 			if (items == null)
 			{
-				throw new ArgumentNullException("items");
+				throw new ArgumentNullException(nameof(items));
 			}
 			if (predicate == null)
 			{
-				throw new ArgumentNullException("predicate");
+				throw new ArgumentNullException(nameof(predicate));
 			}
 			if (start >= items.Count())
 			{
-				throw new ArgumentOutOfRangeException("start");
+				throw new ArgumentOutOfRangeException(nameof(start));
 			}
 
 			var retVal = 0;
@@ -48,27 +48,6 @@ namespace Sproto.Internal
 				retVal++;
 			}
 			return -1;
-		}
-
-		public static List<List<T>> Split<T>(this IEnumerable<T> data, Func<T, bool> predicate)
-		{
-			var output = new List<List<T>>();
-			var curr = new List<T>();
-			output.Add(curr);
-			foreach (var x in data)
-			{
-				if (predicate(x))
-				{
-					curr = new List<T>();
-					output.Add(curr);
-				}
-				else
-				{
-					curr.Add(x);
-				}
-			}
-
-			return output;
 		}
 
 		public static T[] SubArray<T>(this T[] data, int index, int length)

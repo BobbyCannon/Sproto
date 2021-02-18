@@ -12,7 +12,7 @@ using Sproto.OSC;
 namespace OSC.Tests.OSC
 {
 	[TestClass]
-	public class OscSlipTests
+	public class OscSlipTests : BaseTests
 	{
 		#region Methods
 
