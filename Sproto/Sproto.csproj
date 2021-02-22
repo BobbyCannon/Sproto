@@ -10,35 +10,11 @@
 		<Company>Bobby Cannon</Company>
 		<Product>Sproto</Product>
 		<Description>A set of protocols useful for serial interfaces.</Description>
-		<Copyright>© Copyright 2019</Copyright>
+		<Copyright>© Copyright 2019-2021</Copyright>
 		<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-		<AssemblyVersion>2.0.0.0</AssemblyVersion>
-		<FileVersion>2.0.0.0</FileVersion>
-	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-		<DebugSymbols>true</DebugSymbols>
-		<DebugType>full</DebugType>
-		<Optimize>false</Optimize>
-		<OutputPath>bin\Debug\</OutputPath>
-		<DefineConstants>DEBUG;TRACE</DefineConstants>
-		<ErrorReport>prompt</ErrorReport>
-		<WarningLevel>4</WarningLevel>
-		<DocumentationFile></DocumentationFile>
-		<Prefer32Bit>false</Prefer32Bit>
-	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-		<DebugType>pdbonly</DebugType>
-		<Optimize>true</Optimize>
-		<OutputPath>bin\Release\</OutputPath>
-		<DefineConstants>TRACE</DefineConstants>
-		<ErrorReport>prompt</ErrorReport>
-		<WarningLevel>4</WarningLevel>
-		<Prefer32Bit>false</Prefer32Bit>
-	</PropertyGroup>
-	<PropertyGroup>
+		<AssemblyVersion>2.0.1.0</AssemblyVersion>
+		<FileVersion>2.0.1.0</FileVersion>
 		<PackageIcon>Sproto.png</PackageIcon>
-	</PropertyGroup>
-	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 		<ProjectGuid>{DE1FCAF6-D683-44B7-B8E3-FF6A19569C16}</ProjectGuid>
@@ -57,7 +33,7 @@
 		<RepositoryUrl>https://github.com/BobbyCannon/Sproto</RepositoryUrl>
 		<RepositoryType></RepositoryType>
 		<PackageTags>Sproto OSC Serial SerialPort Protocol</PackageTags>
-		<Version>2.0.0.0</Version>
+		<Version>2.0.1.0</Version>
 		<Authors>Bobby Cannon</Authors>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
@@ -68,8 +44,8 @@
 		<None Include="License.txt" Pack="true" PackagePath="$(PackageLicenseFile)" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Speedy" Version="7.0.3" />
-		<PackageReference Include="System.IO.Ports" Version="4.7.0" />
+		<PackageReference Include="Speedy" Version="7.0.4" />
+		<PackageReference Include="System.IO.Ports" Version="5.0.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="Sproto.png" Pack="true" PackagePath="\" />

@@ -40,6 +40,7 @@ try
 
 	# Prepare the build for versioning!
 	$newVersion = .\IncrementVersion.ps1 -Build $BuildNumber
+	$newVersion
 	
 	& nuget.exe restore "$scriptPath\$productName.sln"
 

@@ -5,7 +5,8 @@
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:benchmark="clr-namespace:OSC.Benchmark"
 		mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=benchmark:MainViewModel}"
-		Title="OSC Benchmarks" Height="450" Width="800">
+		Title="OSC Benchmarks" Height="450" Width="800"
+		WindowStartupLocation="CenterScreen">
 	<Window.Resources>
 		<Style TargetType="Button">
 			<Setter Property="Padding" Value="8,4" />
