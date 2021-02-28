@@ -10,16 +10,16 @@ $ErrorActionPreference = "STOP"
 
 Clear-Host
 
-$versionFull = "2.0.0.0"
-$version = "2.0.0"
+$versionFull = "2.0.1.0"
+$version = "2.0.1"
 $files = Get-ChildItem $ProjectPath *.csproj -Recurse | Select-Object Fullname
 
-$speedyR = "<Reference Include=`"Sproto, Version=$($versionFull), Culture=neutral, PublicKeyToken=8db7b042d9663bf8, processorArchitecture=MSIL`"><HintPath>..\packages\Sproto.$version\lib\netstandard2.0\Sproto.dll</HintPath></Reference>"
-$speedyPR = "<PackageReference Include=`"Sproto`" Version=`"$version`" />"
-$speedyPR2 = "<PackageReference Include=`"Sproto`"><Version>$version</Version></PackageReference>"
-$speedyPCR = "<Reference Include=`"Sproto, Version=$($versionFull), Culture=neutral, PublicKeyToken=8db7b042d9663bf8, processorArchitecture=MSIL`"><HintPath>..\packages\Sproto.$version\lib\netstandard2.0\Sproto.dll</HintPath></Reference>"
+$sprotoR = "<Reference Include=`"Sproto, Version=$($versionFull), Culture=neutral, processorArchitecture=MSIL`"><HintPath>..\packages\Sproto.$version\lib\netstandard2.0\Sproto.dll</HintPath></Reference>"
+$sprotoPR = "<PackageReference Include=`"Sproto`" Version=`"$version`" />"
+$sprotoPR2 = "<PackageReference Include=`"Sproto`"><Version>$version</Version></PackageReference>"
+$sprotoPCR = "<Reference Include=`"Sproto, Version=$($versionFull), Culture=neutral, processorArchitecture=MSIL`"><HintPath>..\packages\Sproto.$version\lib\netstandard2.0\Sproto.dll</HintPath></Reference>"
 
-$speedyNR = "<Reference Include=`"Sproto`"><HintPath>C:\Workspaces\GitHub\Sproto\Sproto.EntityFramework\bin\Debug\netstandard2.0\Sproto.dll</HintPath></Reference>"
+$sprotoNR = "<Reference Include=`"Sproto`"><HintPath>C:\Workspaces\GitHub\Sproto\Sproto\bin\Debug\netstandard2.0\Sproto.dll</HintPath></Reference>"
 
 foreach ($file in $files)
 {
@@ -37,18 +37,18 @@ foreach ($file in $files)
 	{
 		if ($packageExists)
 		{
-			$data = $data.Replace($speedyNR, $speedyPCR)
+			$data = $data.Replace($sprotoNR, $sprotoPCR)
 		}
 		else
 		{
-			$data = $data.Replace($speedyNR, $speedyPR)
+			$data = $data.Replace($sprotoNR, $sprotoPR)
 		}
 	}
 	else
 	{
-		$data = $data.Replace($speedyR, $speedyNR)
-		$data = $data.Replace($speedyPR, $speedyNR)
-		$data = $data.Replace($speedyPR2, $speedyNR)
+		$data = $data.Replace($sprotoR, $sprotoNR)
+		$data = $data.Replace($sprotoPR, $sprotoNR)
+		$data = $data.Replace($sprotoPR2, $sprotoNR)
 	}
 	
 	$data = Format-Xml -Data $data -IndentCount 4 -IndentCharacter ' '
