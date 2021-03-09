@@ -1,6 +1,7 @@
 ﻿#region References
 
 using System;
+using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OSC.Tests.Samples;
 using Speedy;
@@ -171,6 +172,7 @@ namespace OSC.Tests.OSC
 			Assert.IsNotNull(message);
 
 			var actual = OscCommand.FromMessage<SampleOscCommand>(message);
+			Assert.AreEqual(new DateTime(2020, 02, 14, 11, 36, 15, DateTimeKind.Utc), actual.BirthDate);
 			Assert.AreEqual(new SampleCustomValue(1, 2, 3), actual.Value);
 		}
 		
