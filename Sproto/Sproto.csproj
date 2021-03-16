@@ -1,53 +1,53 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Configurations>Debug;Release</Configurations>
-        <SignAssembly>true</SignAssembly>
-        <DelaySign>false</DelaySign>
-        <AssemblyTitle>OSC</AssemblyTitle>
-        <Company>Bobby Cannon</Company>
-        <Product>Sproto</Product>
-        <Description>A set of protocols useful for serial interfaces.</Description>
-        <Copyright>© Copyright 2019-2021</Copyright>
-        <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-        <AssemblyVersion>2.0.4.0</AssemblyVersion>
-        <FileVersion>2.0.4.0</FileVersion>
-        <PackageIcon>Sproto.png</PackageIcon>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{DE1FCAF6-D683-44B7-B8E3-FF6A19569C16}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>Sproto</RootNamespace>
-        <AssemblyName>Sproto</AssemblyName>
-        <FileAlignment>512</FileAlignment>
-        <TargetFrameworkProfile />
-        <SignAssembly>true</SignAssembly>
-        <DelaySign>false</DelaySign>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageIconUrl>https://raw.githubusercontent.com/BobbyCannon/Sproto/master/Sproto.png</PackageIconUrl>
-        <PackageProjectUrl>https://github.com/BobbyCannon/Sproto</PackageProjectUrl>
-        <PackageLicenseFile>License.txt</PackageLicenseFile>
-        <RepositoryUrl>https://github.com/BobbyCannon/Sproto</RepositoryUrl>
-        <RepositoryType></RepositoryType>
-        <PackageTags>Sproto OSC Serial SerialPort Protocol</PackageTags>
-        <Version>2.0.4.0</Version>
-        <Authors>Bobby Cannon</Authors>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-    <ItemGroup>
-        <None Remove="Speedy.png" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="License.txt" Pack="true" PackagePath="$(PackageLicenseFile)" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Speedy" Version="8.0.3" />
-        <PackageReference Include="System.IO.Ports" Version="5.0.1" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Sproto.png" Pack="true" PackagePath="\" />
-    </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Configurations>Debug;Release</Configurations>
+		<SignAssembly>true</SignAssembly>
+		<DelaySign>false</DelaySign>
+		<AssemblyTitle>OSC</AssemblyTitle>
+		<Company>Bobby Cannon</Company>
+		<Product>Sproto</Product>
+		<Description>A set of protocols useful for serial interfaces.</Description>
+		<Copyright>© Copyright 2019-2021</Copyright>
+		<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+		<AssemblyVersion>2.0.5.0</AssemblyVersion>
+		<FileVersion>2.0.5.0</FileVersion>
+		<PackageIcon>Sproto.png</PackageIcon>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+		<ProjectGuid>{DE1FCAF6-D683-44B7-B8E3-FF6A19569C16}</ProjectGuid>
+		<OutputType>Library</OutputType>
+		<AppDesignerFolder>Properties</AppDesignerFolder>
+		<RootNamespace>Sproto</RootNamespace>
+		<AssemblyName>Sproto</AssemblyName>
+		<FileAlignment>512</FileAlignment>
+		<TargetFrameworkProfile />
+		<SignAssembly>true</SignAssembly>
+		<DelaySign>false</DelaySign>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageIconUrl>https://raw.githubusercontent.com/BobbyCannon/Sproto/master/Sproto.png</PackageIconUrl>
+		<PackageProjectUrl>https://github.com/BobbyCannon/Sproto</PackageProjectUrl>
+		<PackageLicenseFile>License.txt</PackageLicenseFile>
+		<RepositoryUrl>https://github.com/BobbyCannon/Sproto</RepositoryUrl>
+		<RepositoryType></RepositoryType>
+		<PackageTags>Sproto OSC Serial SerialPort Protocol</PackageTags>
+		<Version>2.0.5.0</Version>
+		<Authors>Bobby Cannon</Authors>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="Speedy.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="License.txt" Pack="true" PackagePath="$(PackageLicenseFile)" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Speedy" Version="8.0.4" />
+		<PackageReference Include="System.IO.Ports" Version="5.0.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="Sproto.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
 </Project>
