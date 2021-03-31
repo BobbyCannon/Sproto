@@ -4,13 +4,13 @@
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<UseWPF>true</UseWPF>
-		<AssemblyVersion>2.0.5.0</AssemblyVersion>
-		<FileVersion>2.0.5.0</FileVersion>
-		<Version>2.0.5.0</Version>
+		<AssemblyVersion>2.0.6.0</AssemblyVersion>
+		<FileVersion>2.0.6.0</FileVersion>
+		<Version>2.0.6.0</Version>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Speedy" Version="8.0.4" />
-		<PackageReference Include="System.IO.Ports" Version="5.0.1" />
+		<PackageReference Include="System.IO.Ports" Version="[4.7.0]" />
 		<PackageReference Include="PropertyChanged.Fody" Version="3.3.3" PrivateAssets="All" />
 	</ItemGroup>
 	<ItemGroup>
