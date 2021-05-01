@@ -5,7 +5,7 @@ using System.Text;
 
 #endregion
 
-namespace Sproto.OSC
+namespace Sproto.Osc
 {
 	public class OscError : OscPacket
 	{

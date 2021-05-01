@@ -3,11 +3,10 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sproto;
 
 #endregion
 
-namespace OSC.Tests
+namespace Sproto.Tests
 {
 	[TestClass]
 	public class ExtensionTests

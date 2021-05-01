@@ -6,7 +6,7 @@ using System.Windows.Input;
 
 #endregion
 
-namespace OSC.Benchmark
+namespace Sproto.Benchmark
 {
 	/// <summary>
 	/// A command whose sole purpose is to relay its functionality to other objects by invoking delegates. The

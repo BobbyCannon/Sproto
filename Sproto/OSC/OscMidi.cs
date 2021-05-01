@@ -5,7 +5,7 @@ using System.Globalization;
 
 #endregion
 
-namespace Sproto.OSC
+namespace Sproto.Osc
 {
 	public struct OscMidi : IOscArgument, IEquatable<OscMidi>
 	{

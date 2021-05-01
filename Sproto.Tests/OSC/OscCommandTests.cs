@@ -4,13 +4,12 @@ using System;
 using System.IO.Ports;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OSC.Tests.Samples;
-using Sproto;
-using Sproto.OSC;
+using Sproto.Osc;
+using Sproto.Tests.Samples;
 
 #endregion
 
-namespace OSC.Tests.OSC
+namespace Sproto.Tests.Osc
 {
 	[TestClass]
 	public class OscCommandTests : BaseTests
@@ -109,7 +108,7 @@ namespace OSC.Tests.OSC
 			var actualCommand = new TestOscCommand();
 			actualCommand.Load(actualMessage);
 			Extensions.AreEqual(command, actualCommand, membersToIgnore: new[] { nameof(OscCommand.HasBeenRead) });
-			
+
 			command = GetTestCommand();
 			command.Version = 2;
 			// Defaults for newer versions
@@ -123,7 +122,7 @@ namespace OSC.Tests.OSC
 			actualCommand = new TestOscCommand();
 			actualCommand.Load(actualMessage);
 			Extensions.AreEqual(command, actualCommand, membersToIgnore: new[] { nameof(OscCommand.HasBeenRead) });
-			
+
 			command = GetTestCommand();
 			command.Version = 3;
 			actual = command.ToString();

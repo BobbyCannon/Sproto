@@ -7,11 +7,11 @@ using System.Linq;
 using System.Windows.Input;
 using PropertyChanged;
 using Speedy;
-using Sproto.OSC;
+using Sproto.Osc;
 
 #endregion
 
-namespace OSC.Benchmark
+namespace Sproto.Benchmark
 {
 	[AddINotifyPropertyChangedInterface]
 	public class MainViewModel

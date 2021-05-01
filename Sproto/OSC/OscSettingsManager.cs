@@ -8,7 +8,7 @@ using System.Linq;
 
 #endregion
 
-namespace Sproto.OSC
+namespace Sproto.Osc
 {
 	public class OscSettingsManager : IEnumerable<OscSetting>
 	{

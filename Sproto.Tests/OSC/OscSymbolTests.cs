@@ -1,11 +1,11 @@
 ﻿#region References
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sproto.OSC;
+using Sproto.Osc;
 
 #endregion
 
-namespace OSC.Tests.OSC
+namespace Sproto.Tests.Osc
 {
 	[TestClass]
 	public class OscSymbolTests : BaseTests

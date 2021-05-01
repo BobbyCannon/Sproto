@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 #endregion
 
-namespace OSC.Tests
+namespace Sproto.Tests
 {
 	public static class Extensions
 	{

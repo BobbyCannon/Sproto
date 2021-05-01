@@ -6,7 +6,7 @@ using Speedy;
 
 #endregion
 
-namespace OSC.Tests
+namespace Sproto.Tests
 {
 	public abstract class BaseTests
 	{

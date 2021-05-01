@@ -1,4 +1,4 @@
-﻿namespace Sproto.OSC
+﻿namespace Sproto.Osc
 {
 	public class OscArgumentParser<T> : OscArgumentParser where T : IOscArgument, new()
 	{

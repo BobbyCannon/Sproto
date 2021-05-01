@@ -1,11 +1,11 @@
 ﻿#region References
 
 using System;
-using Sproto.OSC;
+using Sproto.Osc;
 
 #endregion
 
-namespace OSC.Tests.Samples
+namespace Sproto.Tests.Samples
 {
 	public class SampleOscCommand : OscCommand
 	{

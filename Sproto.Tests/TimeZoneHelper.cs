@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 #endregion
 
-namespace OSC.Tests
+namespace Sproto.Tests
 {
 	public static class TimeZoneHelper
 	{

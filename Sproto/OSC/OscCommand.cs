@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 #endregion
 
-namespace Sproto.OSC
+namespace Sproto.Osc
 {
 	public abstract class OscCommand : INotifyPropertyChanged
 	{
@@ -83,7 +83,7 @@ namespace Sproto.OSC
 			t.Load(OscPacket.Parse(message, parsers) as OscMessage);
 			return t;
 		}
-		
+
 		/// <summary>
 		/// Gets an OscCommand from an OscMessage
 		/// </summary>

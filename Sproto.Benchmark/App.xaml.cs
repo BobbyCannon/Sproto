@@ -4,7 +4,7 @@ using System.Windows;
 
 #endregion
 
-namespace OSC.Benchmark
+namespace Sproto.Benchmark
 {
 	/// <summary>
 	/// Interaction logic for App.xaml

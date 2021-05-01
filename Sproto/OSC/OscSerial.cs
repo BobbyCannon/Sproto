@@ -5,7 +5,7 @@ using System.IO.Ports;
 
 #endregion
 
-namespace Sproto.OSC
+namespace Sproto.Osc
 {
 	public class OscSerial : IDisposable
 	{

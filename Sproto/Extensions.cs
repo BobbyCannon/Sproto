@@ -9,7 +9,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Sproto.OSC;
+using Sproto.Osc;
 
 #endregion
 
@@ -334,7 +334,7 @@ namespace Sproto
 				{
 					return iValue;
 				}
-				
+
 				if (hexString.Length <= 9 && hexString[hexString.Length - 1] == 'u' && uint.TryParse(hexString.Substring(0, hexString.Length - 1), NumberStyles.HexNumber, provider, out var uiValue))
 				{
 					return uiValue;
@@ -344,12 +344,12 @@ namespace Sproto
 				{
 					return lValue;
 				}
-				
+
 				if (hexString.Length <= 17 && hexString[hexString.Length - 1] == 'L' && long.TryParse(hexString.Substring(0, hexString.Length - 1), NumberStyles.HexNumber, provider, out var lValue2))
 				{
 					return lValue2;
 				}
-				
+
 				if (ulong.TryParse(hexString.Substring(0, hexString.Length - 1), NumberStyles.HexNumber, provider, out var value))
 				{
 					return value;
@@ -413,7 +413,7 @@ namespace Sproto
 					{
 						return value32;
 					}
-					
+
 					if (long.TryParse(argString, NumberStyles.Integer, provider, out var value64))
 					{
 						return value64;
@@ -646,7 +646,7 @@ namespace Sproto
 			var chars = new char[count];
 			var hexCountIndex = 0;
 			var j = 0;
-			
+
 			// actually populate the array
 			for (var i = 0; i < value.Length; i++)
 			{
@@ -691,7 +691,7 @@ namespace Sproto
 						case 'r':
 							chars[j++] = '\r';
 							break;
-						
+
 						case 't':
 							chars[j++] = '\t';
 							break;
@@ -707,7 +707,7 @@ namespace Sproto
 						case '\'':
 							chars[j++] = '\'';
 							break;
-						
+
 						case '"':
 							chars[j++] = '"';
 							break;
@@ -721,7 +721,7 @@ namespace Sproto
 								chars[j++] = value[++i];
 							}
 							break;
-						
+
 						case 'u':
 							chars[j++] = (char) ((Uri.FromHex(value[++i]) << 12) | (Uri.FromHex(value[++i]) << 8) | (Uri.FromHex(value[++i]) << 4) | Uri.FromHex(value[++i]));
 							break;

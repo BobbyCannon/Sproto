@@ -7,7 +7,7 @@ using Sproto.Internal;
 
 #endregion
 
-namespace Sproto.OSC
+namespace Sproto.Osc
 {
 	public abstract class OscPacket
 	{

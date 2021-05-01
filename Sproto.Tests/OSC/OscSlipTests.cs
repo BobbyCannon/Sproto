@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sproto.OSC;
+using Sproto.Osc;
 
 #endregion
 
-namespace OSC.Tests.OSC
+namespace Sproto.Tests.Osc
 {
 	[TestClass]
 	public class OscSlipTests : BaseTests

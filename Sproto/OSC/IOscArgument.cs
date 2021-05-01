@@ -1,4 +1,4 @@
-﻿namespace Sproto.OSC
+﻿namespace Sproto.Osc
 {
 	public interface IOscArgument
 	{

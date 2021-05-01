@@ -5,7 +5,7 @@ using PropertyChanged;
 
 #endregion
 
-namespace OSC.Benchmark
+namespace Sproto.Benchmark
 {
 	[AddINotifyPropertyChangedInterface]
 	public class BenchmarkTest

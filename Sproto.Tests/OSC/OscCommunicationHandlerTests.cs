@@ -2,12 +2,12 @@
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OSC.Tests.Samples;
-using Sproto.OSC;
+using Sproto.Osc;
+using Sproto.Tests.Samples;
 
 #endregion
 
-namespace OSC.Tests.OSC
+namespace Sproto.Tests.Osc
 {
 	[TestClass]
 	public class OscCommunicationHandlerTests : BaseTests

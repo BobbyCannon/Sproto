@@ -4,12 +4,11 @@ using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
-using Sproto;
-using Sproto.OSC;
+using Sproto.Osc;
 
 #endregion
 
-namespace OSC.Tests.OSC
+namespace Sproto.Tests.Osc
 {
 	[TestClass]
 	public class OscMessageTests : BaseTests
@@ -242,7 +241,7 @@ namespace OSC.Tests.OSC
 		public void ToBytesForTimeTag()
 		{
 			var message = new OscMessage("/a", new OscTimeTag(new DateTime(2020, 02, 13, 01, 45, 13, DateTimeKind.Utc)));
-			((OscTimeTag)message.Arguments[0]).Value.Dump();
+			((OscTimeTag) message.Arguments[0]).Value.Dump();
 
 			//                             /     a                 ,     t     
 			var expected = new byte[] { 0x2F, 0x61, 0x00, 0x00, 0x2C, 0x74, 0x00, 0x00, 0xE1, 0xEF, 0x28, 0xA9, 0x00, 0x00, 0x00, 0x00 };

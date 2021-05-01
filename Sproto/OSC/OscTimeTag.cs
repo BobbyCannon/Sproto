@@ -6,11 +6,11 @@ using Speedy;
 
 #endregion
 
-namespace Sproto.OSC
+namespace Sproto.Osc
 {
 	/// <summary>
-	/// Time tags are represented by a 64 bit fixed point number. The first 32 bits specify the number of seconds since midnight on January 1, 1900, and 
-	/// the last 32 bits specify fractional parts of a second to a precision of about 200 picoseconds. This is the representation used by Internet NTP 
+	/// Time tags are represented by a 64 bit fixed point number. The first 32 bits specify the number of seconds since midnight on January 1, 1900, and
+	/// the last 32 bits specify fractional parts of a second to a precision of about 200 picoseconds. This is the representation used by Internet NTP
 	/// timestamps.The time tag value consisting of 63 zero bits followed by a one in the least significant bit is a special case meaning "immediately."
 	/// </summary>
 	public struct OscTimeTag : IOscArgument, IComparable<OscTimeTag>, IComparable, IEquatable<OscTimeTag>
@@ -32,7 +32,7 @@ namespace Sproto.OSC
 		/// The minimum date for any OscTimeTag.
 		/// </summary>
 		public static readonly DateTime MaxDateTime;
-		
+
 		/// <summary>
 		/// The minimum date for any OscTimeTag.
 		/// </summary>
@@ -77,7 +77,7 @@ namespace Sproto.OSC
 		/// <summary>
 		/// Gets the number of seconds including fractional parts since midnight on January 1, 1900.
 		/// </summary>
-		public decimal PreciseValue => Seconds + (decimal) (SubSeconds / (double) uint.MaxValue);
+		public decimal PreciseValue => Seconds + (SubSeconds / (decimal) uint.MaxValue);
 
 		/// <summary>
 		/// Gets the number of seconds since midnight on January 1, 1900. This is the first 32 bits of the 64 bit fixed point OscTimeTag value.
@@ -176,15 +176,15 @@ namespace Sproto.OSC
 		/// <returns> The equivalent value as an osc time tag. </returns>
 		public static OscTimeTag FromDateTime(DateTime datetime)
 		{
-			if (datetime <= DateTime.MinValue 
+			if (datetime <= DateTime.MinValue
 				|| datetime <= MinDateTime
 				|| datetime.ToUniversalTime() == DateTime.MinValue
 				|| datetime.ToUniversalTime() == MinDateTime)
 			{
 				return MinValue;
 			}
-			
-			if (datetime >= DateTime.MaxValue 
+
+			if (datetime >= DateTime.MaxValue
 				|| datetime >= MaxDateTime
 				|| datetime.ToUniversalTime() == DateTime.MaxValue
 				|| datetime.ToUniversalTime() == MaxDateTime)
@@ -201,7 +201,7 @@ namespace Sproto.OSC
 			var span = TimeSpan.FromMilliseconds(value);
 			return FromTimeSpan(span);
 		}
-		
+
 		/// <summary>
 		/// Get a OscTimeTag from a TimeSpan value.
 		/// </summary>

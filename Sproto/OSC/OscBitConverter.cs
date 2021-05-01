@@ -6,7 +6,7 @@ using Sproto.Internal;
 
 #endregion
 
-namespace Sproto.OSC
+namespace Sproto.Osc
 {
 	public static class OscBitConverter
 	{

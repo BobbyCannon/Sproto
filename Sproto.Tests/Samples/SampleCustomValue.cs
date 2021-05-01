@@ -3,11 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Sproto.OSC;
+using Sproto.Osc;
 
 #endregion
 
-namespace OSC.Tests.Samples
+namespace Sproto.Tests.Samples
 {
 	public struct SampleCustomValue : IOscArgument, IEquatable<SampleCustomValue>
 	{

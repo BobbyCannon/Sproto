@@ -2,11 +2,11 @@
 
 using System;
 using System.IO.Ports;
-using Sproto.OSC;
+using Sproto.Osc;
 
 #endregion
 
-namespace OSC.Tests.Samples
+namespace Sproto.Tests.Samples
 {
 	public class TestOscCommand : OscCommand
 	{
@@ -112,7 +112,7 @@ namespace OSC.Tests.Samples
 					// You can also use "SetArguments" to only set values
 					SetArguments(Version, Id, Name, Age, BirthDate, Height, Weight, Rating, Values, Enable, SyncId, Visits, VoteId, Elapsed, Error);
 					break;
-				
+
 				case 3:
 				default:
 					// You can also use "SetArguments" to only set values

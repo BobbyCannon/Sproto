@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace Sproto.OSC
+namespace Sproto.Osc
 {
 	public abstract class OscSetting : OscCommand
 	{

@@ -2,30 +2,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using Newtonsoft.Json;
-using Sproto.OSC;
+using Sproto.Osc;
 
 #endregion
 
-namespace OSC.Tests.OSC
+namespace Sproto.Tests.Osc
 {
 	[TestClass]
 	public class OscTimeTagTests : BaseTests
 	{
 		#region Methods
-
-		[TestMethod]
-		public void GetHashCodeShouldSucceed()
-		{
-			Assert.AreEqual(0, new OscTimeTag().GetHashCode());
-			Assert.AreEqual(0, OscTimeTag.MinValue.GetHashCode());
-			Assert.AreEqual(1895321856, new OscTimeTag(new DateTime(2020, 02, 14, 04, 35, 12, DateTimeKind.Utc)).GetHashCode());
-			Assert.AreEqual(1878481506, new OscTimeTag(16136033268821655552).GetHashCode());
-			Assert.AreEqual(2147483647, OscTimeTag.MaxValue.GetHashCode());
-		}
 
 		[TestMethod]
 		public void AddTimeSpan()
@@ -68,8 +55,8 @@ namespace OSC.Tests.OSC
 		{
 			var values = new List<(DateTime, ulong, string)>
 			{
-				( new DateTime(2019, 1, 20, 08, 50, 12, DateTimeKind.Utc), 16136033268821655552, "2019-01-20T08:50:12.000Z" ),
-				( new DateTime(2019, 1, 20, 03, 50, 12, DateTimeKind.Local), 16136033268821655552, "2019-01-20T08:50:12.000Z" ),
+				(new DateTime(2019, 1, 20, 08, 50, 12, DateTimeKind.Utc), 16136033268821655552, "2019-01-20T08:50:12.000Z"),
+				(new DateTime(2019, 1, 20, 03, 50, 12, DateTimeKind.Local), 16136033268821655552, "2019-01-20T08:50:12.000Z")
 			};
 
 			foreach (var e in values)
@@ -123,12 +110,12 @@ namespace OSC.Tests.OSC
 		{
 			var values = new List<(ulong, string)>
 			{
-				( 16280353193693544448, "2020-02-13T06:45:13.000Z" ),
-				( 16163728278807480631, "2019-04-05T00:00:59.001Z" ),
-				( 16163728278846135336, "2019-04-05T00:00:59.010Z" ),
-				( 16163728278803185664, "2019-04-05T00:00:59.000Z" ),
-				( 16163728025400115200, "2019-04-05T00:00:00.000Z" ),
-				( 16181735293039820143, "2019-05-23T12:37:23.715Z" )
+				(16280353193693544448, "2020-02-13T06:45:13.000Z"),
+				(16163728278807480631, "2019-04-05T00:00:59.001Z"),
+				(16163728278846135336, "2019-04-05T00:00:59.010Z"),
+				(16163728278803185664, "2019-04-05T00:00:59.000Z"),
+				(16163728025400115200, "2019-04-05T00:00:00.000Z"),
+				(16181735293039820143, "2019-05-23T12:37:23.715Z")
 			};
 
 			foreach (var e in values)
@@ -138,6 +125,16 @@ namespace OSC.Tests.OSC
 				Assert.AreEqual(e.Item1, actual.Value);
 				Assert.AreEqual(e.Item2, actual.ToString());
 			}
+		}
+
+		[TestMethod]
+		public void GetHashCodeShouldSucceed()
+		{
+			Assert.AreEqual(0, new OscTimeTag().GetHashCode());
+			Assert.AreEqual(0, OscTimeTag.MinValue.GetHashCode());
+			Assert.AreEqual(1895321856, new OscTimeTag(new DateTime(2020, 02, 14, 04, 35, 12, DateTimeKind.Utc)).GetHashCode());
+			Assert.AreEqual(1878481506, new OscTimeTag(16136033268821655552).GetHashCode());
+			Assert.AreEqual(2147483647, OscTimeTag.MaxValue.GetHashCode());
 		}
 
 		[TestMethod]
@@ -159,14 +156,14 @@ namespace OSC.Tests.OSC
 		{
 			var values = new List<(string, ulong, string)>
 			{
-				( "2019-04-05T00:00:59.1Z", 16163728279232682393, "2019-04-05T00:00:59.100Z" ),
-				( "2019-04-05T00:00:59.01Z", 16163728278846135336, "2019-04-05T00:00:59.010Z" ),
-				( "2019-04-05T00:00:59.001Z", 16163728278807480631, "2019-04-05T00:00:59.001Z" ),
-				( "2019-04-05T00:00:59.0010Z", 16163728278807480631, "2019-04-05T00:00:59.001Z" ),
-				( "2019-04-05T00:00:59.7500Z", 16163728282024411135, "2019-04-05T00:00:59.750Z" ),
-				( "2019-04-05T00:00:59Z", 16163728278803185664, "2019-04-05T00:00:59.000Z" ),
-				( "2019-04-05", 16163728025400115200, "2019-04-05T00:00:00.000Z" ),
-				( "2019-05-23T12:37:23.7150Z", 16181735293039820143, "2019-05-23T12:37:23.715Z" )
+				("2019-04-05T00:00:59.1Z", 16163728279232682393, "2019-04-05T00:00:59.100Z"),
+				("2019-04-05T00:00:59.01Z", 16163728278846135336, "2019-04-05T00:00:59.010Z"),
+				("2019-04-05T00:00:59.001Z", 16163728278807480631, "2019-04-05T00:00:59.001Z"),
+				("2019-04-05T00:00:59.0010Z", 16163728278807480631, "2019-04-05T00:00:59.001Z"),
+				("2019-04-05T00:00:59.7500Z", 16163728282024411135, "2019-04-05T00:00:59.750Z"),
+				("2019-04-05T00:00:59Z", 16163728278803185664, "2019-04-05T00:00:59.000Z"),
+				("2019-04-05", 16163728025400115200, "2019-04-05T00:00:00.000Z"),
+				("2019-05-23T12:37:23.7150Z", 16181735293039820143, "2019-05-23T12:37:23.715Z")
 			};
 
 			foreach (var e in values)
@@ -187,14 +184,14 @@ namespace OSC.Tests.OSC
 		{
 			var value = OscTimeTag.MinValue;
 			Assert.AreEqual(0, value.PreciseValue);
-			
+
 			value = OscTimeTag.FromTimeSpan(TimeSpan.Zero);
 			Assert.AreEqual(OscTimeTag.MinValue, value);
-			
+
 			value = OscTimeTag.FromTicks(TimeSpan.FromMilliseconds(123).Ticks);
 			Assert.AreEqual(123, value.ToMilliseconds());
 			Assert.AreEqual(123, value.ToTimeSpan().TotalMilliseconds);
-			
+
 			value = OscTimeTag.FromMilliseconds(123);
 			Assert.AreEqual(123, value.ToMilliseconds());
 			Assert.AreEqual(123, value.ToTimeSpan().TotalMilliseconds);
@@ -203,7 +200,7 @@ namespace OSC.Tests.OSC
 			Assert.AreEqual(1, value.ToMilliseconds());
 			Assert.AreEqual(10000, value.ToTimeSpan().Ticks);
 			Assert.AreEqual(1, value.ToTimeSpan().TotalMilliseconds);
-			
+
 			// 10,000 ticks is the smallest ticks we can register
 			value = OscTimeTag.FromTicks(5000);
 			Assert.AreEqual(0, value.ToTimeSpan().Ticks);
@@ -237,16 +234,16 @@ namespace OSC.Tests.OSC
 		[TestMethod]
 		public void ToFromDateTime()
 		{
-			var dateTime1  = new DateTime(2020, 05, 14, 11, 49, 47, 231, DateTimeKind.Utc);
+			var dateTime1 = new DateTime(2020, 05, 14, 11, 49, 47, 231, DateTimeKind.Utc);
 			var oscTime = OscTimeTag.FromDateTime(dateTime1);
 			var dateTime2 = oscTime.ToDateTime();
 
 			dateTime1.Dump();
 			dateTime2.Dump();
 
-			Assert.AreEqual(dateTime1, dateTime2);			
+			Assert.AreEqual(dateTime1, dateTime2);
 		}
-		
+
 		[TestMethod]
 		public void ToFromUtcNowUsingParse()
 		{
@@ -274,16 +271,16 @@ namespace OSC.Tests.OSC
 			Assert.AreEqual(1234, t.ToMilliseconds());
 			Assert.AreEqual(5299989643u, t.Value);
 			Assert.AreEqual("1900-01-01T00:00:01.234Z", t.ToString());
-			
+
 			t = OscTimeTag.FromMilliseconds(1000f);
 			Assert.AreEqual(1000, t.ToMilliseconds());
 			Assert.AreEqual(4294967296u, t.Value);
 			Assert.AreEqual("1900-01-01T00:00:01.000Z", t.ToString());
-			
+
 			Assert.AreEqual(1000, t.ToMilliseconds());
 			Assert.AreEqual(4294967296u, t.Value);
 			Assert.AreEqual("1900-01-01T00:00:01.000Z", t.ToString());
-			
+
 			t = OscTimeTag.FromMilliseconds(1001f);
 			Assert.AreEqual(1001, t.ToMilliseconds());
 			Assert.AreEqual(4299262263u, t.Value);

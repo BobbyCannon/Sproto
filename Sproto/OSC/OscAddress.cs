@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 #endregion
 
-namespace Sproto.OSC
+namespace Sproto.Osc
 {
 	public class OscAddress : IEnumerable<string>
 	{

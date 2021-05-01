@@ -5,12 +5,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Speedy;
-using Sproto;
-using Sproto.OSC;
+using Sproto.Osc;
 
 #endregion
 
-namespace OSC.Tests.OSC
+namespace Sproto.Tests.Osc
 {
 	[TestClass]
 	public class OscPacketTests : BaseTests
@@ -183,7 +182,7 @@ namespace OSC.Tests.OSC
 				{ " foo", "foo" },
 				{ " foo ", "foo" },
 				{ " foo bar", "foo bar" },
-				{ " foo bar ", "foo bar" },
+				{ " foo bar ", "foo bar" }
 			};
 
 			foreach (var item in values)

@@ -1,42 +1,19 @@
 ﻿#region References
 
 using System;
-using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OSC.Tests.Samples;
 using Speedy;
-using Sproto;
-using Sproto.OSC;
+using Sproto.Osc;
+using Sproto.Tests.Samples;
 
 #endregion
 
-namespace OSC.Tests.OSC
+namespace Sproto.Tests.Osc
 {
 	[TestClass]
 	public class SampleOscCommandTests : BaseTests
 	{
 		#region Methods
-
-		[TestMethod]
-		public void DowngradeCommand()
-		{
-			var data = "/sample,3,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True,{ SampleValue: 1,2,3 },{ Time: 2020-02-14T11:36:16.123Z }";
-			var parser = new OscArgumentParser<SampleCustomValue>();
-			var message = OscPacket.Parse(data, parser) as OscMessage;
-			Assert.IsNotNull(message);
-
-			var command = OscCommand.FromMessage<SampleOscCommand>(message);
-			command.Version = 2;
-			var expected = "/sample,2,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True";
-			var actual = command.ToString();
-			Assert.AreEqual(expected, actual);
-
-			command = OscCommand.FromMessage<SampleOscCommand>(message);
-			command.Version = 1;
-			expected = "/sample,1,\"Bob\"";
-			actual = command.ToString();
-			Assert.AreEqual(expected, actual);
-		}
 
 		[TestMethod]
 		public void DateTimeMinMaxTests()
@@ -146,7 +123,7 @@ namespace OSC.Tests.OSC
 				};
 				actual = command.ToMessage().ToString();
 				Assert.AreEqual(expected, actual);
-				
+
 				TimeZoneHelper.SetSystemTimeZone("Eastern Standard Time");
 				value = TimeService.Now.IsDaylightSavingTime() ? 4 : 3;
 
@@ -165,6 +142,27 @@ namespace OSC.Tests.OSC
 		}
 
 		[TestMethod]
+		public void DowngradeCommand()
+		{
+			var data = "/sample,3,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True,{ SampleValue: 1,2,3 },{ Time: 2020-02-14T11:36:16.123Z }";
+			var parser = new OscArgumentParser<SampleCustomValue>();
+			var message = OscPacket.Parse(data, parser) as OscMessage;
+			Assert.IsNotNull(message);
+
+			var command = OscCommand.FromMessage<SampleOscCommand>(message);
+			command.Version = 2;
+			var expected = "/sample,2,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True";
+			var actual = command.ToString();
+			Assert.AreEqual(expected, actual);
+
+			command = OscCommand.FromMessage<SampleOscCommand>(message);
+			command.Version = 1;
+			expected = "/sample,1,\"Bob\"";
+			actual = command.ToString();
+			Assert.AreEqual(expected, actual);
+		}
+
+		[TestMethod]
 		public void ParseWithArgumentParser()
 		{
 			var data = "/sample,3,\"Bob\",{ Time: 2020-02-14T11:36:15.000Z },True,{ SampleValue: 1,2,3 }";
@@ -175,7 +173,7 @@ namespace OSC.Tests.OSC
 			Assert.AreEqual(new DateTime(2020, 02, 14, 11, 36, 15, DateTimeKind.Utc), actual.BirthDate);
 			Assert.AreEqual(new SampleCustomValue(1, 2, 3), actual.Value);
 		}
-		
+
 		[TestMethod]
 		public void ParseWithoutArgumentParser()
 		{

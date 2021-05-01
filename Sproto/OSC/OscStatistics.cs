@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace Sproto.OSC
+namespace Sproto.Osc
 {
 	public class OscStatistics : Dictionary<string, OscStatisticValue>, IEnumerable<OscStatisticValue>
 	{
