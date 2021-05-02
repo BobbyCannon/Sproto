@@ -3,16 +3,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sproto.Nmea.Exceptions;
 
 #endregion
 
-namespace Sproto.Nmea
+namespace Sproto.Nmea.Messages
 {
-	public abstract class GsaMessage : NmeaMessage
+	public class GsaMessage : NmeaMessage
 	{
 		#region Constructors
 
-		protected GsaMessage(NmeaMessageType type) : base(type)
+		public GsaMessage() : base(NmeaMessageType.OverallSatelliteData)
 		{
 			PrnsOfSatellitesUsedForFix = new List<int>();
 		}
@@ -43,7 +44,7 @@ namespace Sproto.Nmea
 		/// <summary>
 		/// Add pseudo-random noise for a satellite.
 		/// </summary>
-		/// <param name="prn"></param>
+		/// <param name="prn"> </param>
 		public void AddPrn(string prn)
 		{
 			if (!string.IsNullOrEmpty(prn))
@@ -52,37 +53,26 @@ namespace Sproto.Nmea
 			}
 		}
 
-		public override void Parse(string nmeaLine)
+		public override void Parse(string sentence)
 		{
-			if (PrnsOfSatellitesUsedForFix.Any(x => x <= 32))
-			{
-				PrnsOfSatellitesUsedForFix.Sort();
+			// $GNGSA,A,3,01,18,32,08,11,,,,,,,,6.16,1.86,5.88*16
+			//
+			//.       0 1 2                           14  15  16  17
+			//	      | | |                           |   |   |   |
+			// $--GSA,a,a,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x.x,x.x,x.x*hh
+			//
+			// 0) Selection mode
+			// 1) Mode
+			// 2) ID of 1st satellite used for fix
+			// 3) ID of 2nd satellite used for fix
+			// ...
+			// 13) ID of 12th satellite used for fix
+			// 14) PDOP in meters
+			// 15) HDOP in meters
+			// 16) VDOP in meters
+			// 17) Checksum
 
-				OnNmeaMessageParsed(this);
-
-				PrnsOfSatellitesUsedForFix.Clear();
-			}
-
-			if (string.IsNullOrWhiteSpace(nmeaLine)
-				|| !nmeaLine.StartsWith($"${Type}", StringComparison.OrdinalIgnoreCase))
-			{
-				throw new NmeaParseMismatchException();
-			}
-
-			ParseChecksum(nmeaLine);
-
-			if (MandatoryChecksum != ExtractChecksum(nmeaLine))
-			{
-				throw new NmeaParseChecksumException();
-			}
-
-			// remove identifier plus first comma
-			var sentence = nmeaLine.Remove(0, $"${Type}".Length + 1);
-
-			// remove checksum and star
-			sentence = sentence.Remove(sentence.IndexOf('*'));
-
-			var items = sentence.Split(',');
+			var items = StartParse(sentence);
 
 			AutoSelection = items[0];
 			Fix3D = items[1];
@@ -100,9 +90,14 @@ namespace Sproto.Nmea
 			AddPrn(items[12]);
 			AddPrn(items[13]);
 
-			PositionDilutionOfPrecision = Convert.ToDouble(GetValueOrDefault(items[14], "0"));
-			HorizontalDilutionOfPrecision = Convert.ToDouble(GetValueOrDefault(items[15], "0"));
-			VerticalDilutionOfPrecision = Convert.ToDouble(GetValueOrDefault(items[16], "0"));
+			PositionDilutionOfPrecision = Convert.ToDouble(GetValueOrDefault(items, 14, "0"));
+			HorizontalDilutionOfPrecision = Convert.ToDouble(GetValueOrDefault(items, 15, "0"));
+			VerticalDilutionOfPrecision = Convert.ToDouble(GetValueOrDefault(items, 16, "0"));
+		}
+
+		public override void Reset()
+		{
+			PrnsOfSatellitesUsedForFix.Clear();
 		}
 
 		public override string ToString()

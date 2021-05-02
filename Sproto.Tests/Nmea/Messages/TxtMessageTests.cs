@@ -1,14 +1,14 @@
 ﻿#region References
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sproto.Nmea;
+using Sproto.Nmea.Messages;
 
 #endregion
 
-namespace Sproto.Tests.Nmea
+namespace Sproto.Tests.Nmea.Messages
 {
 	[TestClass]
-	public class GntxtMessageTests
+	public class TxtMessageTests
 	{
 		#region Methods
 
@@ -16,7 +16,7 @@ namespace Sproto.Tests.Nmea
 		public void TestMethodParse()
 		{
 			var m = "$GNTXT,01,01,02,u-blox AG - www.u-blox.com*4E";
-			var n = new GntxtMessage();
+			var n = new TxtMessage();
 
 			n.Parse(m);
 

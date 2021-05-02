@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO.Ports;
 using System.Linq;
@@ -17,6 +18,12 @@ namespace Sproto
 {
 	public static class Extensions
 	{
+		#region Constants
+
+		public const string InvalidMessageType = "Invalid message type for this NMEA message.";
+
+		#endregion
+
 		#region Fields
 
 		private static readonly ushort[] _crcTable =
@@ -519,6 +526,17 @@ namespace Sproto
 
 				return bytes;
 			}
+		}
+
+		public static string ToDisplayShortName(this Enum value)
+		{
+			var type = value.GetType();
+			var attribute = type
+				.GetMember(value.ToString())
+				.FirstOrDefault()?
+				.GetCustomAttribute<DisplayAttribute>();
+
+			return attribute == null ? Enum.GetName(type, value) : attribute.ShortName;
 		}
 
 		public static OscTimeTag ToOscTimeTag(this DateTime time)

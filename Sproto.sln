@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sproto.Nmea.Console", "Sproto.Nmea.Console\Sproto.Nmea.Console.csproj", "{2C7111B3-3953-45FE-AEFF-5C3FC2C14B81}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sproto.CodeGenerator", "Sproto.CodeGenerator\Sproto.CodeGenerator.csproj", "{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,6 +102,18 @@ Global
 		{2C7111B3-3953-45FE-AEFF-5C3FC2C14B81}.Release|x64.Build.0 = Release|Any CPU
 		{2C7111B3-3953-45FE-AEFF-5C3FC2C14B81}.Release|x86.ActiveCfg = Release|Any CPU
 		{2C7111B3-3953-45FE-AEFF-5C3FC2C14B81}.Release|x86.Build.0 = Release|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Debug|x64.Build.0 = Debug|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Debug|x86.Build.0 = Debug|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Release|x64.ActiveCfg = Release|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Release|x64.Build.0 = Release|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Release|x86.ActiveCfg = Release|Any CPU
+		{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

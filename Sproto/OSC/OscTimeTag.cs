@@ -77,7 +77,7 @@ namespace Sproto.Osc
 		/// <summary>
 		/// Gets the number of seconds including fractional parts since midnight on January 1, 1900.
 		/// </summary>
-		public decimal PreciseValue => Seconds + (SubSeconds / (decimal) uint.MaxValue);
+		public decimal PreciseValue => Seconds + SubSeconds / (decimal) uint.MaxValue;
 
 		/// <summary>
 		/// Gets the number of seconds since midnight on January 1, 1900. This is the first 32 bits of the 64 bit fixed point OscTimeTag value.

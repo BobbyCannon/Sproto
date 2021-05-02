@@ -2,16 +2,17 @@
 
 using System;
 using System.Collections.Generic;
+using Sproto.Nmea.Exceptions;
 
 #endregion
 
-namespace Sproto.Nmea
+namespace Sproto.Nmea.Messages
 {
-	public abstract class GsvMessage : NmeaMessage
+	public class GsvMessage : NmeaMessage
 	{
 		#region Constructors
 
-		protected GsvMessage(NmeaMessageType type) : base(type)
+		public GsvMessage() : base(NmeaMessageType.DetailedSatelliteData)
 		{
 			Satellites = new List<Satellite>();
 		}
@@ -32,28 +33,25 @@ namespace Sproto.Nmea
 
 		#region Methods
 
-		public override void Parse(string nmeaLine)
+		public override void Parse(string sentence)
 		{
-			if (string.IsNullOrWhiteSpace(nmeaLine)
-				|| !nmeaLine.StartsWith($"${Type}", StringComparison.OrdinalIgnoreCase))
-			{
-				throw new NmeaParseMismatchException();
-			}
+			// $GPGSV,3,1,10,01,50,304,26,03,24,245,16,08,56,204,28,10,21,059,20*77
+			//
+			// .      0 1 2 3 4 5 6     n
+			//        | | | | | | |     |
+			// $--GSV,x,x,x,x,x,x,x,...*hh
+			//
+			// 0) total number of messages
+			// 1) message number
+			// 2) satellites in view
+			// 3) satellite number
+			// 4) elevation in degrees
+			// 5) azimuth in degrees to true
+			// 6) SNR in dB
+			//    more satellite infos like 4)-7)
+			// n) Checksum
 
-			ParseChecksum(nmeaLine);
-
-			if (MandatoryChecksum != ExtractChecksum(nmeaLine))
-			{
-				throw new NmeaParseChecksumException();
-			}
-
-			// remove identifier plus first comma
-			var sentence = nmeaLine.Remove(0, $"${Type}".Length + 1);
-
-			// remove checksum and star
-			sentence = sentence.Remove(sentence.IndexOf('*'));
-
-			var items = sentence.Split(',');
+			var items = StartParse(sentence);
 
 			NumberOfSentences = Convert.ToInt32(items[0]);
 			SentenceNr = Convert.ToInt32(items[1]);
@@ -82,6 +80,10 @@ namespace Sproto.Nmea
 
 				Satellites.Clear();
 			}
+		}
+
+		public override void Reset()
+		{
 		}
 
 		public override string ToString()

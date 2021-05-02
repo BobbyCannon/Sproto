@@ -13,24 +13,36 @@
 			<Setter Property="Margin" Value="10" />
 		</Style>
 	</Window.Resources>
-	<DockPanel LastChildFill="False">
-		<DataGrid DockPanel.Dock="Top" ItemsSource="{Binding Tests}" AutoGenerateColumns="False" CanUserAddRows="False">
-			<DataGrid.Columns>
-				<DataGridCheckBoxColumn Header="Enabled" Binding="{Binding Enabled, Mode=TwoWay}" Width="60" />
-				<DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="220" />
-				<DataGridTextColumn Header="Iterations" Binding="{Binding Iterations, Mode=TwoWay}" Width="80" />
-				<DataGridTextColumn Header="Total (ms)" Binding="{Binding Total, Mode=OneWay}" Width="140" />
-				<DataGridTextColumn Header="Average (ms)" Binding="{Binding Average, Mode=OneWay}" Width="140" />
-			</DataGrid.Columns>
-		</DataGrid>
-		<StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-			<Button Command="{Binding StartCommand}">Start</Button>
-		</StackPanel>
-		<DataGrid DockPanel.Dock="Top" ItemsSource="{Binding Statistics}" AutoGenerateColumns="False" CanUserAddRows="False">
-			<DataGrid.Columns>
-				<DataGridTextColumn Header="Name" Binding="{Binding Key}" Width="220" />
-				<DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="80" />
-			</DataGrid.Columns>
-		</DataGrid>
-	</DockPanel>
+	<TabControl>
+		<TabItem Header="Nmea">
+			<DockPanel LastChildFill="True">
+				<StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+					<Button Command="{Binding ReplayNmeaCommand, Mode=OneWay}">Replay</Button>
+				</StackPanel>
+				<TextBox Text="{Binding Results, Mode=OneWay}"  />
+			</DockPanel>
+		</TabItem>
+		<TabItem Header="OSC">
+			<DockPanel LastChildFill="True">
+				<DataGrid DockPanel.Dock="Top" ItemsSource="{Binding Tests, Mode=OneWay}" AutoGenerateColumns="False" CanUserAddRows="False">
+					<DataGrid.Columns>
+						<DataGridCheckBoxColumn Header="Enabled" Binding="{Binding Enabled, Mode=TwoWay}" Width="60" />
+						<DataGridTextColumn Header="Name" Binding="{Binding Name, Mode=OneWay}" Width="220" />
+						<DataGridTextColumn Header="Iterations" Binding="{Binding Iterations, Mode=TwoWay}" Width="80" />
+						<DataGridTextColumn Header="Total (ms)" Binding="{Binding Total, Mode=OneWay}" Width="140" />
+						<DataGridTextColumn Header="Average (ms)" Binding="{Binding Average, Mode=OneWay}" Width="140" />
+					</DataGrid.Columns>
+				</DataGrid>
+				<StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+					<Button Command="{Binding StartCommand, Mode=OneWay}">Start</Button>
+				</StackPanel>
+				<DataGrid ItemsSource="{Binding Statistics, Mode=OneWay}" AutoGenerateColumns="False" CanUserAddRows="False">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Name" Binding="{Binding Key, Mode=OneWay}" Width="220" />
+						<DataGridTextColumn Header="Value" Binding="{Binding Value, Mode=OneWay}" Width="80" />
+					</DataGrid.Columns>
+				</DataGrid>
+			</DockPanel>
+		</TabItem>
+	</TabControl>
 </Window>

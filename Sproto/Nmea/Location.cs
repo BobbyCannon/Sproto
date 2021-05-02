@@ -13,9 +13,10 @@ namespace Sproto.Nmea
 	{
 		#region Constructors
 
-		public Location(string degree)
+		public Location(string degree, string indicator)
 		{
 			Degree = degree;
+			Indicator = indicator;
 		}
 
 		#endregion
@@ -23,6 +24,8 @@ namespace Sproto.Nmea
 		#region Properties
 
 		public string Degree { get; }
+		
+		public string Indicator { get; }
 
 		#endregion
 
@@ -35,19 +38,23 @@ namespace Sproto.Nmea
 		/// <returns> </returns>
 		public double ToDecimal()
 		{
-			if (string.IsNullOrEmpty(Degree))
+			if (string.IsNullOrEmpty(Degree) || string.IsNullOrEmpty(Indicator))
 			{
 				return -1;
 			}
 
-			var list = Degree.Split('.');
-			var minuteMajor = list[0].Substring(list[0].Length - 2);
-			var degree = list[0].Substring(0, list[0].Length - 2);
-			var nesw = list[1].Substring(list[1].Length - 1);
-			var minuteMinor = list[1].Substring(0, list[1].Length - 1);
-			var minute = minuteMajor + "." + minuteMinor;
+			// ddmm.mmmm
+			var ddmm = Degree.Split('.');
+			var dd = ddmm[0].Substring(0, ddmm[0].Length - 2);
+			var mm = ddmm[0].Substring(ddmm[0].Length - 2);
+			var mmmm = ddmm[1];
+			var minute = mm + "." + mmmm;
+			
+			// indicators
+			var nesw = Indicator;
 			var plusMinus = nesw == "S" || nesw == "W" ? -1 : 1;
-			var result = (Convert.ToDouble(degree) + Convert.ToDouble(minute) / 60.0) * plusMinus;
+
+			var result = (Convert.ToDouble(dd) + Convert.ToDouble(minute) / 60.0) * plusMinus;
 			return result;
 		}
 

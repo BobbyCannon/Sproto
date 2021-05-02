@@ -3,8 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Speedy;
 using Speedy.Extensions;
+using Sproto.Nmea.Exceptions;
+using Sproto.Nmea.Messages;
 
 #endregion
 
@@ -14,8 +17,13 @@ namespace Sproto.Nmea
 	{
 		#region Fields
 
+		private static readonly Dictionary<string, NmeaMessagePrefix> _messagePrefixByShortName;
+		private static readonly Dictionary<NmeaMessagePrefix, string> _messagePrefixShortNames;
+		private static readonly Dictionary<string, NmeaMessageType> _messageTypeByShortName;
+		private static readonly Dictionary<NmeaMessageType, string> _messageTypeShortNames;
 		private readonly Dictionary<NmeaMessageType, NmeaMessage> _parsers;
 		private readonly object _parsersLock;
+		private static readonly Regex _regex;
 
 		#endregion
 
@@ -31,6 +39,19 @@ namespace Sproto.Nmea
 				.Except(new[] { NmeaMessageType.Unknown });
 
 			values.ForEach(AddMessageParser);
+		}
+
+		static NmeaParser()
+		{
+			_regex = new Regex(@"^[$](?<prefix>[\w]{2})(?<type>[\w]{3})[,]{1}", RegexOptions.Compiled | RegexOptions.Singleline);
+
+			var prefixes = Enum.GetValues(typeof(NmeaMessagePrefix)).Cast<NmeaMessagePrefix>().Where(x => x != NmeaMessagePrefix.Unknown).ToArray();
+			_messagePrefixByShortName = prefixes.ToDictionary(x => x.ToDisplayShortName(), x => x);
+			_messagePrefixShortNames = prefixes.ToDictionary(x => x, x => x.ToDisplayShortName());
+
+			var types = Enum.GetValues(typeof(NmeaMessageType)).Cast<NmeaMessageType>().Where(x => x != NmeaMessageType.Unknown).ToArray();
+			_messageTypeByShortName = types.ToDictionary(x => x.ToDisplayShortName(), x => x);
+			_messageTypeShortNames = types.ToDictionary(x => x, x => x.ToDisplayShortName());
 		}
 
 		#endregion
@@ -58,6 +79,27 @@ namespace Sproto.Nmea
 			}
 		}
 
+		public static (NmeaMessagePrefix prefix, NmeaMessageType type, string value) ExtractPrefixAndType(string sentence)
+		{
+			var result = _regex.Match(sentence);
+			if (!result.Success)
+			{
+				return (NmeaMessagePrefix.Unknown, NmeaMessageType.Unknown, string.Empty);
+			}
+
+			var prefix = GetMessagePrefix(result.Groups["prefix"].Value);
+			var type = GetMessageType(result.Groups["type"].Value);
+
+			return (prefix, type, result.Value);
+		}
+
+		public static string GetSentenceStart(NmeaMessage message)
+		{
+			var prefix = _messagePrefixShortNames[message.Prefix];
+			var type = _messageTypeShortNames[message.Type];
+			return $"${prefix}{type}";
+		}
+
 		public NmeaMessage Parse(string nmeaLine, DateTime? timestamp = null)
 		{
 			try
@@ -77,7 +119,7 @@ namespace Sproto.Nmea
 					return null;
 				}
 
-				var type = GetMessageType(nmeaLine);
+				var (prefix, type, value) = ExtractPrefixAndType(nmeaLine);
 
 				lock (_parsersLock)
 				{
@@ -102,36 +144,32 @@ namespace Sproto.Nmea
 			}
 		}
 
-		private NmeaMessage CreateMessageParser(NmeaMessageType filter)
+		private NmeaMessage CreateMessageParser(NmeaMessageType type)
 		{
-			return filter switch
+			return type switch
 			{
-				NmeaMessageType.Gbgsv => new GbgsvMessage(),
-				NmeaMessageType.Glgsv => new GlgsvMessage(),
-				NmeaMessageType.Gngga => new GnggaMessage(),
-				NmeaMessageType.Gngll => new GngllMessage(),
-				NmeaMessageType.Gngsa => new GngsaMessage(),
-				NmeaMessageType.Gnrmc => new GnrmcMessage(),
-				NmeaMessageType.Gntxt => new GntxtMessage(),
-				NmeaMessageType.Gnvtg => new GnvtgMessage(),
-				NmeaMessageType.Gpgga => new GpggaMessage(),
-				NmeaMessageType.Gpgsa => new GpgsaMessage(),
-				NmeaMessageType.Gpgsv => new GpgsvMessage(),
-				NmeaMessageType.Gprmc => new GprmcMessage(),
-				NmeaMessageType.Gpvtg => new GpvtgMessage(),
+				NmeaMessageType.GgaFixInformation => new GgaMessage(),
+				NmeaMessageType.LatitudeLongitudeData => new GllMessage(),
+				NmeaMessageType.GnssFixInformation => new GnsMessage(),
+				NmeaMessageType.OverallSatelliteData => new GsaMessage(),
+				NmeaMessageType.DetailedSatelliteData => new GsvMessage(),
+				NmeaMessageType.RecommendedMinimumDataForGps => new RmcMessage(),
+				NmeaMessageType.TextTransmission => new TxtMessage(),
+				NmeaMessageType.VectorTrackOfSpeedOverTheGround => new VtgMessage(),
 				_ => null
 			};
 		}
 
-		private NmeaMessageType GetMessageType(string nmeaLine)
+		private static NmeaMessagePrefix GetMessagePrefix(string prefix)
 		{
-			if (nmeaLine.Length < 6)
-			{
-				return NmeaMessageType.Unknown;
-			}
+			prefix = prefix?.ToUpper() ?? string.Empty;
+			return _messagePrefixByShortName.ContainsKey(prefix) ? _messagePrefixByShortName[prefix] : NmeaMessagePrefix.Unknown;
+		}
 
-			var type = nmeaLine.Substring(1, 5);
-			return Enum.TryParse(type, true, out NmeaMessageType messageType) ? messageType : NmeaMessageType.Unknown;
+		private static NmeaMessageType GetMessageType(string type)
+		{
+			type = type?.ToUpper() ?? string.Empty;
+			return _messageTypeByShortName.ContainsKey(type) ? _messageTypeByShortName[type] : NmeaMessageType.Unknown;
 		}
 
 		private void OnMessageParsed(object sender, NmeaMessage e)

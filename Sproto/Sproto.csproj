@@ -45,6 +45,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Speedy" Version="8.0.5" />
+		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 		<PackageReference Include="System.IO.Ports" Version="[4.7.0]" />
 	</ItemGroup>
 	<ItemGroup>

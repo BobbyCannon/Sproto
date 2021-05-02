@@ -3,10 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using PropertyChanged;
 using Speedy;
+using Sproto.Nmea;
 using Sproto.Osc;
 
 #endregion
@@ -62,6 +64,9 @@ namespace Sproto.Benchmark
 				{ "Messages", MessageValues.Keys.Count.ToString() },
 				{ "Packets", Packets.Length.ToString() }
 			};
+
+			// Commands
+			ReplayNmeaCommand = new RelayCommand(ReplayNmea);
 		}
 
 		#endregion
@@ -74,6 +79,10 @@ namespace Sproto.Benchmark
 
 		public OscPacket[] Packets { get; }
 
+		public ICommand ReplayNmeaCommand { get; }
+
+		public string Results { get; set; }
+
 		public ICommand StartCommand { get; }
 
 		public Dictionary<string, string> Statistics { get; }
@@ -83,6 +92,24 @@ namespace Sproto.Benchmark
 		#endregion
 
 		#region Methods
+
+		private void ReplayNmea(object commandParameter)
+		{
+			var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+			var lines = File.ReadAllLines(Path.Combine(desktop, "data.txt"));
+			var parser = new NmeaParser();
+
+			foreach (var line in lines)
+			{
+				var message = parser.Parse(line);
+				if (message == null)
+				{
+					Results += line + Environment.NewLine;
+				}
+
+				//Results += line + Environment.NewLine;
+			}
+		}
 
 		private void Start()
 		{

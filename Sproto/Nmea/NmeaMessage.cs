@@ -1,6 +1,7 @@
 ﻿#region References
 
 using System;
+using Sproto.Nmea.Exceptions;
 
 #endregion
 
@@ -22,7 +23,9 @@ namespace Sproto.Nmea
 
 		#region Properties
 
-		public string MandatoryChecksum { get; set; }
+		public string Checksum { get; set; }
+
+		public NmeaMessagePrefix Prefix { get; set; }
 
 		public DateTime TimestampUtc { get; set; }
 
@@ -48,7 +51,7 @@ namespace Sproto.Nmea
 			return sentence.Substring(index + 1);
 		}
 
-		public abstract void Parse(string nmeaLine);
+		public abstract void Parse(string sentence);
 
 		/// <summary>
 		/// Calculate checksum of Nmea sentence.
@@ -60,7 +63,77 @@ namespace Sproto.Nmea
 		/// </remarks>
 		public void ParseChecksum(string sentence)
 		{
-			//Start with first Item
+			// Calculate the checksum formatted as a two-character hexadecimal
+			Checksum = CalculateChecksum(sentence);
+		}
+
+		public abstract void Reset();
+
+		/// <summary>
+		/// Update the Checksum property by using ToString() value.
+		/// </summary>
+		public void UpdateChecksum()
+		{
+			Checksum = CalculateChecksum(ToString());
+		}
+
+		/// <summary>
+		/// Get the value or return the provided default value.
+		/// </summary>
+		/// <param name="items"> The items. </param>
+		/// <param name="index"> The index of the item. </param>
+		/// <param name="defaultValue"> The default value to use if the value is not found. </param>
+		/// <returns> </returns>
+		protected string GetValueOrDefault(string[] items, int index, string defaultValue)
+		{
+			var item = index >= items.Length
+				? defaultValue
+				: items[index];
+
+			return string.IsNullOrEmpty(item) ? defaultValue : item;
+		}
+
+		protected virtual void OnNmeaMessageParsed(NmeaMessage e)
+		{
+			NmeaMessageParsed?.Invoke(this, e);
+		}
+
+		protected string[] StartParse(string sentence)
+		{
+			Reset();
+
+			var (prefix, type, value) = NmeaParser.ExtractPrefixAndType(sentence);
+
+			if (type != Type)
+			{
+				throw new NmeaParseMismatchException();
+			}
+
+			Prefix = prefix;
+			ParseChecksum(sentence);
+
+			if (Checksum != ExtractChecksum(sentence))
+			{
+				throw new NmeaParseChecksumException();
+			}
+
+			// remove identifier plus first comma
+			var values = sentence.Remove(0, value.Length);
+
+			// remove checksum and star
+			values = values.Remove(values.IndexOf('*'));
+
+			return values.Split(',');
+		}
+
+		/// <summary>
+		/// Generates a checksum for a NMEA sentence
+		/// </summary>
+		/// <param name="sentence"> The sentence to calculate for. </param>
+		/// <returns> The checksum in a two-character hexadecimal format. </returns>
+		private static string CalculateChecksum(string sentence)
+		{
+			// Start with first Item
 			int checksum = Convert.ToByte(sentence[sentence.IndexOf('$') + 1]);
 
 			// Loop through all chars to get a checksum
@@ -71,20 +144,7 @@ namespace Sproto.Nmea
 			}
 
 			// Return the checksum formatted as a two-character hexadecimal
-			MandatoryChecksum = checksum.ToString("X2");
-		}
-
-		protected string GetValueOrDefault(string item, string defaultValue)
-		{
-			return string.IsNullOrEmpty(item) ? defaultValue : item;
-		}
-
-		protected virtual void OnNmeaMessageParsed(NmeaMessage e)
-		{
-			if (NmeaMessageParsed != null)
-			{
-				NmeaMessageParsed(this, e);
-			}
+			return checksum.ToString("X2");
 		}
 
 		#endregion

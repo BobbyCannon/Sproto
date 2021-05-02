@@ -1,15 +1,14 @@
 ﻿#region References
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sproto.Nmea;
+using Sproto.Nmea.Messages;
 
 #endregion
 
-namespace Sproto.Tests.Nmea
+namespace Sproto.Tests.Nmea.Messages
 {
 	[TestClass]
-	public class GpgsvMessageTests
-
+	public class GsvMessageTests
 	{
 		#region Methods
 
@@ -17,7 +16,7 @@ namespace Sproto.Tests.Nmea
 		public void TestMethodParse()
 		{
 			var m = "$GPGSV,3,1,10,01,50,304,26,03,24,245,16,08,56,204,28,10,21,059,20*77";
-			var n = new GpgsvMessage();
+			var n = new GsvMessage();
 
 			n.Parse(m);
 
