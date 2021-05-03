@@ -2,8 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Sproto.Nmea.Exceptions;
 
 #endregion
 
@@ -72,32 +70,33 @@ namespace Sproto.Nmea.Messages
 			// 16) VDOP in meters
 			// 17) Checksum
 
-			var items = StartParse(sentence);
+			StartParse(sentence);
 
-			AutoSelection = items[0];
-			Fix3D = items[1];
+			AutoSelection = GetArgument(0);
+			Fix3D = GetArgument(1);
 
-			AddPrn(items[2]);
-			AddPrn(items[3]);
-			AddPrn(items[4]);
-			AddPrn(items[5]);
-			AddPrn(items[6]);
-			AddPrn(items[7]);
-			AddPrn(items[8]);
-			AddPrn(items[9]);
-			AddPrn(items[10]);
-			AddPrn(items[11]);
-			AddPrn(items[12]);
-			AddPrn(items[13]);
+			AddPrn(GetArgument(2));
+			AddPrn(GetArgument(3));
+			AddPrn(GetArgument(4));
+			AddPrn(GetArgument(5));
+			AddPrn(GetArgument(6));
+			AddPrn(GetArgument(7));
+			AddPrn(GetArgument(8));
+			AddPrn(GetArgument(9));
+			AddPrn(GetArgument(10));
+			AddPrn(GetArgument(11));
+			AddPrn(GetArgument(12));
+			AddPrn(GetArgument(13));
 
-			PositionDilutionOfPrecision = Convert.ToDouble(GetValueOrDefault(items, 14, "0"));
-			HorizontalDilutionOfPrecision = Convert.ToDouble(GetValueOrDefault(items, 15, "0"));
-			VerticalDilutionOfPrecision = Convert.ToDouble(GetValueOrDefault(items, 16, "0"));
+			PositionDilutionOfPrecision = Convert.ToDouble(GetArgument(14, "0"));
+			HorizontalDilutionOfPrecision = Convert.ToDouble(GetArgument(15, "0"));
+			VerticalDilutionOfPrecision = Convert.ToDouble(GetArgument(16, "0"));
 		}
 
 		public override void Reset()
 		{
 			PrnsOfSatellitesUsedForFix.Clear();
+			base.Reset();
 		}
 
 		public override string ToString()

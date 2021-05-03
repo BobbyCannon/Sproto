@@ -23,7 +23,7 @@ namespace Sproto.Tests.Nmea.Messages
 			Assert.AreEqual(143718.00, n.FixTaken);
 			Assert.AreEqual("45.21896550", n.Latitude.ToString());
 			Assert.AreEqual("18.98661733", n.Longitude.ToString());
-			Assert.AreEqual("GPS fix", n.FixQuality);
+			Assert.AreEqual("1", n.FixQuality);
 			Assert.AreEqual(5, n.NumberOfSatellites);
 			Assert.AreEqual(1.86, n.HorizontalDilutionOfPrecision);
 			Assert.AreEqual(108.1, n.Altitude);
@@ -37,7 +37,7 @@ namespace Sproto.Tests.Nmea.Messages
 			Assert.AreEqual(14349.357, n.FixTaken);
 			Assert.AreEqual("-1.00000000", n.Latitude.ToString());
 			Assert.AreEqual("-1.00000000", n.Longitude.ToString());
-			Assert.AreEqual("Invalid", n.FixQuality);
+			Assert.AreEqual("0", n.FixQuality);
 			Assert.AreEqual(0, n.NumberOfSatellites);
 			Assert.AreEqual(0.0, n.HorizontalDilutionOfPrecision);
 			Assert.AreEqual(0.0, n.Altitude);

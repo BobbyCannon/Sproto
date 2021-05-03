@@ -50,7 +50,7 @@ namespace Sproto.Nmea
 
 		#region Methods
 
-		public bool IsValid()
+		public bool IsSet()
 		{
 			return _navigationalStatuses.ContainsKey(Status);
 		}

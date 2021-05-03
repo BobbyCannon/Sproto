@@ -9,19 +9,20 @@ using Sproto.Nmea.Messages;
 namespace Sproto.Tests.Nmea.Messages
 {
 	[TestClass]
-	public class VtgMessageTests
+	public class VtgMessageTests : BaseMessageTests
 	{
 		#region Methods
 
 		[TestMethod]
 		public void TestMethodParse()
 		{
-			var scenarios = new (string sentance, VtgMessage expected)[]
+			ProcessParseScenarios(new (string sentance, VtgMessage expected)[]
 			{
 				(
 					"$GPVTG,103.85,T,92.79,M,0.14,N,0.25,K,D*1E",
 					new VtgMessage
 					{
+						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
 						TrueCourse = "103.85",
 						TrueCourseUnit = "T",
 						MagneticCourse = "92.79",
@@ -30,15 +31,15 @@ namespace Sproto.Tests.Nmea.Messages
 						GroundSpeedUnit = "N",
 						GroundSpeedKilometersPerHour = "0.25",
 						GroundSpeedKilometersPerHourUnit = "K",
-						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
-						Checksum = "1E",
 						ModeIndicator = new ModeIndicator("D"),
+						Checksum = "1E"
 					}
 				),
 				(
 					"$GPVTG,,T,654.21,M,2.44,N,1.05,K,E*3B",
 					new VtgMessage
 					{
+						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
 						TrueCourse = "",
 						TrueCourseUnit = "T",
 						MagneticCourse = "654.21",
@@ -47,15 +48,15 @@ namespace Sproto.Tests.Nmea.Messages
 						GroundSpeedUnit = "N",
 						GroundSpeedKilometersPerHour = "1.05",
 						GroundSpeedKilometersPerHourUnit = "K",
-						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
-						Checksum = "3B",
 						ModeIndicator = new ModeIndicator("E"),
+						Checksum = "3B"
 					}
 				),
 				(
-					"$GPVTG,,,,,,,,,**7E",
+					"$GPVTG,,,,,,,,*52",
 					new VtgMessage
 					{
+						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
 						TrueCourse = "",
 						TrueCourseUnit = "",
 						MagneticCourse = "",
@@ -64,24 +65,10 @@ namespace Sproto.Tests.Nmea.Messages
 						GroundSpeedUnit = "",
 						GroundSpeedKilometersPerHour = "",
 						GroundSpeedKilometersPerHourUnit = "",
-						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
-						Checksum = "7E",
-						ModeIndicator = new ModeIndicator("*"),
+						Checksum = "52"
 					}
 				)
-			};
-
-			foreach (var scenario in scenarios)
-			{
-				scenario.expected.UpdateChecksum();
-				scenario.expected.ToString().Dump();
-
-				var actual = new VtgMessage();
-				actual.Parse(scenario.sentance);
-
-				Extensions.AreEqual(scenario.expected, actual);
-				Assert.AreEqual(scenario.expected.ToString(), actual.ToString());
-			}
+			});
 		}
 
 		#endregion

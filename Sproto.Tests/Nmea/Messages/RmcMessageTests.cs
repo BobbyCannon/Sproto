@@ -9,14 +9,14 @@ using Sproto.Nmea.Messages;
 namespace Sproto.Tests.Nmea.Messages
 {
 	[TestClass]
-	public class RmcMessageTests
+	public class RmcMessageTests : BaseMessageTests
 	{
 		#region Methods
 
 		[TestMethod]
 		public void TestMethodParse()
 		{
-			var scenarios = new (string sentance, RmcMessage expected)[]
+			ProcessParseScenarios(new (string sentance, RmcMessage expected)[]
 			{
 				(
 					"$GNRMC,143718.00,A,4513.13793,N,01859.19704,E,0.050,,290719,,,A*65",
@@ -53,20 +53,25 @@ namespace Sproto.Tests.Nmea.Messages
 						ModeIndicator = new ModeIndicator("D"),
 						Checksum = "63"
 					}
+				),
+				(
+					"$GPRMC,210230,A,3855.4487,N,09446.0071,W,0.0,076.2,130495,003.8,E*69",
+					new RmcMessage
+					{
+						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
+						TimeOfFix = "210230",
+						Status = "A",
+						Latitude = new Location("3855.4487", "N"),
+						Longitude = new Location("09446.0071", "W"),
+						Speed = "0.0",
+						Course = "076.2",
+						DateOfFix = "130495",
+						MagneticVariation = "003.8",
+						MagneticVariationUnit = "E",
+						Checksum = "63"
+					}
 				)
-			};
-
-			foreach (var scenario in scenarios)
-			{
-				scenario.expected.UpdateChecksum();
-				scenario.expected.ToString().Dump();
-
-				var actual = new RmcMessage();
-				actual.Parse(scenario.sentance);
-
-				Extensions.AreEqual(scenario.expected, actual);
-				Assert.AreEqual(scenario.expected.ToString(), actual.ToString());
-			}
+			});
 		}
 
 		#endregion

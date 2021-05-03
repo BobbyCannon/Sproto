@@ -20,13 +20,13 @@ namespace Sproto.Tests.Nmea.Messages
 			var n = new GllMessage();
 			var e = new GllMessage
 			{
-				DataValid = "A",
-				FixTaken = "143717.00",
+				Prefix = NmeaMessagePrefix.GlobalNavigationSatelliteSystem,
 				Latitude = new Location("4513.13795", "N"),
 				Longitude = new Location("01859.19702", "E"),
-				Checksum = "72",
+				FixTaken = "143717.00",
+				DataValid = "A",
 				ModeIndicator = new ModeIndicator("Autonomous"),
-				Prefix = NmeaMessagePrefix.GlobalNavigationSatelliteSystem
+				Checksum = "72"
 			};
 
 			n.Parse(m);

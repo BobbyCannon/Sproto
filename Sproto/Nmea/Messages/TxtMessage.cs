@@ -1,11 +1,4 @@
-﻿#region References
-
-using System;
-using Sproto.Nmea.Exceptions;
-
-#endregion
-
-namespace Sproto.Nmea.Messages
+﻿namespace Sproto.Nmea.Messages
 {
 	public class TxtMessage : NmeaMessage
 	{
@@ -19,7 +12,13 @@ namespace Sproto.Nmea.Messages
 
 		#region Properties
 
-		public string Text { get; private set; }
+		public int SentenceNumber { get; set; }
+
+		public string Text { get; set; }
+
+		public string TextIdentifier { get; set; }
+
+		public int TotalNumberOfSentences { get; set; }
 
 		#endregion
 
@@ -39,22 +38,27 @@ namespace Sproto.Nmea.Messages
 			// 3) Text Message
 			// 4) Checksum
 
-			var items = StartParse(sentence);
+			StartParse(sentence);
 
-			Text = items[3];
+			TotalNumberOfSentences = int.TryParse(GetArgument(0, "0"), out var t) ? t : 0;
+			SentenceNumber = int.TryParse(GetArgument(1, "0"), out var n) ? n : 0;
+			TextIdentifier = GetArgument(2);
+			Text = GetArgument(3);
 
 			OnNmeaMessageParsed(this);
 		}
 
-		public override void Reset()
-		{
-		}
-
 		public override string ToString()
 		{
-			var result = $"{Type} Text:{Text} ";
+			var start = string.Join(",",
+				NmeaParser.GetSentenceStart(this),
+				TotalNumberOfSentences.ToString("00"),
+				SentenceNumber.ToString("00"),
+				TextIdentifier,
+				Text
+			);
 
-			return result;
+			return $"{start}*{Checksum}";
 		}
 
 		#endregion

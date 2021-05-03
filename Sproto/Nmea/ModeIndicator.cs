@@ -18,14 +18,18 @@ namespace Sproto.Nmea
 
 		public ModeIndicator(string modeIndicator)
 		{
+			// Mode Indicator:
 			_modeIndicators = new Dictionary<char, string>
 			{
 				{ 'A', "Autonomous" },
 				{ 'D', "Differential" },
-				{ 'E', "Estimated(dead reckoning) mode" },
-				{ 'M', "Manual input" },
-				{ 'N', "Data not valid" },
-				{ '*', "Not implemented" }
+				{ 'E', "Estimated" },
+				{ 'F', "Float RTK" },
+				{ 'M', "Manual" },
+				{ 'N', "No Fix" },
+				{ 'P', "Precise" },
+				{ 'R', "Real Time Kinematic" },
+				{ 'S', "Simulator" },
 			};
 
 			if (!string.IsNullOrEmpty(modeIndicator) && _modeIndicators.ContainsKey(modeIndicator[0]))
@@ -35,8 +39,8 @@ namespace Sproto.Nmea
 			}
 			else
 			{
-				Mode = '*';
-				ModeName = _modeIndicators[Mode];
+				Mode = ' ';
+				ModeName = string.Empty;
 			}
 		}
 
@@ -51,6 +55,11 @@ namespace Sproto.Nmea
 		#endregion
 
 		#region Methods
+
+		public bool IsSet()
+		{
+			return _modeIndicators.ContainsKey(Mode);
+		}
 
 		public bool IsValid()
 		{

@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using Sproto.Nmea.Exceptions;
 
 #endregion
 
@@ -51,11 +50,11 @@ namespace Sproto.Nmea.Messages
 			//    more satellite infos like 4)-7)
 			// n) Checksum
 
-			var items = StartParse(sentence);
+			StartParse(sentence);
 
-			NumberOfSentences = Convert.ToInt32(items[0]);
-			SentenceNr = Convert.ToInt32(items[1]);
-			NumberOfSatellitesInView = Convert.ToInt32(items[2]);
+			NumberOfSentences = Convert.ToInt32(GetArgument(0));
+			SentenceNr = Convert.ToInt32(GetArgument(1));
+			NumberOfSatellitesInView = Convert.ToInt32(GetArgument(2));
 
 			var satelliteCount = GetSatelliteCount(
 				Convert.ToInt32(NumberOfSatellitesInView),
@@ -67,10 +66,10 @@ namespace Sproto.Nmea.Messages
 				Satellites.Add(
 					new Satellite
 					{
-						SatellitePrnNumber = items[3 + i * 4 + 0],
-						ElevationDegrees = items[3 + i * 4 + 1],
-						AzimuthDegrees = items[3 + i * 4 + 2],
-						SignalStrength = items[3 + i * 4 + 3]
+						SatellitePrnNumber = GetArgument(3 + i * 4 + 0),
+						ElevationDegrees = GetArgument(3 + i * 4 + 1),
+						AzimuthDegrees = GetArgument(3 + i * 4 + 2),
+						SignalStrength = GetArgument(3 + i * 4 + 3)
 					});
 			}
 
@@ -80,10 +79,6 @@ namespace Sproto.Nmea.Messages
 
 				Satellites.Clear();
 			}
-		}
-
-		public override void Reset()
-		{
 		}
 
 		public override string ToString()

@@ -1,12 +1,24 @@
 ﻿#region References
 
-using System;
-using Sproto.Nmea.Exceptions;
-
 #endregion
 
 namespace Sproto.Nmea.Messages
 {
+	/// <summary>
+	/// GP: GlobalPositioningSystem
+	/// To provide information specific to the GPS constellation when more than one constellation is used
+	/// for the differential position fix.
+	///
+	/// GL: GlonassReceiver
+	/// To provide information specific to the GLONASS constellation when more than one constellation is used
+	/// for the differential position fix
+	///
+	/// GN: GlobalNavigationSatelliteSystem
+	/// GNSS position fix from more than one constellation (eg. GPS + GLONASS)
+	/// </summary>
+	/// <remarks>
+	/// Priority should be GN > GL > GP.
+	/// </remarks>
 	public class GnsMessage : NmeaMessage
 	{
 		#region Constructors
@@ -62,13 +74,9 @@ namespace Sproto.Nmea.Messages
 			//     - Null if talker ID is GN, additional GNS messages follow with GP and/or GL Reference station ID
 			// 12) Checksum
 
-			var items = StartParse(sentence);
+			StartParse(sentence);
 
 			OnNmeaMessageParsed(this);
-		}
-
-		public override void Reset()
-		{
 		}
 
 		public override string ToString()

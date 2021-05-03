@@ -51,39 +51,54 @@
 			//     A = Active
 			//     V = Void
 			//  2) Latitude, ddmm.mmmm
-			//  3) N or S
-			//  4) Longitude, ddmm.mmmm
-			//  5) E or W
+			//  3) Direction
+			//     N - North
+			//     S - South
+			//  4) Longitude - DDDmm.mm
+			//  5) Direction
+			//     E - East
+			//     W - West
 			//  6) Speed over ground, knots
 			//  7) Course over ground, degrees true
 			//  8) Date, ddmmyy
 			//  9) Magnetic Variation, degrees
-			// 10) E or W
-			// 11) Mode
+			// 10) Direction
+			//     E - East
+			//     W - West
+			// 11) Mode Indicator
 			//     A = Autonomous
-			//     D = DGPS
-			//     E = DR
+			//     D = Differential
+			//     E - Estimated
+			//     M - Manual
+			//     N - No Fix
+			//     P - Precise
+			//     R - Real Time Kinematic
+			//     S - Simulator
 			// 12) Checksum
 
-			var items = StartParse(sentence);
+			StartParse(sentence);
 
-			TimeOfFix = items[0];
-			Status = items[1];
-			Latitude = new Location(items[2], items[3]);
-			Longitude = new Location(items[4], items[5]);
-			Speed = items[6];
-			Course = items[7];
-			DateOfFix = items[8];
-			MagneticVariation = items[9];
-			MagneticVariationUnit = items[10];
-			ModeIndicator = new ModeIndicator(GetValueOrDefault(items, 11, ""));
-			NavigationStatus = items.Length >= 13 ? new NavigationStatus(GetValueOrDefault(items, 12, "")) : null;
+			TimeOfFix = GetArgument(0);
+			Status = GetArgument(1);
+			Latitude = new Location(GetArgument(2), GetArgument(3));
+			Longitude = new Location(GetArgument(4), GetArgument(5));
+			Speed = GetArgument(6);
+			Course = GetArgument(7);
+			DateOfFix = GetArgument(8);
+			MagneticVariation = GetArgument(9);
+			MagneticVariationUnit = GetArgument(10);
+
+			// Optional Mode
+			ModeIndicator = Arguments.Count >= 12
+				? new ModeIndicator(GetArgument(11, ""))
+				: null;
+
+			// Optional Navigation Status
+			NavigationStatus = Arguments.Count >= 13
+				? new NavigationStatus(GetArgument(12, ""))
+				: null;
 
 			OnNmeaMessageParsed(this);
-		}
-
-		public override void Reset()
-		{
 		}
 
 		public override string ToString()
@@ -100,11 +115,15 @@
 				Course,
 				DateOfFix,
 				MagneticVariation,
-				MagneticVariationUnit,
-				ModeIndicator
+				MagneticVariationUnit
 			);
 
-			if (NavigationStatus != null && NavigationStatus.IsValid())
+			if (ModeIndicator != null && ModeIndicator.IsSet())
+			{
+				start += $",{ModeIndicator}";
+			}
+
+			if (NavigationStatus != null && NavigationStatus.IsSet())
 			{
 				start += $",{NavigationStatus}";
 			}

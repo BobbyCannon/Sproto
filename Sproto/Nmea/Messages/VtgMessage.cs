@@ -50,32 +50,32 @@
 			// 5) N: speed is measured in knots
 			// 6) Speed over ground in kilometers/hour (kph)
 			// 7) K: speed over ground is measured in kph
-			// 8) Mode indicator:
-			//    A: Autonomous mode
-			//    D: Differential mode
-			//    E: Estimated (dead reckoning) mode
-			//    M: Manual Input mode
-			//    S: Simulator mode
-			//    N: Data not valid
+			// 8) Mode Indicator
+			//    A = Autonomous
+			//    D = Differential
+			//    E - Estimated
+			//    M - Manual
+			//    N - No Fix
+			//    P - Precise
+			//    R - Real Time Kinematic
+			//    S - Simulator
 			// 9) Checksum
 
-			var items = StartParse(sentence);
+			StartParse(sentence);
 
-			TrueCourse = items[0];
-			TrueCourseUnit = items[1];
-			MagneticCourse = items[2];
-			MagneticCourseUnit = items[3];
-			GroundSpeed = items[4];
-			GroundSpeedUnit = items[5];
-			GroundSpeedKilometersPerHour = items[6];
-			GroundSpeedKilometersPerHourUnit = items[7];
-			ModeIndicator = new ModeIndicator(GetValueOrDefault(items, 8, ""));
+			TrueCourse = GetArgument(0);
+			TrueCourseUnit = GetArgument(1);
+			MagneticCourse = GetArgument(2);
+			MagneticCourseUnit = GetArgument(3);
+			GroundSpeed = GetArgument(4);
+			GroundSpeedUnit = GetArgument(5);
+			GroundSpeedKilometersPerHour = GetArgument(6);
+			GroundSpeedKilometersPerHourUnit = GetArgument(7);
+			ModeIndicator = Arguments.Count >= 9
+				? new ModeIndicator(GetArgument(8, ""))
+				: null;
 
 			OnNmeaMessageParsed(this);
-		}
-
-		public override void Reset()
-		{
 		}
 
 		public override string ToString()
@@ -89,9 +89,13 @@
 				GroundSpeed,
 				GroundSpeedUnit,
 				GroundSpeedKilometersPerHour,
-				GroundSpeedKilometersPerHourUnit,
-				ModeIndicator
+				GroundSpeedKilometersPerHourUnit
 			);
+
+			if (ModeIndicator != null && ModeIndicator.IsSet())
+			{
+				start += $",{ModeIndicator}";
+			}
 
 			return $"{start}*{Checksum}";
 		}

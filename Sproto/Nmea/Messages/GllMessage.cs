@@ -1,8 +1,5 @@
 ﻿#region References
 
-using System;
-using Sproto.Nmea.Exceptions;
-
 #endregion
 
 namespace Sproto.Nmea.Messages
@@ -42,37 +39,41 @@ namespace Sproto.Nmea.Messages
 			//        |       | |        | |         | |
 			// $--GLL,llll.ll,a,yyyyy.yy,a,hhmmss.ss,A*hh
 			//
-			// 0) Latitude
-			// 1) N or S (North or South)
-			// 2) Longitude
-			// 3) E or W (East or West)
-			// 4) Time (UTC)
+			// 0) Latitude - DDmm.mm
+			// 1) Direction
+			//    N - North
+			//    S - South
+			// 2) Longitude - DDDmm.mm
+			// 3) Direction
+			//    E - East
+			//    W - West
+			// 4) Time (UTC) hhmmss.ss
 			// 5) Status
 			//    A - Data Valid
 			//    V - Data Invalid
-			// 6) Mode
+			// 6) Mode Indicator
 			//    A = Autonomous
-			//    D = DGPS
-			//    E = DR (This field is only present in NMEA version 3.0)
+			//    D = Differential
+			//    E - Estimated
+			//    M - Manual
+			//    N - No Fix
+			//    P - Precise
+			//    R - Real Time Kinematic
+			//    S - Simulator
 			// 7) Checksum
 
-			var items = StartParse(sentence);
+			StartParse(sentence);
 
-			Latitude = new Location(items[0], items[1]);
-			Longitude = new Location(items[2], items[3]);
-			FixTaken = items[4];
-			DataValid = items[5];
+			Latitude = new Location(GetArgument(0), GetArgument(1));
+			Longitude = new Location(GetArgument(2), GetArgument(3));
+			FixTaken = GetArgument(4);
+			DataValid = GetArgument(5);
 
-			ModeIndicator = new ModeIndicator(GetValueOrDefault(items, 6, ""));
-			ModeIndicator = items.Length > 6
-				? new ModeIndicator(items[6])
-				: new ModeIndicator("");
+			ModeIndicator = Arguments.Count > 6
+				? new ModeIndicator(GetArgument(6))
+				: null;
 
 			OnNmeaMessageParsed(this);
-		}
-
-		public override void Reset()
-		{
 		}
 
 		public override string ToString()
