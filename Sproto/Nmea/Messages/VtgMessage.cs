@@ -72,7 +72,7 @@
 			GroundSpeedKilometersPerHour = GetArgument(6);
 			GroundSpeedKilometersPerHourUnit = GetArgument(7);
 			ModeIndicator = Arguments.Count >= 9
-				? new ModeIndicator(GetArgument(8, ""))
+				? new ModeIndicator(GetArgument(8))
 				: null;
 
 			OnNmeaMessageParsed(this);

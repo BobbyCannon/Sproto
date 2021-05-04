@@ -20,20 +20,20 @@ namespace Sproto.Nmea.Messages
 
 		#region Properties
 
-		public string AutoSelection { get; private set; }
+		public string AutoSelection { get; set; }
 
-		public string Fix3D { get; private set; }
+		public string Fix3D { get; set; }
 
-		public double HorizontalDilutionOfPrecision { get; private set; }
+		public double HorizontalDilutionOfPrecision { get; set; }
 
-		public double PositionDilutionOfPrecision { get; private set; }
+		public double PositionDilutionOfPrecision { get; set; }
 
 		/// <summary>
 		/// Pseudo-Random Noise for satellites used for fix.
 		/// </summary>
 		public List<int> PrnsOfSatellitesUsedForFix { get; }
 
-		public double VerticalDilutionOfPrecision { get; private set; }
+		public double VerticalDilutionOfPrecision { get; set; }
 
 		#endregion
 
@@ -60,8 +60,19 @@ namespace Sproto.Nmea.Messages
 			// $--GSA,a,a,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x.x,x.x,x.x*hh
 			//
 			// 0) Selection mode
+			//    M - Manual, forced to operate in 2D or 3D mode
+			//    A - Automatic, allowed to automatically switch 2D/3D
 			// 1) Mode
+			//    1 - Fix not available
+			//    2 - 2D
+			//    3 - 3D
 			// 2) ID of 1st satellite used for fix
+			//    GPS and Beidou satellites are differentiated by the GP and BD prefix. Maximally 12 satellites are included in each GSA sentence
+			//    01 ~ 32 are for GPS;
+			//    33 ~ 64 are for SBAS (PRN minus 87);
+			//    65 ~ 96 are for GLONASS (64 plus slot numbers);
+			//    193 ~ 197 are for QZSS;
+			//    01 ~ 37 are for Beidou (BD PRN).
 			// 3) ID of 2nd satellite used for fix
 			// ...
 			// 13) ID of 12th satellite used for fix
@@ -101,18 +112,30 @@ namespace Sproto.Nmea.Messages
 
 		public override string ToString()
 		{
-			var prnsOfSatellitesUsedForFix = string.Empty;
+			var start = string.Join(",",
+				NmeaParser.GetSentenceStart(this),
+				AutoSelection,
+				Fix3D
+			);
 
-			foreach (var prn in PrnsOfSatellitesUsedForFix)
+			var totalPrn = PrnsOfSatellitesUsedForFix.Count;
+
+			for (var i = 0; i < totalPrn; i++)
 			{
-				prnsOfSatellitesUsedForFix += $"{prn} ";
+				start += $",{PrnsOfSatellitesUsedForFix[i]:00}";
 			}
 
-			prnsOfSatellitesUsedForFix = prnsOfSatellitesUsedForFix.Trim();
+			for (var i = totalPrn; i < 12; i++)
+			{
+				start += ",";
+			}
 
-			var result = $"{Type} AutoSelection:{AutoSelection} Fix3D:{Fix3D} Prns:{prnsOfSatellitesUsedForFix} PDop:{PositionDilutionOfPrecision:N1} HDop:{HorizontalDilutionOfPrecision:N1} VDop:{VerticalDilutionOfPrecision:N1} ";
+			start += ",";
+			start += PositionDilutionOfPrecision.ToString("##0.0#") + ",";
+			start += HorizontalDilutionOfPrecision.ToString("##0.0#") + ",";
+			start += VerticalDilutionOfPrecision.ToString("##0.0#");
 
-			return result;
+			return $"{start}*{Checksum}";
 		}
 
 		#endregion

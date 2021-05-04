@@ -18,25 +18,29 @@ namespace Sproto.Nmea.Messages
 
 		#region Properties
 
-		public double Altitude { get; private set; }
+		public double Altitude { get; set; }
 
-		public string FixQuality { get; private set; }
+		public string AltitudeUnit { get; set; }
 
-		public double FixTaken { get; private set; }
+		public string FixQuality { get; set; }
 
-		public double HeightOfGeoid { get; private set; }
+		public double FixTaken { get; set; }
 
-		public double HorizontalDilutionOfPrecision { get; private set; }
+		public double HeightOfGeoid { get; set; }
 
-		public Location Latitude { get; private set; }
+		public string HeightOfGeoidUnit { get; set; }
 
-		public Location Longitude { get; private set; }
+		public double HorizontalDilutionOfPrecision { get; set; }
 
-		public int NumberOfSatellites { get; private set; }
+		public Location Latitude { get; set; }
 
-		public string SecondsSinceLastUpdateDgps { get; private set; }
+		public Location Longitude { get; set; }
 
-		public string StationIdNumberDgps { get; private set; }
+		public int NumberOfSatellites { get; set; }
+
+		public string SecondsSinceLastUpdateDgps { get; set; }
+
+		public string StationIdNumberDgps { get; set; }
 
 		#endregion
 
@@ -95,7 +99,9 @@ namespace Sproto.Nmea.Messages
 			NumberOfSatellites = Convert.ToInt32(GetArgument(6));
 			HorizontalDilutionOfPrecision = Convert.ToDouble(GetArgument(7, "0"));
 			Altitude = Convert.ToDouble(GetArgument(8, "0"));
+			AltitudeUnit = GetArgument(9);
 			HeightOfGeoid = Convert.ToDouble(GetArgument(10, "0"));
+			HeightOfGeoidUnit = GetArgument(11);
 			SecondsSinceLastUpdateDgps = GetArgument(12);
 			StationIdNumberDgps = GetArgument(13);
 
@@ -104,8 +110,25 @@ namespace Sproto.Nmea.Messages
 
 		public override string ToString()
 		{
-			var result = $"{Type} Latitude:{Latitude} Longitude:{Longitude} FixTaken:{FixTaken} Quality:{FixQuality} SatCount:{NumberOfSatellites} HDop:{HorizontalDilutionOfPrecision:N1} Altitude:{Altitude} Geoid:{HeightOfGeoid} LastUpdate:{SecondsSinceLastUpdateDgps} DGPS:{StationIdNumberDgps} ";
-			return result;
+			var start = string.Join(",",
+				NmeaParser.GetSentenceStart(this),
+				FixTaken.ToString("000000.00"),
+				Latitude.Degree,
+				Latitude.Indicator,
+				Longitude.Degree,
+				Longitude.Indicator,
+				FixQuality,
+				NumberOfSatellites.ToString("00"),
+				HorizontalDilutionOfPrecision,
+				Altitude,
+				AltitudeUnit,
+				HeightOfGeoid.ToString("0.0"),
+				HeightOfGeoidUnit,
+				SecondsSinceLastUpdateDgps,
+				StationIdNumberDgps
+			);
+
+			return $"{start}*{Checksum}";
 		}
 
 		#endregion

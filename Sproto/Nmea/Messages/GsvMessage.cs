@@ -20,13 +20,13 @@ namespace Sproto.Nmea.Messages
 
 		#region Properties
 
-		public int NumberOfSatellitesInView { get; private set; }
+		public int NumberOfSatellitesInView { get; set; }
 
-		public int NumberOfSentences { get; private set; }
+		public int NumberOfSentences { get; set; }
 
 		public List<Satellite> Satellites { get; }
 
-		public int SentenceNr { get; private set; }
+		public int SentenceNr { get; set; }
 
 		#endregion
 
@@ -36,19 +36,19 @@ namespace Sproto.Nmea.Messages
 		{
 			// $GPGSV,3,1,10,01,50,304,26,03,24,245,16,08,56,204,28,10,21,059,20*77
 			//
-			// .      0 1 2 3 4 5 6     n
-			//        | | | | | | |     |
-			// $--GSV,x,x,x,x,x,x,x,...*hh
+			// .      0 1 2  3  4  5   6    X
+			//        | | |  |  |  |   |    |
+			// $--GSV,x,u,xx,uu,vv,zzz,ss,…*hh
 			//
-			// 0) total number of messages
-			// 1) message number
-			// 2) satellites in view
-			// 3) satellite number
-			// 4) elevation in degrees
-			// 5) azimuth in degrees to true
-			// 6) SNR in dB
-			//    more satellite infos like 4)-7)
-			// n) Checksum
+			// 0) Total number of GSV messages - x
+			// 1) Message number - u
+			// 2) Satellites in view - xx
+			// 3) Satellite number - uu
+			// 4) Elevation in degrees - vv
+			// 5) Azimuth in degrees to true - zzz
+			// 6) SNR in dB - ss
+			//    more satellite infos like 3-6... maximum of 4
+			// X) Checksum - hh
 
 			StartParse(sentence);
 
@@ -72,25 +72,30 @@ namespace Sproto.Nmea.Messages
 						SignalStrength = GetArgument(3 + i * 4 + 3)
 					});
 			}
-
-			if (NumberOfSentences == SentenceNr)
-			{
-				OnNmeaMessageParsed(this);
-
-				Satellites.Clear();
-			}
 		}
 
 		public override string ToString()
 		{
-			var result = $"{Type} InView:{NumberOfSatellitesInView} ";
+			var start = string.Join(",",
+				NmeaParser.GetSentenceStart(this),
+				NumberOfSentences,
+				SentenceNr,
+				NumberOfSatellitesInView
+			);
 
-			foreach (var s in Satellites)
+			var total = Satellites.Count;
+
+			for (var i = 0; i < total; i++)
 			{
-				result += $"{s.SatellitePrnNumber}: Azi={s.AzimuthDegrees}° Ele={s.ElevationDegrees}° Str={s.SignalStrength}; ";
+				start += $",{Satellites[i].SatellitePrnNumber},{Satellites[i].ElevationDegrees},{Satellites[i].AzimuthDegrees},{Satellites[i].SignalStrength}";
 			}
 
-			return result;
+			for (var i = total; i < 4; i++)
+			{
+				start += ",";
+			}
+
+			return $"{start}*{Checksum}";
 		}
 
 		private int GetSatelliteCount(int numberOfSatellitesInView, int numberOfSentences, int sentenceNr)

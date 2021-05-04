@@ -90,12 +90,12 @@
 
 			// Optional Mode
 			ModeIndicator = Arguments.Count >= 12
-				? new ModeIndicator(GetArgument(11, ""))
+				? new ModeIndicator(GetArgument(11))
 				: null;
 
 			// Optional Navigation Status
 			NavigationStatus = Arguments.Count >= 13
-				? new NavigationStatus(GetArgument(12, ""))
+				? new NavigationStatus(GetArgument(12))
 				: null;
 
 			OnNmeaMessageParsed(this);

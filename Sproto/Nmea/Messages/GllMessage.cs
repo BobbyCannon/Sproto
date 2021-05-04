@@ -2,6 +2,8 @@
 
 #endregion
 
+using System;
+
 namespace Sproto.Nmea.Messages
 {
 	public class GllMessage : NmeaMessage
@@ -18,7 +20,7 @@ namespace Sproto.Nmea.Messages
 
 		public string DataValid { get; set; }
 
-		public string FixTaken { get; set; }
+		public double FixTaken { get; set; }
 
 		public Location Latitude { get; set; }
 
@@ -47,7 +49,7 @@ namespace Sproto.Nmea.Messages
 			// 3) Direction
 			//    E - East
 			//    W - West
-			// 4) Time (UTC) hhmmss.ss
+			// 4) Time (UTC) - hhmmss.ss
 			// 5) Status
 			//    A - Data Valid
 			//    V - Data Invalid
@@ -66,7 +68,7 @@ namespace Sproto.Nmea.Messages
 
 			Latitude = new Location(GetArgument(0), GetArgument(1));
 			Longitude = new Location(GetArgument(2), GetArgument(3));
-			FixTaken = GetArgument(4);
+			FixTaken = Convert.ToDouble(GetArgument(4, "0"));
 			DataValid = GetArgument(5);
 
 			ModeIndicator = Arguments.Count > 6
@@ -78,8 +80,22 @@ namespace Sproto.Nmea.Messages
 
 		public override string ToString()
 		{
-			var result = $"{Type} Latitude:{Latitude} Longitude:{Longitude} FixTaken:{FixTaken} Valid:{DataValid} Mode:{ModeIndicator}";
-			return result;
+			var start = string.Join(",",
+				NmeaParser.GetSentenceStart(this),
+				Latitude.Degree,
+				Latitude.Indicator,
+				Longitude.Degree,
+				Longitude.Indicator,
+				FixTaken.ToString("000000.00"),
+				DataValid
+			);
+
+			if (ModeIndicator != null && ModeIndicator.IsSet())
+			{
+				start += $",{ModeIndicator}";
+			}
+
+			return $"{start}*{Checksum}";
 		}
 
 		#endregion

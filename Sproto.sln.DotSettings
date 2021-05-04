@@ -611,6 +611,7 @@ public static void ClassInitialize(TestContext context)&#xD;
 	&lt;TextBlock Text="$Name$" /&gt;&#xD;
 &lt;/StackPanel&gt;</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Atel/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Beidou/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=blox/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=ddmm/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=ddmmyy/@EntryIndexedValue">True</s:Boolean>
@@ -658,6 +659,7 @@ public static void ClassInitialize(TestContext context)&#xD;
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=prns/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Pseudorange/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=PSLIB/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=QZSS/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=SBAS/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Sproto/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Timetag/@EntryIndexedValue">True</s:Boolean>

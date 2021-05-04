@@ -18,7 +18,6 @@ $sprotoR = "<Reference Include=`"Sproto, Version=$($versionFull), Culture=neutra
 $sprotoPR = "<PackageReference Include=`"Sproto`" Version=`"$version`" />"
 $sprotoPR2 = "<PackageReference Include=`"Sproto`"><Version>$version</Version></PackageReference>"
 $sprotoPCR = "<Reference Include=`"Sproto, Version=$($versionFull), Culture=neutral, processorArchitecture=MSIL`"><HintPath>..\packages\Sproto.$version\lib\netstandard2.0\Sproto.dll</HintPath></Reference>"
-
 $sprotoNR = "<Reference Include=`"Sproto`"><HintPath>C:\Workspaces\GitHub\Sproto\Sproto\bin\Debug\netstandard2.0\Sproto.dll</HintPath></Reference>"
 
 foreach ($file in $files)
