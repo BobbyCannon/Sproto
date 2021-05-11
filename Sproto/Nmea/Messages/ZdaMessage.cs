@@ -20,6 +20,9 @@
 
 		public int Month { get; set; }
 
+		/// <summary>
+		/// Time in the hhmmss.ss format.
+		/// </summary>
 		public string Time { get; set; }
 
 		public int Year { get; set; }

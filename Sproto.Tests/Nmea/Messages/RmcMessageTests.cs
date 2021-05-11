@@ -23,7 +23,7 @@ namespace Sproto.Tests.Nmea.Messages
 					new RmcMessage
 					{
 						Prefix = NmeaMessagePrefix.GlobalNavigationSatelliteSystem,
-						TimeOfFix = "143718.00",
+						Time = "143718.00",
 						Status = "A",
 						Latitude = new Location("4513.13793", "N"),
 						Longitude = new Location("01859.19704", "E"),
@@ -41,7 +41,7 @@ namespace Sproto.Tests.Nmea.Messages
 					new RmcMessage
 					{
 						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
-						TimeOfFix = "002959.00",
+						Time = "002959.00",
 						Status = "A",
 						Latitude = new Location("4253.65205", "N"),
 						Longitude = new Location("07852.11902", "W"),
@@ -59,7 +59,7 @@ namespace Sproto.Tests.Nmea.Messages
 					new RmcMessage
 					{
 						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
-						TimeOfFix = "210230",
+						Time = "210230",
 						Status = "A",
 						Latitude = new Location("3855.4487", "N"),
 						Longitude = new Location("09446.0071", "W"),
@@ -77,7 +77,7 @@ namespace Sproto.Tests.Nmea.Messages
 					new RmcMessage
 					{
 						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
-						TimeOfFix = "002959.00",
+						Time = "002959.00",
 						Status = "A",
 						Latitude = new Location("4253.65205", "N"),
 						Longitude = new Location("07852.11902", "W"),
@@ -96,7 +96,7 @@ namespace Sproto.Tests.Nmea.Messages
 					new RmcMessage
 					{
 						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
-						TimeOfFix = "003007.00",
+						Time = "003007.00",
 						Status = "A",
 						Latitude = new Location("4253.65269", "N"),
 						Longitude = new Location("07852.11899", "W"),

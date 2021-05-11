@@ -16,8 +16,6 @@
 
 		public string BiasEstimate { get; set; }
 
-		public double FixTaken { get; set; }
-
 		public double LatitudeExpectedError { get; set; }
 
 		public double LongitudeExpectedError { get; set; }
@@ -27,6 +25,11 @@
 		public string SatelliteId { get; set; }
 
 		public string StandardDeviation { get; set; }
+
+		/// <summary>
+		/// Time in the hhmmss.ss format.
+		/// </summary>
+		public double Time { get; set; }
 
 		#endregion
 
@@ -52,7 +55,7 @@
 
 			StartParse(sentence);
 
-			FixTaken = GetArgumentAsDouble(0, 0.0);
+			Time = GetArgumentAsDouble(0, 0.0);
 			LatitudeExpectedError = GetArgumentAsDouble(1, 0.0);
 			LongitudeExpectedError = GetArgumentAsDouble(2, 0.0);
 			AltitudeExpectedError = GetArgumentAsDouble(3, 0.0);

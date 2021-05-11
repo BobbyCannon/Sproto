@@ -1240,7 +1240,7 @@ namespace Sproto.Tests.Nmea
 			var n = parser.Parse(m) as GgaMessage;
 
 			Assert.IsNotNull(n);
-			Assert.AreEqual(143718.00, n.FixTaken);
+			Assert.AreEqual(143718.00, n.Time);
 			Assert.AreEqual("45.21896550", n.Latitude.ToString());
 			Assert.AreEqual("18.98661733", n.Longitude.ToString());
 			Assert.AreEqual("1", n.FixQuality);

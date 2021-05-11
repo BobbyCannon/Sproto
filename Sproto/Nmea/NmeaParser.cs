@@ -62,20 +62,29 @@ namespace Sproto.Nmea
 		{
 			lock (_parsersLock)
 			{
-				if (_parsers.ContainsKey(type))
-				{
-					_parsers.Remove(type);
-				}
-
-				var parser = CreateMessageParser(type);
-				if (parser == null)
+				var message = CreateMessageParser(type);
+				if (message == null)
 				{
 					return;
 				}
 
-				parser.NmeaMessageParsed += OnMessageParsed;
+				AddMessageParser(message);
+			}
+		}
 
-				_parsers.AddOrUpdate(type, parser);
+		public void AddMessageParser(NmeaMessage message)
+		{
+			lock (_parsersLock)
+			{
+				if (_parsers.ContainsKey(message.Type))
+				{
+					var parser = _parsers[message.Type];
+					parser.NmeaMessageParsed -= OnMessageParsed;
+					_parsers.Remove(message.Type);
+				}
+
+				message.NmeaMessageParsed += OnMessageParsed;
+				_parsers.AddOrUpdate(message.Type, message);
 			}
 		}
 
@@ -128,6 +137,7 @@ namespace Sproto.Nmea
 							return null;
 						}
 						p.Parse(sentence);
+						p.ReceivedOn = timestamp ?? TimeService.UtcNow;
 						return p;
 					}
 				}

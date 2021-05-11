@@ -20,13 +20,16 @@ namespace Sproto.Nmea.Messages
 
 		public string DataValid { get; set; }
 
-		public double FixTaken { get; set; }
-
 		public Location Latitude { get; set; }
 
 		public Location Longitude { get; set; }
 
 		public ModeIndicator ModeIndicator { get; set; }
+
+		/// <summary>
+		/// Time in the hhmmss.ss format.
+		/// </summary>
+		public double Time { get; set; }
 
 		#endregion
 
@@ -68,7 +71,7 @@ namespace Sproto.Nmea.Messages
 
 			Latitude = new Location(GetArgument(0), GetArgument(1));
 			Longitude = new Location(GetArgument(2), GetArgument(3));
-			FixTaken = Convert.ToDouble(GetArgument(4, "0"));
+			Time = Convert.ToDouble(GetArgument(4, "0"));
 			DataValid = GetArgument(5);
 
 			ModeIndicator = Arguments.Count > 6
@@ -86,7 +89,7 @@ namespace Sproto.Nmea.Messages
 				Latitude.Indicator,
 				Longitude.Degree,
 				Longitude.Indicator,
-				FixTaken.ToString("000000.00"),
+				Time.ToString("000000.00"),
 				DataValid
 			);
 

@@ -23,7 +23,7 @@ namespace Sproto.Tests.Nmea.Messages
 					new GgaMessage
 					{
 						Prefix = NmeaMessagePrefix.GlobalNavigationSatelliteSystem,
-						FixTaken = 143718.00,
+						Time = 143718.00,
 						Latitude = new Location("4513.13793", "N"),
 						Longitude = new Location("01859.19704", "E"),
 						FixQuality = "1",
@@ -43,7 +43,7 @@ namespace Sproto.Tests.Nmea.Messages
 					new GgaMessage
 					{
 						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
-						FixTaken = 014349.36,
+						Time = 014349.36,
 						Latitude = new Location("", ""),
 						Longitude = new Location("", ""),
 						FixQuality = "0",

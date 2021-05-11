@@ -32,7 +32,10 @@
 
 		public string Status { get; set; }
 
-		public string TimeOfFix { get; set; }
+		/// <summary>
+		/// Time in the hhmmss.ss format.
+		/// </summary>
+		public string Time { get; set; }
 
 		#endregion
 
@@ -78,7 +81,7 @@
 
 			StartParse(sentence);
 
-			TimeOfFix = GetArgument(0);
+			Time = GetArgument(0);
 			Status = GetArgument(1);
 			Latitude = new Location(GetArgument(2), GetArgument(3));
 			Longitude = new Location(GetArgument(4), GetArgument(5));
@@ -105,7 +108,7 @@
 		{
 			var start = string.Join(",",
 				NmeaParser.GetSentenceStart(this),
-				TimeOfFix,
+				Time,
 				Status,
 				Latitude.Degree,
 				Latitude.Indicator,

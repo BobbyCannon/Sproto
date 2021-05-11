@@ -36,6 +36,11 @@ namespace Sproto.Nmea
 		public NmeaMessagePrefix Prefix { get; set; }
 
 		/// <summary>
+		/// The date and time the message was received on.
+		/// </summary>
+		public DateTime ReceivedOn { get; set; }
+
+		/// <summary>
 		/// The sentence type of this NMEA message.
 		/// </summary>
 		public NmeaMessageType Type { get; }
@@ -92,7 +97,7 @@ namespace Sproto.Nmea
 		{
 			return double.TryParse(GetArgument(index), out var result) ? result : defaultValue;
 		}
-		
+
 		/// <summary>
 		/// Gets the argument or returns the default value if the index is not found.
 		/// </summary>
@@ -103,7 +108,7 @@ namespace Sproto.Nmea
 		{
 			return int.TryParse(GetArgument(index), out var result) ? result : defaultValue;
 		}
-		
+
 		/// <summary>
 		/// Gets the argument or returns the default value if the index is not found.
 		/// </summary>

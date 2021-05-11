@@ -74,6 +74,12 @@ namespace Sproto.Nmea.Messages
 			}
 		}
 
+		public override void Reset()
+		{
+			Satellites.Clear();
+			base.Reset();
+		}
+
 		public override string ToString()
 		{
 			var start = string.Join(",",

@@ -37,7 +37,7 @@ namespace Sproto.Nmea.Messages
 
 		public string DifferentialReferenceStationId { get; set; }
 
-		public double FixTaken { get; set; }
+		public double Time { get; set; }
 
 		public double HeightOfGeoid { get; set; }
 
@@ -100,7 +100,7 @@ namespace Sproto.Nmea.Messages
 
 			StartParse(sentence);
 
-			FixTaken = Convert.ToDouble(GetArgument(0, "0"));
+			Time = Convert.ToDouble(GetArgument(0, "0"));
 			Latitude = new Location(GetArgument(1), GetArgument(2));
 			Longitude = new Location(GetArgument(3), GetArgument(4));
 			ModeIndicator = GetArgument(5);
@@ -118,7 +118,7 @@ namespace Sproto.Nmea.Messages
 		{
 			var start = string.Join(",",
 				NmeaParser.GetSentenceStart(this),
-				FixTaken.ToString("000000.00"),
+				Time.ToString("000000.00"),
 				Latitude.Degree,
 				Latitude.Indicator,
 				Longitude.Degree,

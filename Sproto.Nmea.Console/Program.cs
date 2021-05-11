@@ -3,8 +3,13 @@
 using System;
 using System.IO;
 using System.IO.Ports;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using Speedy;
 using Speedy.Extensions;
 
 #endregion
@@ -16,6 +21,8 @@ namespace Sproto.Nmea.Console
 		#region Fields
 
 		private static NmeaParser _parser;
+		private static UdpClient _network;
+		private static IPEndPoint _networkEndPoint;
 
 		#endregion
 
@@ -50,7 +57,7 @@ namespace Sproto.Nmea.Console
 							try
 							{
 								var line = port.ReadLine();
-								var message = _parser.Parse(line);
+								var message = _parser.Parse(line, TimeService.UtcNow);
 								if (message != null)
 								{
 									return port;
@@ -79,11 +86,44 @@ namespace Sproto.Nmea.Console
 		private static void Main(string[] args)
 		{
 			_parser = new NmeaParser();
+			_network = new UdpClient { ExclusiveAddressUse = false };
+			_network.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+			_network.Client.Bind(new IPEndPoint(IPAddress.Any, 22030));
+			_networkEndPoint = new IPEndPoint(IPAddress.Broadcast, 22030);
 
+			RunAsSerialPort(args);
+
+			//int port = 22030;
+			//var udpClient = new UdpClient { EnableBroadcast = true, ExclusiveAddressUse = false };
+			//udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+			//udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, port));
+
+			//var from = new IPEndPoint(0, 0);
+			//Task.Run(() =>
+			//{
+			//	while (true)
+			//	{
+			//		var buffer = udpClient.Receive(ref from);
+			//		System.Console.WriteLine(from + " >> " + Encoding.UTF8.GetString(buffer));
+			//	}
+			//});
+
+			//for (var i = 0; i < 10000; i++)
+			//{
+			//	var data = Encoding.UTF8.GetBytes($"{udpClient.Client.LocalEndPoint}: Hello World");
+			//	udpClient.Send(data, data.Length, "255.255.255.255", port);
+			//	Thread.Sleep(1000);
+			//}
+
+			System.Console.ReadKey();
+		}
+
+		public static void RunAsSerialPort(string[] args)
+		{
 			SerialPort port = null;
-
+			
 			var test = Assembly.GetExecutingAssembly().GetName().CodeBase;
-			var directory = Path.GetDirectoryName(test).Replace("file:\\", "");
+			var directory = Path.GetDirectoryName(test)?.Replace("file:\\", "") ?? string.Empty;
 			DataFilePath = Path.Combine(directory, "data.txt");
 			new FileInfo(DataFilePath).SafeDelete();
 
@@ -119,8 +159,6 @@ namespace Sproto.Nmea.Console
 				System.Console.WriteLine($"Found GPS device on port {port.PortName}:{port.BaudRate}, Read Timeout: {port.ReadTimeout}");
 				port.DataReceived += PortOnDataReceived;
 			}
-
-			System.Console.ReadKey();
 		}
 
 		public static int ReadTimeout { get; set; }
@@ -132,11 +170,15 @@ namespace Sproto.Nmea.Console
 			try
 			{
 				var line = port.ReadLine();
+				var data = Encoding.UTF8.GetBytes(line);
+				
+				// Broadcast the data as a UDP broadcast
+				_network.Send(data, data.Length, _networkEndPoint);
 
 				File.AppendAllText(DataFilePath, line);
 				System.Console.WriteLine("\t\t >>> " + line);
 
-				var message = _parser.Parse(line);
+				var message = _parser.Parse(line, TimeService.UtcNow);
 				if (message != null)
 				{
 					System.Console.WriteLine(message);
