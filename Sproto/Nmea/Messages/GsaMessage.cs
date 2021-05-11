@@ -11,7 +11,7 @@ namespace Sproto.Nmea.Messages
 	{
 		#region Constructors
 
-		public GsaMessage() : base(NmeaMessageType.OverallSatelliteData)
+		public GsaMessage() : base(NmeaMessageType.GSA)
 		{
 			PrnsOfSatellitesUsedForFix = new List<int>();
 		}

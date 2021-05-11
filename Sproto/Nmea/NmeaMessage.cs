@@ -35,8 +35,9 @@ namespace Sproto.Nmea
 		/// </summary>
 		public NmeaMessagePrefix Prefix { get; set; }
 
-		public DateTime TimestampUtc { get; set; }
-
+		/// <summary>
+		/// The sentence type of this NMEA message.
+		/// </summary>
 		public NmeaMessageType Type { get; }
 
 		/// <summary>
@@ -62,6 +63,56 @@ namespace Sproto.Nmea
 			}
 
 			return sentence.Substring(index + 1);
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <typeparam name="T"> The type of the argument expected. </typeparam>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public T GetArgument<T>(int index, T defaultValue)
+		{
+			return defaultValue switch
+			{
+				int dValue => (T) (object) GetArgumentAsInteger(index, dValue),
+				uint dValue => (T) (object) GetArgumentAsUnsignedInteger(index, dValue),
+				_ => defaultValue
+			};
+		}
+
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public double GetArgumentAsDouble(int index, double defaultValue)
+		{
+			return double.TryParse(GetArgument(index), out var result) ? result : defaultValue;
+		}
+		
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public int GetArgumentAsInteger(int index, int defaultValue)
+		{
+			return int.TryParse(GetArgument(index), out var result) ? result : defaultValue;
+		}
+		
+		/// <summary>
+		/// Gets the argument or returns the default value if the index is not found.
+		/// </summary>
+		/// <param name="index"> The index of the argument. </param>
+		/// <param name="defaultValue"> The default value to return if not found. </param>
+		/// <returns> The argument if found or default value if not. </returns>
+		public uint GetArgumentAsUnsignedInteger(int index, uint defaultValue)
+		{
+			return uint.TryParse(GetArgument(index), out var result) ? result : defaultValue;
 		}
 
 		public abstract void Parse(string sentence);
@@ -118,6 +169,7 @@ namespace Sproto.Nmea
 		{
 			Reset();
 
+			sentence = CleanupSentence(sentence);
 			var (prefix, type, value) = NmeaParser.ExtractPrefixAndType(sentence);
 
 			if (type != Type)
@@ -141,6 +193,23 @@ namespace Sproto.Nmea
 
 			// Assign the values as arguments
 			Arguments.AddRange(values.Split(','));
+		}
+
+		internal static string CleanupSentence(string sentence)
+		{
+			if (sentence.EndsWith("\r") || sentence.EndsWith("\n"))
+			{
+				sentence = sentence.TrimEnd('\r', '\n');
+			}
+
+			var startIndex = sentence.LastIndexOf('$');
+
+			if (startIndex >= 0 && startIndex != 0)
+			{
+				sentence = sentence.Substring(startIndex);
+			}
+
+			return startIndex == -1 ? string.Empty : sentence;
 		}
 
 		/// <summary>

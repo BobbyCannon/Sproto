@@ -23,7 +23,7 @@ namespace Sproto.Nmea.Messages
 	{
 		#region Constructors
 
-		public GnsMessage() : base(NmeaMessageType.GnssFixInformation)
+		public GnsMessage() : base(NmeaMessageType.GNS)
 		{
 		}
 

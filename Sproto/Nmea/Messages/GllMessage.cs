@@ -1,8 +1,8 @@
 ﻿#region References
 
-#endregion
-
 using System;
+
+#endregion
 
 namespace Sproto.Nmea.Messages
 {
@@ -10,7 +10,7 @@ namespace Sproto.Nmea.Messages
 	{
 		#region Constructors
 
-		public GllMessage() : base(NmeaMessageType.LatitudeLongitudeData)
+		public GllMessage() : base(NmeaMessageType.GLL)
 		{
 		}
 

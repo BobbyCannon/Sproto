@@ -36,8 +36,6 @@ if (!(Test-Path $destination2 -PathType Container))
 
 try
 {
-	& "ResetAssemblyInfos.ps1"
-
 	# Prepare the build for versioning!
 	$newVersion = .\IncrementVersion.ps1 -Build $BuildNumber
 	$newVersion

@@ -53,6 +53,25 @@ namespace Sproto.Tests.Nmea.Messages
 						DifferentialReferenceStationId = "0000",
 						Checksum = "46"
 					}
+				),
+				(
+					// Message with garbage at the beginning
+					"?\t\f     \b\f ? ?$???\r\a,? O  \a$$GPGNS,003000.00,4253.65208,N,07852.11903,W,DA,14,0.76,253.0,-35.4,,0000*46",
+					new GnsMessage
+					{
+						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
+						FixTaken = 3000,
+						Latitude = new Location("4253.65208","N"),
+						Longitude = new Location("07852.11903","W"),
+						ModeIndicator = "DA",
+						NumberOfSatellites = 14,
+						HorizontalDilutionOfPrecision = 0.76,
+						Altitude = 253.0,
+						HeightOfGeoid = -35.4,
+						AgeOfDifferentialData = "",
+						DifferentialReferenceStationId = "0000",
+						Checksum = "46"
+					}
 				)
 			});
 		}

@@ -4,7 +4,7 @@
 	{
 		#region Constructors
 
-		public RmcMessage() : base(NmeaMessageType.RecommendedMinimumDataForGps)
+		public RmcMessage() : base(NmeaMessageType.RMC)
 		{
 		}
 
@@ -46,11 +46,11 @@
 			//        |         | |         | |         | |   |   |      |   | | |
 			// $--RMC,hhmmss.ss,A,ddmm.mmmm,N,ddmm.mmmm,W,x.x,x.x,ddmmyy,x.x,W,a*hh
 			//
-			//  0) Time (UTC)
+			//  0) Time (UTC) - hhmmss.ss
 			//  1) Status
 			//     A = Active
 			//     V = Void
-			//  2) Latitude, ddmm.mmmm
+			//  2) Latitude - ddmm.mmmm
 			//  3) Direction
 			//     N - North
 			//     S - South

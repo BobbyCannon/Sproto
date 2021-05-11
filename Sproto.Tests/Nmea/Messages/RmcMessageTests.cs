@@ -70,6 +70,44 @@ namespace Sproto.Tests.Nmea.Messages
 						MagneticVariationUnit = "E",
 						Checksum = "63"
 					}
+				),
+				(
+					// Message with garbage at the beginning
+					"  ?D?v?$$$GPRMC,002959.00,A,4253.65205,N,07852.11902,W,0.022,,020521,,,D*63",
+					new RmcMessage
+					{
+						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
+						TimeOfFix = "002959.00",
+						Status = "A",
+						Latitude = new Location("4253.65205", "N"),
+						Longitude = new Location("07852.11902", "W"),
+						Speed = "0.022",
+						Course = "",
+						DateOfFix = "020521",
+						MagneticVariation = "",
+						MagneticVariationUnit = "",
+						ModeIndicator = new ModeIndicator("D"),
+						Checksum = "63"
+					}
+				),
+				(
+					// Message with garbage at the beginning
+					"      lQ?b ?? ?  ?c?4?$GPRMC,003007.00,A,4253.65269,N,07852.11899,W,0.054,,020521,,,D*68",
+					new RmcMessage
+					{
+						Prefix = NmeaMessagePrefix.GlobalPositioningSystem,
+						TimeOfFix = "003007.00",
+						Status = "A",
+						Latitude = new Location("4253.65269", "N"),
+						Longitude = new Location("07852.11899", "W"),
+						Speed = "0.054",
+						Course = "",
+						DateOfFix = "020521",
+						MagneticVariation = "",
+						MagneticVariationUnit = "",
+						ModeIndicator = new ModeIndicator("D"),
+						Checksum = "68"
+					}
 				)
 			});
 		}

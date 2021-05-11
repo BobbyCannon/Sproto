@@ -11,7 +11,7 @@ namespace Sproto.Nmea.Messages
 	{
 		#region Constructors
 
-		public GsvMessage() : base(NmeaMessageType.DetailedSatelliteData)
+		public GsvMessage() : base(NmeaMessageType.GSV)
 		{
 			Satellites = new List<Satellite>();
 		}

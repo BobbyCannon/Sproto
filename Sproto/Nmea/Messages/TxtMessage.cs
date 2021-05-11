@@ -4,7 +4,7 @@
 	{
 		#region Constructors
 
-		public TxtMessage() : base(NmeaMessageType.TextTransmission)
+		public TxtMessage() : base(NmeaMessageType.TXT)
 		{
 		}
 

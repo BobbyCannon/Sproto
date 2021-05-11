@@ -10,7 +10,7 @@ namespace Sproto.Nmea.Messages
 	{
 		#region Constructors
 
-		public GgaMessage() : base(NmeaMessageType.GgaFixInformation)
+		public GgaMessage() : base(NmeaMessageType.GGA)
 		{
 		}
 

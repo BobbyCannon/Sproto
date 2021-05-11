@@ -4,7 +4,7 @@
 	{
 		#region Constructors
 
-		public VtgMessage() : base(NmeaMessageType.VectorTrackOfSpeedOverTheGround)
+		public VtgMessage() : base(NmeaMessageType.VTG)
 		{
 		}
 

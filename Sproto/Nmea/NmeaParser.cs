@@ -100,26 +100,23 @@ namespace Sproto.Nmea
 			return $"${prefix}{type}";
 		}
 
-		public NmeaMessage Parse(string nmeaLine, DateTime? timestamp = null)
+		public NmeaMessage Parse(string sentence, DateTime? timestamp = null)
 		{
 			try
 			{
-				if (nmeaLine.EndsWith("\r") || nmeaLine.EndsWith("\n"))
-				{
-					nmeaLine = nmeaLine.TrimEnd('\r', '\n');
-				}
+				sentence = NmeaMessage.CleanupSentence(sentence);
 
-				if (string.IsNullOrWhiteSpace(nmeaLine))
+				if (string.IsNullOrWhiteSpace(sentence))
 				{
 					return null;
 				}
 
-				if (nmeaLine.Length < 6)
+				if (sentence.Length < 6)
 				{
 					return null;
 				}
 
-				var (prefix, type, value) = ExtractPrefixAndType(nmeaLine);
+				var (prefix, type, value) = ExtractPrefixAndType(sentence);
 
 				lock (_parsersLock)
 				{
@@ -130,8 +127,7 @@ namespace Sproto.Nmea
 						{
 							return null;
 						}
-						p.TimestampUtc = timestamp ?? TimeService.UtcNow;
-						p.Parse(nmeaLine);
+						p.Parse(sentence);
 						return p;
 					}
 				}
@@ -148,14 +144,18 @@ namespace Sproto.Nmea
 		{
 			return type switch
 			{
-				NmeaMessageType.GgaFixInformation => new GgaMessage(),
-				NmeaMessageType.LatitudeLongitudeData => new GllMessage(),
-				NmeaMessageType.GnssFixInformation => new GnsMessage(),
-				NmeaMessageType.OverallSatelliteData => new GsaMessage(),
-				NmeaMessageType.DetailedSatelliteData => new GsvMessage(),
-				NmeaMessageType.RecommendedMinimumDataForGps => new RmcMessage(),
-				NmeaMessageType.TextTransmission => new TxtMessage(),
-				NmeaMessageType.VectorTrackOfSpeedOverTheGround => new VtgMessage(),
+				NmeaMessageType.GBS => new GbsMessage(),
+				NmeaMessageType.GGA => new GgaMessage(),
+				NmeaMessageType.GLL => new GllMessage(),
+				NmeaMessageType.GNS => new GnsMessage(),
+				NmeaMessageType.GRS => new GrsMessage(),
+				NmeaMessageType.GSA => new GsaMessage(),
+				NmeaMessageType.GST => new GstMessage(),
+				NmeaMessageType.GSV => new GsvMessage(),
+				NmeaMessageType.RMC => new RmcMessage(),
+				NmeaMessageType.TXT => new TxtMessage(),
+				NmeaMessageType.VTG => new VtgMessage(),
+				NmeaMessageType.ZDA => new ZdaMessage(),
 				_ => null
 			};
 		}
