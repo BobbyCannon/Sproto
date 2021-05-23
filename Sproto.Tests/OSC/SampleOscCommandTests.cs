@@ -181,7 +181,8 @@ namespace Sproto.Tests.Osc
 			var message = OscPacket.Parse(data) as OscMessage;
 			Assert.IsNotNull(message);
 
-			Extensions.ExpectedException<InvalidCastException>(() => OscCommand.FromMessage<SampleOscCommand>(message), "Specified cast is not valid");
+			Extensions.ExpectedException<InvalidCastException>(() => OscCommand.FromMessage<SampleOscCommand>(message),
+				"Unable to cast object of type 'System.String' to type 'Sproto.Tests.Samples.SampleCustomValue'.");
 		}
 
 		[TestMethod]

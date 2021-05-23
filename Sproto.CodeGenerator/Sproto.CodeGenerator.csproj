@@ -1,15 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.2.3" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.2.3" />
-  </ItemGroup>
-
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<IsPackable>false</IsPackable>
+		<LangVersion>latest</LangVersion>
+		<AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+		<PackageReference Include="MSTest.TestAdapter" Version="2.2.3" />
+		<PackageReference Include="MSTest.TestFramework" Version="2.2.3" />
+	</ItemGroup>
 </Project>

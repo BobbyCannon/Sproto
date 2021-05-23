@@ -37,7 +37,7 @@ if (!(Test-Path $destination2 -PathType Container))
 try
 {
 	# Prepare the build for versioning!
-	$newVersion = .\IncrementVersion.ps1 -Build $BuildNumber
+	$newVersion = .\IncrementVersion.ps1 -Major 5 -Minor 0 -Build $BuildNumber -Revision 0
 	$newVersion
 	
 	& nuget.exe restore "$scriptPath\$productName.sln"
@@ -51,8 +51,8 @@ try
 		exit $LASTEXITCODE
 	}
 
-	Copy-Item "$productName\bin\$Configuration\netstandard2.0\$productName.dll" "$destination\bin\"
-	Copy-Item "$productName\bin\$Configuration\netstandard2.0\$productName.pdb" "$destination\bin\"
+	Copy-Item "$productName\bin\$Configuration\$productName.dll" "$destination\bin\"
+	Copy-Item "$productName\bin\$Configuration\$productName.pdb" "$destination\bin\"
 	
 	$versionInfo = [System.Diagnostics.FileVersionInfo]::GetVersionInfo("$destination\bin\$productName.dll")
 	$nugetVersion = $versionInfo.ProductVersionRaw.ToString(3)

@@ -1,6 +1,7 @@
 ﻿#region References
 
 using System;
+using Sproto.Internal;
 
 #endregion
 
@@ -51,7 +52,7 @@ namespace Sproto.Osc
 
 		public override int GetHashCode()
 		{
-			return Value != null ? Value.GetHashCode() : 0;
+			return Value != null ? Value.GetStableHashCode() : 0;
 		}
 
 		public static bool operator ==(OscSymbol a, OscSymbol b)

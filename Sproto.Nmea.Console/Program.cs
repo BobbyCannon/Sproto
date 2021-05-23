@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CommandLineParser.Arguments;
 using Speedy;
 using Speedy.Extensions;
 
@@ -16,13 +17,13 @@ using Speedy.Extensions;
 
 namespace Sproto.Nmea.Console
 {
-	internal class Program
+	public class Program
 	{
 		#region Fields
 
-		private static NmeaParser _parser;
 		private static UdpClient _network;
 		private static IPEndPoint _networkEndPoint;
+		private static NmeaParser _parser;
 
 		#endregion
 
@@ -30,9 +31,58 @@ namespace Sproto.Nmea.Console
 
 		public static string DataFilePath { get; set; }
 
+		public static int ReadTimeout { get; set; }
+
 		#endregion
 
 		#region Methods
+
+		public static void Main(string[] args)
+		{
+			var arguments = new CommandLineParser.CommandLineParser();
+			var comPort = new ValueArgument<string>('c', "com", "The COM port to be used.") { DefaultValue = string.Empty, ValueOptional = true };
+			var portArgument = new ValueArgument<string>('p', "port", "The port to be used.");
+			var shareIncomingPort = new SwitchArgument('s', "share", "Option to share the incoming port.", false);
+			arguments.Arguments.Add(comPort);
+			arguments.Arguments.Add(portArgument);
+			arguments.Arguments.Add(shareIncomingPort);
+			arguments.ParseCommandLine(args);
+
+			if (!portArgument.Parsed || !int.TryParse(portArgument.Value, out var port))
+			{
+				System.Console.WriteLine("Sproto.Nmea.Console -p [port] -s");
+				return;
+			}
+
+			_parser = new NmeaParser();
+			_network = new UdpClient { ExclusiveAddressUse = !shareIncomingPort.Parsed || !shareIncomingPort.Value };
+
+			if (!_network.ExclusiveAddressUse)
+			{
+				_network.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+			}
+
+			_network.Client.Bind(new IPEndPoint(IPAddress.Any, port));
+			_networkEndPoint = new IPEndPoint(IPAddress.Broadcast, port);
+
+			if (comPort.Parsed)
+			{
+				RunAsSerialPort(comPort.Value);
+			}
+
+			var from = new IPEndPoint(0, 0);
+
+			Task.Run(() =>
+			{
+				while (!System.Console.KeyAvailable)
+				{
+					var buffer = _network.Receive(ref from);
+					System.Console.WriteLine(from + " >> " + Encoding.UTF8.GetString(buffer));
+				}
+			});
+		
+			System.Console.ReadKey();
+		}
 
 		private static SerialPort FindGpsDevice()
 		{
@@ -83,86 +133,6 @@ namespace Sproto.Nmea.Console
 			return null;
 		}
 
-		private static void Main(string[] args)
-		{
-			_parser = new NmeaParser();
-			_network = new UdpClient { ExclusiveAddressUse = false };
-			_network.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-			_network.Client.Bind(new IPEndPoint(IPAddress.Any, 22030));
-			_networkEndPoint = new IPEndPoint(IPAddress.Broadcast, 22030);
-
-			RunAsSerialPort(args);
-
-			//int port = 22030;
-			//var udpClient = new UdpClient { EnableBroadcast = true, ExclusiveAddressUse = false };
-			//udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-			//udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, port));
-
-			//var from = new IPEndPoint(0, 0);
-			//Task.Run(() =>
-			//{
-			//	while (true)
-			//	{
-			//		var buffer = udpClient.Receive(ref from);
-			//		System.Console.WriteLine(from + " >> " + Encoding.UTF8.GetString(buffer));
-			//	}
-			//});
-
-			//for (var i = 0; i < 10000; i++)
-			//{
-			//	var data = Encoding.UTF8.GetBytes($"{udpClient.Client.LocalEndPoint}: Hello World");
-			//	udpClient.Send(data, data.Length, "255.255.255.255", port);
-			//	Thread.Sleep(1000);
-			//}
-
-			System.Console.ReadKey();
-		}
-
-		public static void RunAsSerialPort(string[] args)
-		{
-			SerialPort port = null;
-			
-			var test = Assembly.GetExecutingAssembly().GetName().CodeBase;
-			var directory = Path.GetDirectoryName(test)?.Replace("file:\\", "") ?? string.Empty;
-			DataFilePath = Path.Combine(directory, "data.txt");
-			new FileInfo(DataFilePath).SafeDelete();
-
-			if (args.Length == 2)
-			{
-				try
-				{
-					port = new SerialPort(args[0], int.Parse(args[1]), Parity.None, 8, StopBits.One);
-					System.Console.WriteLine($"{port.PortName} : {port.BaudRate}");
-					port.Open();
-				}
-				catch
-				{
-					port?.Dispose();
-					port = null;
-				}
-			}
-			else
-			{
-				port = FindGpsDevice();
-			}
-
-			ReadTimeout = args.Length == 3 ? int.Parse(args[2]) : 30000;
-
-			if (port == null)
-			{
-				System.Console.WriteLine("Failed to find the GPS device.");
-			}
-			else
-			{
-				port.ReadTimeout = ReadTimeout;
-
-				System.Console.WriteLine($"Found GPS device on port {port.PortName}:{port.BaudRate}, Read Timeout: {port.ReadTimeout}");
-				port.DataReceived += PortOnDataReceived;
-			}
-		}
-
-		public static int ReadTimeout { get; set; }
-
 		private static void PortOnDataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
 			var port = (SerialPort) sender;
@@ -171,7 +141,7 @@ namespace Sproto.Nmea.Console
 			{
 				var line = port.ReadLine();
 				var data = Encoding.UTF8.GetBytes(line);
-				
+
 				// Broadcast the data as a UDP broadcast
 				_network.Send(data, data.Length, _networkEndPoint);
 
@@ -187,6 +157,47 @@ namespace Sproto.Nmea.Console
 			catch (Exception ex)
 			{
 				System.Console.WriteLine(ex.Message);
+			}
+		}
+
+		private static void RunAsSerialPort(string portName)
+		{
+			SerialPort port = null;
+
+			var test = Assembly.GetExecutingAssembly().GetName().CodeBase;
+			var directory = Path.GetDirectoryName(test)?.Replace("file:\\", "") ?? string.Empty;
+			DataFilePath = Path.Combine(directory, "data.txt");
+			new FileInfo(DataFilePath).SafeDelete();
+
+			if (!string.IsNullOrWhiteSpace(portName))
+			{
+				try
+				{
+					port = new SerialPort(portName, 4800, Parity.None, 8, StopBits.One);
+					System.Console.WriteLine($"{port.PortName} : {port.BaudRate}");
+					port.Open();
+				}
+				catch
+				{
+					port?.Dispose();
+					port = null;
+				}
+			}
+			else
+			{
+				port = FindGpsDevice();
+			}
+
+			if (port == null)
+			{
+				System.Console.WriteLine("Failed to find the GPS device.");
+			}
+			else
+			{
+				port.ReadTimeout = 30000;
+
+				System.Console.WriteLine($"Found GPS device on port {port.PortName}:{port.BaudRate}, Read Timeout: {port.ReadTimeout}");
+				port.DataReceived += PortOnDataReceived;
 			}
 		}
 
