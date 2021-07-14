@@ -18,9 +18,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sproto.Nmea.Console", "Sproto.Nmea.Console\Sproto.Nmea.Console.csproj", "{2C7111B3-3953-45FE-AEFF-5C3FC2C14B81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sproto.Nmea.Console", "Sproto.Nmea.Console\Sproto.Nmea.Console.csproj", "{2C7111B3-3953-45FE-AEFF-5C3FC2C14B81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sproto.CodeGenerator", "Sproto.CodeGenerator\Sproto.CodeGenerator.csproj", "{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sproto.CodeGenerator", "Sproto.CodeGenerator\Sproto.CodeGenerator.csproj", "{62D2D678-8ECE-4A02-A1BF-C4AD468AA182}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
