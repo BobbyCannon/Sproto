@@ -12,8 +12,8 @@
 		<Description>A set of protocols useful for serial interfaces.</Description>
 		<Copyright>© Copyright 2019-2021</Copyright>
 		<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-		<AssemblyVersion>3.0.4.0</AssemblyVersion>
-		<FileVersion>3.0.4.0</FileVersion>
+		<AssemblyVersion>3.0.5.0</AssemblyVersion>
+		<FileVersion>3.0.5.0</FileVersion>
 		<PackageIcon>Sproto.png</PackageIcon>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -33,7 +33,7 @@
 		<RepositoryUrl>https://github.com/BobbyCannon/Sproto</RepositoryUrl>
 		<RepositoryType></RepositoryType>
 		<PackageTags>Sproto OSC Serial SerialPort Protocol</PackageTags>
-		<Version>3.0.4.0</Version>
+		<Version>3.0.5.0</Version>
 		<Authors>Bobby Cannon</Authors>
 		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
@@ -44,7 +44,7 @@
 		<None Include="License.txt" Pack="true" PackagePath="$(PackageLicenseFile)" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Speedy" Version="8.0.9" />
+		<PackageReference Include="Speedy" Version="8.1.0" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 		<PackageReference Include="System.IO.Ports" Version="[4.7.0]" />
 	</ItemGroup>

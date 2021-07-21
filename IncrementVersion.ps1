@@ -23,12 +23,14 @@ if ($DateSince -eq $null)
 }
 
 # See if the build should be generated.
+
 if ($Build -eq "*")
 {
 	$Build = [Math]::Floor([DateTime]::Now.Subtract($DateSince).TotalDays)
 }
 
 # See if the revision should be generated.
+
 if ($Revision -eq "*")
 {
 	$Revision = [Math]::Floor([DateTime]::Now.TimeOfDay.TotalSeconds / 2)
@@ -46,12 +48,14 @@ function Get-VersionArray
 	$versionParts = $version.Split('.')
 
 	# Ensure there is a part 3.
+	
 	if ($versionParts.Length -lt 3)
 	{
 		$versionParts += 0
 	}
 
 	# Ensure there is a part 4.
+	
 	if ($versionParts.Length -lt 4)
 	{
 		$versionParts += 0
@@ -106,7 +110,7 @@ function Set-BuildNumbers
 
 try
 {
-	# $scriptPath = "C:\Workspaces\GitHub\OSC"
+	# $scriptPath = "C:\Workspaces\GitHub\Sproto"
 	$scriptPath = Split-Path(Get-Variable MyInvocation).Value.MyCommand.Path
 	Set-Location $scriptPath
 
@@ -118,7 +122,6 @@ try
 	{
 		$versionArray[0] = ([int] $versionArray[0]) + 1
 	}
-
 	elseif($Major.Length -gt 0)
 	{
 		$versionArray[0] = $Major
@@ -128,12 +131,10 @@ try
 	{
 		$versionArray[1] = ([int] $versionArray[1]) + 1
 	}
-
 	elseif($Minor.Length -gt 0)
 	{
 		$versionArray[1] = $Minor
 	}
-
 	elseif($Major.Length -gt 0)
 	{
 		$Minor = "0"
@@ -144,12 +145,10 @@ try
 	{
 		$versionArray[2] = ([int] $versionArray[2]) + 1
 	}
-
 	elseif($Build.Length -gt 0)
 	{
 		$versionArray[2] = $Build
 	}
-
 	elseif($Minor.Length -gt 0)
 	{
 		$Build = "0"
@@ -160,12 +159,10 @@ try
 	{
 		$versionArray[3] = ([int] $versionArray[3]) + 1
 	}
-
 	elseif($Revision.Length -gt 0)
 	{
 		$versionArray[3] = $Revision
 	}
-
 	elseif($Build.Length -gt 0)
 	{
 		$Revision = "0"

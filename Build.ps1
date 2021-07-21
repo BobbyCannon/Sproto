@@ -3,12 +3,15 @@ param
 	[Parameter(Mandatory = $false, Position = 0)]
 	[string] $Configuration = "Release",
 	[Parameter()]
-	[string] $BuildNumber = "+"
+	[string] $BuildNumber = "+",
+	[Parameter()]
+	[string] $VersionSuffix = ""
 )
 
 $ErrorActionPreference = "Stop"
 $watch = [System.Diagnostics.Stopwatch]::StartNew()
 $scriptPath = $PSScriptRoot
+#$scriptPath = "C:\Workspaces\GitHub\Sproto"
 $productName = "Sproto"
 
 if ($scriptPath.Length -le 0)
@@ -37,6 +40,7 @@ if (!(Test-Path $destination2 -PathType Container))
 try
 {
 	# Prepare the build for versioning!
+	# $newVersion = .\IncrementVersion.ps1 -Build +
 	$newVersion = .\IncrementVersion.ps1 -Build $BuildNumber
 	$newVersion
 	
@@ -57,9 +61,14 @@ try
 	$versionInfo = [System.Diagnostics.FileVersionInfo]::GetVersionInfo("$destination\bin\$productName.dll")
 	$nugetVersion = $versionInfo.ProductVersionRaw.ToString(3)
 
+	if ($VersionSuffix.Length -gt 0)
+	{
+		$nugetVersion = "$nugetVersion-$VersionSuffix"
+	}
+
 	Copy-Item "$productName\bin\$Configuration\$productName.$nugetVersion.nupkg" "$destination\"
 	Copy-Item "$productName\bin\$Configuration\$productName.$nugetVersion.nupkg" "$destination2\"
-	
+
 	if ($versionInfo.FileVersion.ToString() -ne $newVersion)
 	{
 		Write-Error "The new version $($versionInfo.FileVersion.ToString()) does not match the expected version ($newVersion)"
