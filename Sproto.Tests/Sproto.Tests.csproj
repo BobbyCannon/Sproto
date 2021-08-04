@@ -3,8 +3,8 @@
 	<PropertyGroup>
 		<TargetFramework>net5.0-windows</TargetFramework>
 		<IsPackable>false</IsPackable>
-		<AssemblyVersion>5.0.1.0</AssemblyVersion>
-		<FileVersion>5.0.1.0</FileVersion>
+		<AssemblyVersion>5.0.2.0</AssemblyVersion>
+		<FileVersion>5.0.2.0</FileVersion>
 		<LangVersion>latest</LangVersion>
 		<AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
@@ -16,6 +16,6 @@
 		<PackageReference Include="MSTest.TestFramework" Version="2.2.5" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<ProjectReference Include="..\Sproto\Sproto.csproj" />
-		<PackageReference Include="Speedy" Version="9.0.2" />
+		<PackageReference Include="Speedy" Version="9.0.3" />
 	</ItemGroup>
 </Project>
