@@ -15,6 +15,6 @@
 		<PackageReference Include="MSTest.TestFramework" Version="2.2.5" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<ProjectReference Include="..\Sproto\Sproto.csproj" />
-		<PackageReference Include="Speedy" Version="8.1.0" />
+		<PackageReference Include="Speedy" Version="8.1.1" />
 	</ItemGroup>
 </Project>
