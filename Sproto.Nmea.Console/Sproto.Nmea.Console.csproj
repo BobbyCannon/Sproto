@@ -1,17 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
-    <TargetPlatform>x86</TargetPlatform>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.IO.Ports" Version="4.7.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Sproto\Sproto.csproj" />
-  </ItemGroup>
-
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <TargetPlatform>x86</TargetPlatform>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="System.IO.Ports" Version="4.7.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Speedy" Version="8.1.3" />
+        <ProjectReference Include="..\Sproto\Sproto.csproj" />
+    </ItemGroup>
 </Project>
