@@ -10,8 +10,8 @@ $ErrorActionPreference = "STOP"
 
 Clear-Host
 
-$versionFull = "3.0.6.0"
-$version = "3.0.6"
+$versionFull = "3.0.8.0"
+$version = "3.0.8"
 $files = Get-ChildItem $ProjectPath *.csproj -Recurse | Select-Object Fullname
 
 $sprotoR = "<Reference Include=`"Sproto, Version=$($versionFull), Culture=neutral, processorArchitecture=MSIL`"><HintPath>..\packages\Sproto.$version\lib\netstandard2.0\Sproto.dll</HintPath></Reference>"

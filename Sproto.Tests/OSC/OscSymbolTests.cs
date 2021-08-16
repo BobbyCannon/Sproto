@@ -21,8 +21,8 @@ namespace Sproto.Tests.Osc
 			Assert.IsTrue(expected.Equals(actual));
 			// ReSharper disable once SuspiciousTypeConversion.Global
 			Assert.IsTrue(expected.Equals("Foo Bar"));
-			Assert.AreEqual(-1226249167, expected.GetHashCode());
-			Assert.AreEqual(-1226249167, actual.GetHashCode());
+			Assert.AreEqual(1716311859, expected.GetHashCode());
+			Assert.AreEqual(1716311859, actual.GetHashCode());
 		}
 
 		[TestMethod]
@@ -30,7 +30,7 @@ namespace Sproto.Tests.Osc
 		{
 			var notExpected = new OscSymbol { Value = "Foo Bar" };
 			var actual = new OscSymbol("foo bar");
-			Assert.AreEqual(-1226250191, actual.GetHashCode());
+			Assert.AreEqual(1715228275, actual.GetHashCode());
 			Assert.IsTrue(notExpected != actual);
 			// ReSharper disable once SuspiciousTypeConversion.Global
 			Assert.IsFalse(actual.Equals(true));
